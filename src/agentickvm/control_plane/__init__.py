@@ -1,8 +1,4 @@
-"""Control-plane constants for the AgenticKVM bootstrap slice.
-
-This module documents required vocabulary before the policy engine exists. It is
-not a policy engine implementation.
-"""
+"""Control-plane vocabulary and initial policy-core exports."""
 
 from __future__ import annotations
 
@@ -95,3 +91,48 @@ def default_decision_for_unknown_capability(_: str) -> str:
     """Return the constitutional default for an unknown capability."""
 
     return UNKNOWN_CAPABILITY_DECISION
+
+
+from agentickvm.control_plane.capabilities import (  # noqa: E402
+    DEFAULT_CAPABILITY_REGISTRY,
+    Capability,
+    CapabilityRegistry,
+    RiskLevel,
+)
+from agentickvm.control_plane.decisions import (  # noqa: E402
+    ControlMode,
+    PolicyDecision,
+)
+from agentickvm.control_plane.policy import (  # noqa: E402
+    CapabilityPolicy,
+    PolicyDecisionResult,
+    PolicyRule,
+    SessionScope,
+    TargetScope,
+    load_policy_file,
+    mode_preset,
+)
+
+__all__ = [
+    "CAPABILITY_FAMILIES",
+    "CONTROL_MODES",
+    "DANGEROUS_ACTIONS",
+    "DEFAULT_CAPABILITY_REGISTRY",
+    "HARD_INVARIANTS",
+    "INTERNAL_DECISIONS",
+    "REQUIRED_FLOW",
+    "UNKNOWN_CAPABILITY_DECISION",
+    "Capability",
+    "CapabilityPolicy",
+    "CapabilityRegistry",
+    "ControlMode",
+    "PolicyDecision",
+    "PolicyDecisionResult",
+    "PolicyRule",
+    "RiskLevel",
+    "SessionScope",
+    "TargetScope",
+    "default_decision_for_unknown_capability",
+    "load_policy_file",
+    "mode_preset",
+]

@@ -32,3 +32,23 @@
 - next recommended task: implement the first Maturity 1 policy core slice with
   a schema-backed capability registry and default-deny decision tests
 - blockers: none for repo-local policy core work
+
+## 2026-06-03T03:38:55Z
+
+- selected maturity level: Maturity 1, Policy Core
+- selected task: add a minimal schema-aligned capability registry and policy
+  decision engine scaffold
+- why this task is safe: repo-local code only, no provider calls, no real
+  hardware, and it strengthens default-deny behavior before any MCP or provider
+  implementation
+- files expected to change:
+  - `src/agentickvm/control_plane/__init__.py`
+  - `src/agentickvm/control_plane/capabilities.py`
+  - `src/agentickvm/control_plane/decisions.py`
+  - `src/agentickvm/control_plane/policy.py`
+  - `tests/unit/test_policy_core.py`
+  - `tests/contract/test_capability_registry.py`
+  - `tests/security/test_policy_core_security.py`
+  - `docs/heartbeat-log.md`
+- tests expected to run:
+  - `uv run --with pytest --python python3.13 python -m pytest`
