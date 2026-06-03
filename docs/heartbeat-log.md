@@ -536,3 +536,39 @@
   - live provider work requires operator approval, credential backend decision,
     timeout/TLS review, production audit-store decision, and manual smoke gate
     completion
+
+## 2026-06-03T22:54:26Z
+
+- selected maturity level: Maturity 6, PiKVM live observe readiness design
+- selected task: add a PiKVM observe-only live transport ADR, fake-only
+  transport boundary, fixture contracts, config hardening, screenshot artifact
+  safety checks, CLI/MCP fixture coverage, manual smoke design updates, and
+  readiness documentation
+- why this task is safe: all provider behavior remains offline and
+  fixture-backed; no live PiKVM transport, network calls, real hardware,
+  credentials, credential resolution, mutating actions, or CI live targets are
+  introduced; CLI and MCP continue to route through registries and
+  `ControlPlane`
+- files expected to change:
+  - `docs/adr/`
+  - `src/agentickvm/providers/`
+  - `src/agentickvm/config/`
+  - `tests/fixtures/providers/pikvm/`
+  - `tests/unit/`
+  - `tests/contract/`
+  - `tests/security/`
+  - `examples/config/`
+  - `specs/004-pikvm-observe-only/contracts/`
+  - `docs/manual-smoke/`
+  - `docs/provider-contracts.md`
+  - `docs/provider-conformance.md`
+  - `docs/transport-security.md`
+  - `docs/credentials.md`
+  - `docs/configuration.md`
+  - `docs/cli.md`
+  - `docs/mcp-tools.md`
+  - `docs/security-model.md`
+  - `docs/roadmap.md`
+  - `docs/heartbeat-log.md`
+- tests expected to run:
+  - `uv run --with pytest --python python3.13 python -m pytest`
