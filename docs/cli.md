@@ -15,6 +15,17 @@ agentickvm call --target mock-host --tool get_power_state
 
 The CLI emits JSON for tests and future automation.
 
+With an explicit fixture-mode test config, the CLI can exercise fake
+PiKVM/Redfish observe-only providers:
+
+```text
+agentickvm --config ./redfish-fixture.yaml call --target redfish-target --tool get_sensors
+agentickvm --config ./pikvm-fixture.yaml call --target pikvm-target --tool observe_screen
+```
+
+Disabled placeholder examples are documentation only and will fail closed if
+called.
+
 ## Safety
 
 - Defaults to a built-in mock-only config.
@@ -38,7 +49,8 @@ The CLI flow is:
 7. provider adapter only if allowed
 8. structured JSON result
 
-Real provider CLI usage remains deferred.
+Real provider CLI usage remains deferred. Live PiKVM or Redfish CLI usage
+remains deferred until manual smoke gates pass.
 
 ## Consistency
 

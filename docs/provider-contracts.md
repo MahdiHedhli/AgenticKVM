@@ -56,6 +56,11 @@ Disabled real-provider placeholders may declare future observe-only
 capabilities for contract tests, but they cannot execute and must not make
 network calls.
 
+Fixture-backed PiKVM and Redfish observe adapters now exist for offline
+contract tests. They are not live providers: they require injected fake
+transports, declare `is_real_hardware=false`, return
+`performed_on_hardware=false`, and support observe capabilities only.
+
 ## Readiness Gates
 
 Real provider readiness is specified in
@@ -69,3 +74,14 @@ live testing.
 Reset, boot, firmware, storage, power, BMC, and credential operations can vary
 widely by provider. They must be represented as explicit capabilities and cannot
 be downgraded to generic low-risk operations.
+
+## Provider Readiness Matrix
+
+| Provider | Current status | Allowed observe capabilities | Mutating actions status | Config status | Test status | Live smoke status | CI status | Next gate |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Mock | Default executable safe provider | All current mock observations plus fake state families | Fake only and policy-gated | Built-in and example config enabled | Unit, contract, security | Not applicable | Mock-only | Continue provider conformance tests |
+| PiKVM | Offline observe fixture adapter plus disabled placeholder | `observe.status`, `observe.screen`, `observe.screenshot`, `observe.power_state`, `observe.hardware_inventory`, `observe.event_logs`, `observe.boot_status` | Unsupported, denied by policy, or provider-error without hardware action | Disabled placeholder examples; explicit fixture mode for tests | Fake transport, contract, CLI/MCP tests | Deferred, manual only | Fixtures only | Live transport spec and operator-approved smoke |
+| Redfish | Offline observe fixture adapter plus disabled placeholder | `observe.status`, `observe.power_state`, `observe.hardware_inventory`, `observe.sensors`, `observe.event_logs`, `observe.boot_status` | Unsupported, denied by policy, or provider-error without hardware action; fake transport rejects non-GET | Disabled placeholder examples; explicit fixture mode for tests | Fake GET transport, contract, CLI/MCP tests | Deferred, manual only | Fixtures only | GET-only live transport spec and operator-approved smoke |
+| iLO placeholder | Disabled placeholder | Future observe-only subset | Unimplemented and non-executable | Placeholder only | Placeholder safety tests | Not started | Disabled | Provider-specific observe spec |
+| iDRAC placeholder | Disabled placeholder | Future observe-only subset | Unimplemented and non-executable | Placeholder only | Placeholder safety tests | Not started | Disabled | Provider-specific observe spec |
+| Supermicro/IPMI placeholder | Disabled placeholder | Future observe-only subset | Unimplemented and non-executable | Placeholder only | Placeholder safety tests | Not started | Disabled | Provider-specific observe spec |

@@ -12,6 +12,9 @@ Examples:
 
 - `examples/config/mock-only.yaml`
 - `examples/config/provider-placeholders.yaml`
+- `examples/config/pikvm-observe-placeholder.yaml`
+- `examples/config/redfish-observe-placeholder.yaml`
+- `examples/config/lab-observe-only.example.yaml`
 
 The CLI defaults to a safe built-in mock-only config when no `--config` path is
 provided. Tests do not read global user config, environment secrets, or
@@ -53,3 +56,13 @@ by default.
 
 Enabled real provider entries are rejected until future provider-specific gates
 explicitly allow them.
+
+PiKVM and Redfish fixture mode is available for offline tests only:
+
+```text
+"metadata": {"fixture_mode": true}
+```
+
+Fixture mode builds a fake observe-only adapter with no live transport and no
+credentials. Placeholder examples keep `fixture_mode` false and `enabled`
+false.

@@ -35,6 +35,10 @@ MCP server yet.
 The current CLI adapter uses the same mock-only registry and control-plane path
 as MCP.
 
+PiKVM and Redfish fixture-mode integrations are available only for offline
+observe tests. They still enter through the same registry and control-plane
+path and do not create live provider access.
+
 ### Provider Registry
 
 The provider registry stores explicit provider entries. Unknown providers,
@@ -86,6 +90,7 @@ The current implementation includes:
 - safe mock-only config loader
 - safe stateful mock provider
 - disabled real-provider placeholders
+- fixture-backed PiKVM and Redfish observe-only adapters
 - MCP-style models, registry, and router
 - mock-only CLI adapter
 - CLI/MCP consistency matrix

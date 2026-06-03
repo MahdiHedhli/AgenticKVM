@@ -47,6 +47,11 @@ CI must not use real hardware, real credentials, real BMCs, real KVM devices, or
 production network endpoints. Tests should use mocks, fixtures, schemas, and
 offline contract checks.
 
+PiKVM and Redfish provider-specific tests use fake transports only. The fake
+Redfish transport rejects non-GET methods. The provider modules do not define a
+live transport implementation, and placeholder configs remain disabled by
+default.
+
 ## Emergency Stop
 
 Emergency stop must not be disableable by an agent-controlled request. Future

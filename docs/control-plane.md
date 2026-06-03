@@ -47,6 +47,11 @@ closed.
 Unknown providers, unknown targets, disabled providers, disabled targets, and
 provider/target mismatches also fail closed before provider execution.
 
+Fixture-backed PiKVM and Redfish observe providers are treated as providers only
+after registry validation. They still require capability mapping, policy
+evaluation, audit, and structured results. Live PiKVM and Redfish providers
+remain deferred.
+
 ## Capability Families
 
 - `session`

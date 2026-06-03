@@ -49,6 +49,10 @@ Initial mappings include:
 | `observe_screen` | `observe.screenshot` |
 | `get_status` | `observe.status` |
 | `get_power_state` | `observe.power_state` |
+| `get_hardware_inventory` | `observe.hardware_inventory` |
+| `get_sensors` | `observe.sensors` |
+| `get_event_logs` | `observe.event_logs` |
+| `get_boot_status` | `observe.boot_status` |
 | `power_on` | `power.on` |
 | `graceful_restart` | `power.graceful_restart` |
 | `force_restart` | `power.force_restart` |
@@ -84,13 +88,14 @@ approval.
 - Raw secret reveal is denied by default.
 - Denied and approval-required requests do not reach the provider.
 - Returned params and provider results are redacted before MCP output.
-- The current scaffold uses the mock provider only.
+- The current scaffold supports the mock provider plus explicit fixture-mode
+  PiKVM/Redfish observe providers for offline tests only.
 - CLI/MCP equivalent requests are covered by a status consistency matrix.
 
 ## Deferred Work
 
 - Live MCP SDK server adapter.
 - MCP client integration tests.
-- Real provider MCP tests.
+- Live provider MCP tests.
 - Live operator approval transport.
 - Live provider registry selection beyond disabled placeholders.

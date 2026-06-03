@@ -11,16 +11,23 @@ and they do not decide policy, scope, approval, or audit behavior.
 - Provider type is explicit and validated.
 - Config cannot dynamically import provider classes.
 - Disabled providers cannot execute.
-- `mock` is the only default executable provider type in this lane.
+- `mock` is the only default executable provider type.
+- PiKVM and Redfish may execute only in explicit fixture mode with injected fake
+  transports and `is_real_hardware=false`.
 - Real provider types may appear only as disabled placeholders until their
   provider specs, contracts, and safety tests are complete.
 
 ## Current Types
 
 - executable: `mock`
+- fixture-only executable in tests: `pikvm`, `redfish`
 - disabled placeholders: `pikvm`, `redfish`, `ilo`, `idrac`, `ipmi`,
   `supermicro`, `proxmox`
 
 External interfaces must resolve providers through the registry before creating
 a control-plane request. A provider id supplied by a request is treated as
 untrusted input and must match the configured target provider.
+
+Enabled PiKVM or Redfish config without explicit fixture mode still fails
+closed. Fixture mode is for offline tests and demos only; it does not create a
+live provider execution path.

@@ -252,6 +252,17 @@ tools may expose different names if the capability model requires it.
 | 8 | IPMI/Supermicro provider specs | defer | Requires first real provider lessons. |
 | 9 | Supermicro iKVM bridge | defer | Needs separate runtime/container threat model. |
 
+## Provider Readiness Notes
+
+The canonical repo now has PiKVM and Redfish observe-only specs, fake transport
+client contracts, fixture-backed observe adapters, disabled config placeholders,
+CLI/MCP fixture integration tests, and manual smoke docs.
+
+This does not migrate donor implementation code. Donor provider behavior remains
+reference material only, and future live providers must still pass the
+constitution, readiness gates, manual smoke review, and mock-only CI
+requirements.
+
 ## Open Questions
 
 - Should provider routing/fallback be represented as policy, provider registry

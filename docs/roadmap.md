@@ -39,19 +39,24 @@
 - Add readiness gates before any real provider implementation.
 - Add disabled placeholder provider contracts.
 - Require observe-only first slice.
+- Add PiKVM and Redfish observe-only specs, fake transports, fixture-backed
+  adapters, disabled config placeholders, CLI/MCP fixture tests, and manual
+  smoke docs.
 - Keep CI mock-only.
 - Require manual smoke docs and human approval before live testing.
 
 ## 5. PiKVM Provider
 
 - Write PiKVM provider spec.
-- Implement the smallest safe observe-only adapter slice.
+- Implement the smallest safe observe-only live adapter slice after readiness
+  gates pass.
 - Add opt-in lab tests outside CI.
 
 ## 6. Redfish Provider
 
 - Write Redfish provider spec.
-- Implement observe and narrowly scoped power actions.
+- Implement the smallest safe GET-only observe live adapter slice after
+  readiness gates pass.
 - Add opt-in lab tests outside CI.
 
 ## 7. Operator Approval UX
