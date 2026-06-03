@@ -68,7 +68,7 @@ def mock_only_config() -> AgenticKVMConfig:
                 environment="local",
                 labels=("mock", "safe"),
                 risk_tier="low",
-                allowed_modes=("Observe", "Supervised", "Full Control"),
+                allowed_modes=("Observe", "Assisted", "Supervised", "Full Control"),
                 metadata={"description": "safe mock target"},
             ),
         ),
