@@ -38,6 +38,23 @@
   while preserving policy gates before execution
 - blockers: none for repo-local mock provider expansion
 
+## 2026-06-03T03:49:25Z
+
+- selected maturity level: Maturity 3, Mock Provider
+- selected task: expand `MockProvider` with safe fake state for power, screen
+  observation, input, media, boot, BMC, network, storage, and runtime
+  capabilities
+- why this task is safe: mock behavior records simulated effects only,
+  `performed_on_hardware` remains false, and policy gate tests already prove
+  provider execution is reached only after control-plane decisions
+- files expected to change:
+  - `src/agentickvm/providers/mock.py`
+  - `tests/unit/test_mock_provider.py`
+  - `tests/unit/test_control_plane_engine.py`
+  - `docs/heartbeat-log.md`
+- tests expected to run:
+  - `uv run --with pytest --python python3.13 python -m pytest`
+
 ### Result
 
 - timestamp: 2026-06-03T03:46:15Z

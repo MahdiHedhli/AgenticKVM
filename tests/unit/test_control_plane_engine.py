@@ -58,6 +58,23 @@ def test_allowed_request_reaches_mock_provider_after_policy() -> None:
     assert sink.events[0].to_dict()["request"]["parameters"]["password"] == "[REDACTED]"
 
 
+def test_full_control_can_execute_mock_destructive_action_without_hardware() -> None:
+    sink = InMemoryAuditSink()
+    provider = MockProvider()
+    engine = ControlPlane(
+        policy=mode_preset(ControlMode.FULL_CONTROL),
+        provider=provider,
+        audit_sink=sink,
+    )
+
+    result = engine.handle(_request("storage.wipe_disk"))
+
+    assert result.status == ControlPlaneStatus.COMPLETED
+    assert result.provider_result is not None
+    assert result.provider_result.performed_on_hardware is False
+    assert result.provider_result.data["destructive_effect_simulated"] is True
+
+
 def test_supervised_dangerous_action_returns_approval_without_provider_call() -> None:
     sink = InMemoryAuditSink()
     provider = MockProvider()
