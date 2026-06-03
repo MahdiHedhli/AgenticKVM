@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from enum import StrEnum
@@ -30,6 +32,23 @@ class ApprovalOutcome(StrEnum):
     GRANTED = "granted"
     DENIED = "denied"
     EXPIRED = "expired"
+
+
+class ApprovalGrantScope(StrEnum):
+    """Reusable scope of an approval grant."""
+
+    ONE_TIME = "one_time"
+    SESSION = "session"
+
+
+APPROVAL_RESUMPTION_BLOCKED_CAPABILITIES = frozenset(
+    {
+        "session.modify_policy",
+        "session.disable_audit",
+        "session.disable_emergency_stop",
+        "secrets.raw_reveal",
+    }
+)
 
 
 @dataclass(frozen=True)
@@ -92,6 +111,7 @@ class ApprovalRequest:
     operator_message: str
     material_risks: tuple[str, ...]
     proposed_audit_event_id: str
+    provider_id: str | None = None
     limits: Mapping[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
@@ -129,6 +149,8 @@ class ApprovalRequest:
         }
         if self.limits:
             data["limits"] = dict(self.limits)
+        if self.provider_id is not None:
+            data["provider_id"] = self.provider_id
         return data
 
 
@@ -180,16 +202,88 @@ class SessionApprovalGrant:
         )
 
 
+@dataclass(frozen=True)
+class ApprovalGrant:
+    """Approval grant bound to an exact provider, target, capability, and params."""
+
+    request_id: str
+    response_id: str
+    capability_id: str
+    session_id: str
+    target_id: str
+    provider_id: str
+    params_fingerprint: str
+    expires_at: datetime
+    scope: ApprovalGrantScope
+    operator: Actor
+
+    def __post_init__(self) -> None:
+        if self.capability_id in APPROVAL_RESUMPTION_BLOCKED_CAPABILITIES:
+            raise ValueError(f"Capability cannot be approval-resumed: {self.capability_id}")
+        if self.operator.type != ActorType.OPERATOR:
+            raise ValueError("Approval grants require an operator actor")
+
+    @property
+    def reusable(self) -> bool:
+        """Return whether this grant is reusable within the session."""
+
+        return self.scope == ApprovalGrantScope.SESSION
+
+    def matches(
+        self,
+        *,
+        capability_id: str,
+        session_id: str,
+        target_id: str,
+        provider_id: str,
+        params_fingerprint: str,
+        now: datetime,
+    ) -> bool:
+        """Return whether this grant authorizes the exact requested action."""
+
+        return (
+            capability_id == self.capability_id
+            and session_id == self.session_id
+            and target_id == self.target_id
+            and provider_id == self.provider_id
+            and params_fingerprint == self.params_fingerprint
+            and now < self.expires_at
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """Return a schema-compatible dictionary."""
+
+        return {
+            "request_id": self.request_id,
+            "response_id": self.response_id,
+            "capability_id": self.capability_id,
+            "session_id": self.session_id,
+            "target_id": self.target_id,
+            "provider_id": self.provider_id,
+            "params_fingerprint": self.params_fingerprint,
+            "expires_at": self.expires_at.isoformat(),
+            "scope": self.scope.value,
+            "operator": self.operator.to_dict(),
+        }
+
+
 class ApprovalStore:
     """In-memory approval grant store for tests and bootstrap development."""
 
     def __init__(self) -> None:
         self._grants: list[SessionApprovalGrant] = []
+        self._action_grants: list[ApprovalGrant] = []
+        self._consumed_response_ids: set[str] = set()
 
     def add(self, grant: SessionApprovalGrant) -> None:
         """Store a reusable approval grant."""
 
         self._grants.append(grant)
+
+    def add_action_grant(self, grant: ApprovalGrant) -> None:
+        """Store a provider-bound action approval grant."""
+
+        self._action_grants.append(grant)
 
     def find(
         self,
@@ -210,6 +304,76 @@ class ApprovalStore:
             ):
                 return grant
         return None
+
+    def grant_from_response(
+        self,
+        *,
+        request: ApprovalRequest,
+        response: ApprovalResponse,
+        provider_id: str,
+        parameters: Mapping[str, Any],
+        scope: ApprovalGrantScope = ApprovalGrantScope.ONE_TIME,
+    ) -> ApprovalGrant:
+        """Create and store an exact action grant from an approval response."""
+
+        if response.request_id != request.id:
+            raise ValueError("Approval response does not match request")
+        if response.outcome != ApprovalOutcome.GRANTED:
+            raise ValueError("Only granted approval responses create grants")
+        if request.capability.id in APPROVAL_RESUMPTION_BLOCKED_CAPABILITIES:
+            raise ValueError(f"Capability cannot be approval-resumed: {request.capability.id}")
+        if provider_id != (request.provider_id or provider_id):
+            raise ValueError("Approval provider does not match request provider")
+
+        grant = ApprovalGrant(
+            request_id=request.id,
+            response_id=response.id,
+            capability_id=request.capability.id,
+            session_id=request.session_id,
+            target_id=request.target_ids[0],
+            provider_id=provider_id,
+            params_fingerprint=fingerprint_parameters(parameters),
+            expires_at=request.expires_at,
+            scope=scope,
+            operator=response.operator,
+        )
+        self.add_action_grant(grant)
+        return grant
+
+    def find_action_grant(
+        self,
+        *,
+        capability_id: str,
+        session_id: str,
+        target_id: str,
+        provider_id: str,
+        params_fingerprint: str,
+        now: datetime,
+    ) -> ApprovalGrant | None:
+        """Return a matching, unexpired, unconsumed action grant."""
+
+        for grant in self._action_grants:
+            if (
+                not grant.reusable
+                and grant.response_id in self._consumed_response_ids
+            ):
+                continue
+            if grant.matches(
+                capability_id=capability_id,
+                session_id=session_id,
+                target_id=target_id,
+                provider_id=provider_id,
+                params_fingerprint=params_fingerprint,
+                now=now,
+            ):
+                return grant
+        return None
+
+    def consume(self, grant: ApprovalGrant) -> None:
+        """Mark a one-time grant as consumed."""
+
+        if not grant.reusable:
+            self._consumed_response_ids.add(grant.response_id)
 
 
 class EmergencyStopActive(RuntimeError):
@@ -243,6 +407,7 @@ def build_approval_request(
     ttl: timedelta = timedelta(minutes=15),
     now: datetime | None = None,
     id_factory: Callable[[], str] | None = None,
+    provider_id: str | None = None,
 ) -> ApprovalRequest:
     """Build an explainable approval request from a policy decision."""
 
@@ -270,5 +435,28 @@ def build_approval_request(
         operator_message=operator_message,
         material_risks=material_risks,
         proposed_audit_event_id=new_id(),
+        provider_id=provider_id,
         limits=decision_result.limits,
     )
+
+
+def fingerprint_parameters(parameters: Mapping[str, Any]) -> str:
+    """Return a stable action fingerprint for provider parameters."""
+
+    encoded = json.dumps(
+        _canonical_json_value(parameters),
+        sort_keys=True,
+        separators=(",", ":"),
+        default=str,
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _canonical_json_value(value: Any) -> Any:
+    if isinstance(value, Mapping):
+        return {str(key): _canonical_json_value(child) for key, child in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_canonical_json_value(child) for child in value]
+    if isinstance(value, (set, frozenset)):
+        return sorted(_canonical_json_value(child) for child in value)
+    return value

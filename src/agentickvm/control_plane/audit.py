@@ -25,6 +25,7 @@ class AuditEventType(StrEnum):
     APPROVAL_DENIED = "approval_denied"
     APPROVAL_EXPIRED = "approval_expired"
     APPROVAL_REUSED = "approval_reused"
+    APPROVAL_CONSUMED = "approval_consumed"
     PROVIDER_EXECUTION_STARTED = "provider_execution_started"
     PROVIDER_EXECUTION_COMPLETED = "provider_execution_completed"
     PROVIDER_EXECUTION_FAILED = "provider_execution_failed"

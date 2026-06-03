@@ -118,8 +118,11 @@ from agentickvm.control_plane.targets import (  # noqa: E402
     TargetRegistryError,
 )
 from agentickvm.control_plane.approvals import (  # noqa: E402
+    APPROVAL_RESUMPTION_BLOCKED_CAPABILITIES,
     Actor,
     ActorType,
+    ApprovalGrant,
+    ApprovalGrantScope,
     ApprovalOutcome,
     ApprovalRequest,
     ApprovalResponse,
@@ -129,6 +132,7 @@ from agentickvm.control_plane.approvals import (  # noqa: E402
     EmergencyStopState,
     SessionApprovalGrant,
     build_approval_request,
+    fingerprint_parameters,
 )
 from agentickvm.control_plane.audit import (  # noqa: E402
     AuditEvent,
@@ -147,8 +151,11 @@ from agentickvm.control_plane.engine import (  # noqa: E402
 )
 
 __all__ = [
+    "APPROVAL_RESUMPTION_BLOCKED_CAPABILITIES",
     "Actor",
     "ActorType",
+    "ApprovalGrant",
+    "ApprovalGrantScope",
     "ApprovalOutcome",
     "ApprovalRequest",
     "ApprovalResponse",
@@ -190,6 +197,7 @@ __all__ = [
     "build_approval_request",
     "build_audit_event",
     "default_decision_for_unknown_capability",
+    "fingerprint_parameters",
     "load_policy_file",
     "mode_preset",
     "redact_mapping",

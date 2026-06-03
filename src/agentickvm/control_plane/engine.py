@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from datetime import UTC, datetime
 from enum import StrEnum
 from types import MappingProxyType
 from typing import Any, Mapping
@@ -11,8 +12,10 @@ from agentickvm.control_plane import CAPABILITY_FAMILIES
 from agentickvm.control_plane.approvals import (
     Actor,
     ApprovalRequest,
+    ApprovalStore,
     CapabilityRef,
     build_approval_request,
+    fingerprint_parameters,
 )
 from agentickvm.control_plane.audit import (
     AuditEventType,
@@ -81,11 +84,15 @@ class ControlPlane:
         provider: Provider,
         audit_sink: AuditSink,
         registry: CapabilityRegistry = DEFAULT_CAPABILITY_REGISTRY,
+        approval_store: ApprovalStore | None = None,
+        now_factory: Any | None = None,
     ) -> None:
         self.policy = policy
         self.provider = provider
         self.audit_sink = audit_sink
         self.registry = registry
+        self.approval_store = approval_store
+        self.now_factory = now_factory or (lambda: datetime.now(UTC))
 
     def handle(self, request: CapabilityRequest) -> ControlPlaneResult:
         """Handle a capability request through the required control flow."""
@@ -167,6 +174,26 @@ class ControlPlane:
         if decision.requires_approval:
             if capability is None:
                 raise RuntimeError("Unknown capabilities cannot require approval")
+            grant = self._matching_approval_grant(request)
+            if grant is not None:
+                if self.approval_store is None:
+                    raise RuntimeError("Approval grant found without approval store")
+                self.approval_store.consume(grant)
+                self._emit(
+                    event_type=AuditEventType.APPROVAL_CONSUMED,
+                    request=request,
+                    capability_ref=capability_ref,
+                    policy_decision=decision.decision,
+                    approval_payload=grant.to_dict(),
+                    material_risks=decision.material_risks,
+                )
+                return self._execute_provider(
+                    request=request,
+                    capability=capability,
+                    capability_ref=capability_ref,
+                    decision=decision,
+                )
+
             approval_request = build_approval_request(
                 decision_result=decision,
                 capability=capability,
@@ -174,6 +201,8 @@ class ControlPlane:
                 requester=request.requester,
                 target_ids=(request.target_id,),
                 intended_effect=request.intended_effect,
+                provider_id=self.provider.provider_id,
+                now=self.now_factory(),
             )
             self._emit(
                 event_type=AuditEventType.APPROVAL_REQUESTED,
@@ -199,6 +228,21 @@ class ControlPlane:
         if capability is None:
             raise RuntimeError("Unknown capability reached provider execution")
 
+        return self._execute_provider(
+            request=request,
+            capability=capability,
+            capability_ref=capability_ref,
+            decision=decision,
+        )
+
+    def _execute_provider(
+        self,
+        *,
+        request: CapabilityRequest,
+        capability: Capability,
+        capability_ref: CapabilityRef,
+        decision: PolicyDecisionResult,
+    ) -> ControlPlaneResult:
         provider_request = ProviderActionRequest(
             capability=capability.id,
             action=capability.action,
@@ -245,6 +289,18 @@ class ControlPlane:
             decision=decision,
             provider_result=provider_result,
             message=provider_result.message,
+        )
+
+    def _matching_approval_grant(self, request: CapabilityRequest) -> Any | None:
+        if self.approval_store is None:
+            return None
+        return self.approval_store.find_action_grant(
+            capability_id=request.capability_id,
+            session_id=request.session_id,
+            target_id=request.target_id,
+            provider_id=self.provider.provider_id,
+            params_fingerprint=fingerprint_parameters(request.parameters),
+            now=self.now_factory(),
         )
 
     def _emit(
