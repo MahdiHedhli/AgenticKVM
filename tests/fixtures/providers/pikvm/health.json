@@ -1,0 +1,13 @@
+{
+  "health": "ok",
+  "fixture": true,
+  "transport": "fake",
+  "source": "synthetic-fixture",
+  "streamer": {
+    "state": "online",
+    "resolution": "1280x720"
+  },
+  "atx": {
+    "power": "on"
+  }
+}

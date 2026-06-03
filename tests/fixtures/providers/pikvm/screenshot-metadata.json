@@ -1,0 +1,14 @@
+{
+  "artifact": {
+    "kind": "screenshot",
+    "content_type": "image/png",
+    "byte_length": 128,
+    "storage": "metadata-only",
+    "target_id": "fixture-target",
+    "artifact_name": "screenshot-fixture-0001.png"
+  },
+  "sensitive": true,
+  "raw_bytes_included": false,
+  "fixture": true,
+  "source": "synthetic-fixture"
+}

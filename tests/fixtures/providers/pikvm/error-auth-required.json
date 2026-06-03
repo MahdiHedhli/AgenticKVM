@@ -1,0 +1,8 @@
+{
+  "error": {
+    "code": "auth_required",
+    "message": "synthetic fixture requires credential reference"
+  },
+  "fixture": true,
+  "source": "synthetic-fixture"
+}

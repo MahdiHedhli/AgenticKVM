@@ -1,0 +1,8 @@
+{
+  "error": {
+    "code": "timeout",
+    "message": "synthetic fixture timed out"
+  },
+  "fixture": true,
+  "source": "synthetic-fixture"
+}

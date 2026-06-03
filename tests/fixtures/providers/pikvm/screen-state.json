@@ -1,0 +1,7 @@
+{
+  "kind": "text_snapshot",
+  "content": "PiKVM fixture screen",
+  "sensitive": true,
+  "source": "synthetic-fixture",
+  "redaction_required": true
+}
