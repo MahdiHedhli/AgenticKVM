@@ -111,7 +111,7 @@ class MockProvider(Provider):
             self.state.power_state = "off"
             self._record_simulated_event(request)
             data["power_state"] = self.state.power_state
-        elif request.capability == "power.force_restart":
+        elif request.capability in {"power.graceful_restart", "power.force_restart"}:
             self.state.power_state = "on"
             self._record_simulated_event(request)
             data["power_state"] = self.state.power_state

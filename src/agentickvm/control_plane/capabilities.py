@@ -229,6 +229,13 @@ DEFAULT_CAPABILITIES: tuple[Capability, ...] = (
         dangerous=True,
     ),
     _capability(
+        "power.graceful_restart",
+        "Graceful restart",
+        "Request an orderly restart.",
+        RiskLevel.HIGH,
+        dangerous=True,
+    ),
+    _capability(
         "power.force_off",
         "Force power off",
         "Force a target off without relying on the operating system.",

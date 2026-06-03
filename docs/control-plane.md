@@ -14,6 +14,9 @@ execution.
 7. Audit writer records structured events.
 8. Result returns to the caller.
 
+MCP requests follow the same lifecycle. The MCP router maps tool names to
+capability ids and calls `ControlPlane`; it does not call providers directly.
+
 ## Visible Modes
 
 - Observe: read-only observation with redacted secrets.
@@ -32,6 +35,9 @@ execution.
 - `allow_with_limits`
 
 Unknown capability behavior is always `deny`.
+
+Unknown MCP tool names and MCP mappings to unknown capabilities also fail
+closed.
 
 ## Capability Families
 
@@ -78,3 +84,6 @@ outcome.
 Full Control bypasses prompts only for in-scope allowed actions. It does not
 bypass scope, limits, audit, emergency stop, secret redaction, or hard
 invariants.
+
+MCP requests cannot use a requested mode field to self-escalate the active
+policy.

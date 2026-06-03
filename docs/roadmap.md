@@ -24,6 +24,8 @@
 - Add MCP tools that submit capability requests.
 - Prove MCP tools cannot call providers directly.
 - Add contract tests for tool-to-control-plane routing.
+- Keep live MCP SDK server and client integration deferred until the internal
+  router, schemas, safety tests, and mock provider path are stable.
 
 ## 4. PiKVM Provider
 

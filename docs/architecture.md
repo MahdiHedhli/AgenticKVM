@@ -21,9 +21,12 @@ All action paths must follow:
 
 ### Interface Layer
 
-Future MCP tools, CLI commands, API handlers, and agent workflows live here.
-Their job is to describe intent and submit capability requests to the control
-plane. They must not import or call provider adapters directly.
+MCP tools, CLI commands, API handlers, and agent workflows live here. Their job
+is to describe intent and submit capability requests to the control plane. They
+must not import or call provider adapters directly.
+
+The current MCP scaffold provides internal MCP-style models, a tool registry,
+and a router. It does not start a live MCP server yet.
 
 ### Control Plane
 
@@ -53,15 +56,16 @@ provider-specific operations. They do not own policy.
 
 ## Current Bootstrap State
 
-The current implementation includes only:
+The current implementation includes:
 
-- documented constants
-- base provider contract
-- safe mock provider
+- capability registry and policy decision engine
+- approval and audit models
+- control-plane router for mock provider execution
+- safe stateful mock provider
+- MCP-style models, registry, and router
 - offline tests
 
-Real provider implementations are deferred until the control plane, policy
-engine, approvals, audit, and mock tests are in place.
+Real provider implementations and live MCP SDK testing remain deferred.
 
 ## Design Rule
 

@@ -204,3 +204,29 @@
   - `docs/heartbeat-log.md`
 - tests expected to run:
   - `uv run --with pytest --python python3.13 python -m pytest`
+
+## 2026-06-03T06:14:34Z
+
+- selected maturity level: Maturity 4, MCP Interface
+- selected task: add internal MCP-style request/response models, a tool registry
+  that maps tool names to existing capabilities, and a router that calls
+  `ControlPlane`
+- why this task is safe: no MCP SDK, live server, real providers, credentials,
+  or real hardware are introduced; unknown tool names and unknown capability
+  mappings fail closed; the router cannot execute provider behavior except
+  through `ControlPlane`
+- files expected to change:
+  - `src/agentickvm/mcp/__init__.py`
+  - `src/agentickvm/mcp/models.py`
+  - `src/agentickvm/mcp/registry.py`
+  - `src/agentickvm/mcp/router.py`
+  - `tests/unit/test_mcp_registry.py`
+  - `tests/unit/test_mcp_router.py`
+  - `tests/security/test_mcp_safety.py`
+  - `docs/mcp-tools.md`
+  - `docs/architecture.md`
+  - `docs/control-plane.md`
+  - `docs/roadmap.md`
+  - `docs/heartbeat-log.md`
+- tests expected to run:
+  - `uv run --with pytest --python python3.13 python -m pytest`
