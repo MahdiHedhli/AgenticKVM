@@ -56,6 +56,10 @@ Redfish transport rejects non-GET methods. The provider modules do not define a
 live transport implementation, and placeholder configs remain disabled by
 default.
 
+PiKVM now has a provider-specific fake observe transport boundary and synthetic
+fixture contracts. The live PiKVM transport is still absent. Fixture mode must
+be explicit and cannot be combined with live mode.
+
 Transport security policy defaults to TLS verification enabled, no redirects,
 GET-only Redfish first slice, observe-only PiKVM first slice, bounded response
 size, and no retry for unsafe or mutating capabilities.
@@ -79,3 +83,7 @@ tamper-evidence.
 
 Provider errors and provider results normalize into structured envelopes before
 CLI/MCP output. Secret-shaped fields and credential references are redacted.
+
+Screenshot and screen observations are sensitive. The current scaffold records
+metadata only, rejects repo-default artifact paths, redacts raw byte fields in
+audit, and ignores common local screenshot artifact paths.

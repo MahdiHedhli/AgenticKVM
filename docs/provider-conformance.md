@@ -25,6 +25,11 @@ It does not approve live provider access.
   mocks and fixtures.
 - Provider observe results normalize into a shared envelope before CLI/MCP
   output.
+- PiKVM fixture observations run through the provider-specific fake observe
+  transport boundary.
+- PiKVM fixture contracts validate health, screen state, screenshot metadata,
+  power state, auth-required errors, timeout errors, and unexpected shapes.
+- Screenshot artifacts remain metadata-only in tests and audit.
 - Secret-shaped parameter values are redacted or absent from provider output.
 - Fake providers do not read environment secrets.
 - Provider modules do not import live IO clients.
@@ -40,5 +45,8 @@ smoke testing can be considered.
 
 - `tests/contract/test_mock_provider_conformance.py`
 - `tests/contract/test_pikvm_provider_conformance.py`
+- `tests/contract/test_pikvm_fixture_provider_integration.py`
+- `tests/contract/test_pikvm_fixture_cli_mcp_path.py`
+- `tests/contract/test_pikvm_fixture_contracts.py`
 - `tests/contract/test_redfish_provider_conformance.py`
 - `tests/contract/test_provider_result_normalization.py`

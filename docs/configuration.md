@@ -13,6 +13,7 @@ Examples:
 - `examples/config/mock-only.yaml`
 - `examples/config/provider-placeholders.yaml`
 - `examples/config/pikvm-observe-placeholder.yaml`
+- `examples/config/pikvm-observe-fixture.yaml`
 - `examples/config/redfish-observe-placeholder.yaml`
 - `examples/config/lab-observe-only.example.yaml`
 
@@ -66,6 +67,18 @@ PiKVM and Redfish fixture mode is available for offline tests only:
 Fixture mode builds a fake observe-only adapter with no live transport and no
 credentials. Placeholder examples keep `fixture_mode` false and `enabled`
 false.
+
+For PiKVM, fixture mode must use `transport: "fake"` or the implicit fake
+transport default. `fixture_mode` and `live_mode` cannot both be true. Enabled
+PiKVM live-provider config is rejected until live smoke gates and a future live
+transport implementation exist.
+
+TLS verification defaults to true. Disabling TLS verification without an
+explicit override fails closed, and insecure TLS is not a default example
+setting.
+
+PiKVM screenshot/artifact and audit paths in examples are placeholders only.
+Future live smoke must configure explicit local paths outside the repository.
 
 ## Credential References
 

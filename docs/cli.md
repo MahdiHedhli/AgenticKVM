@@ -23,11 +23,15 @@ PiKVM/Redfish observe-only providers:
 
 ```text
 agentickvm --config ./redfish-fixture.yaml call --target redfish-target --tool get_sensors
-agentickvm --config ./pikvm-fixture.yaml call --target pikvm-target --tool observe_screen
+agentickvm --config examples/config/pikvm-observe-fixture.yaml call --target pikvm-fixture-target --tool observe_screen
+agentickvm --config examples/config/pikvm-observe-fixture.yaml call --target pikvm-fixture-target --tool get_power_state
 ```
 
 Disabled placeholder examples are documentation only and will fail closed if
 called.
+
+PiKVM fixture output is metadata-only for screenshots and remains normalized
+under `data.provider_result`. It is not live PiKVM output.
 
 ## Safety
 
@@ -56,6 +60,7 @@ Real provider CLI usage remains deferred. Live PiKVM or Redfish CLI usage
 remains deferred until manual smoke gates pass.
 
 The CLI does not resolve credential references.
+The CLI does not write screenshot artifacts.
 
 ## Consistency
 

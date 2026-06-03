@@ -90,6 +90,10 @@ approval.
 - Returned params and provider results are redacted before MCP output.
 - The current scaffold supports the mock provider plus explicit fixture-mode
   PiKVM/Redfish observe providers for offline tests only.
+- PiKVM fixture observations use the provider-specific fake observe transport
+  boundary and synthetic fixture contracts.
+- PiKVM screenshot results are metadata-only; raw image bytes are not returned
+  by the scaffold.
 - Provider results use the normalized provider result envelope.
 - CLI/MCP equivalent requests are covered by a status consistency matrix.
 
@@ -98,6 +102,7 @@ approval.
 - Live MCP SDK server adapter.
 - MCP client integration tests.
 - Live provider MCP tests.
+- Live PiKVM transport and live PiKVM MCP tests.
 - Live operator approval transport.
 - Live provider registry selection beyond disabled placeholders.
 

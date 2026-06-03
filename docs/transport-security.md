@@ -11,6 +11,8 @@ defines the policy future transports must satisfy.
 - PiKVM first live slice is observe-only.
 - Redirects are disabled unless a provider spec explicitly allows them.
 - Tests use fake transports only.
+- PiKVM fixture tests use `FakePiKVMObserveTransport`; no default live PiKVM
+  transport can be instantiated.
 
 ## Timeouts
 
@@ -38,6 +40,10 @@ It is not available in tests.
 
 - Redfish first-slice methods: `GET` only.
 - PiKVM first-slice behavior: observe-only, no input or mutation.
+- PiKVM live observe is currently design-only. The implemented PiKVM transport
+  boundary is fake-only and validates synthetic fixture response shapes.
+- PiKVM screenshot observations are sensitive artifacts; audit records metadata
+  only and must not include raw image bytes.
 
 ## Audit
 
@@ -50,3 +56,6 @@ timeout policy.
 `TransportSecurityPolicy` validates defaults and retry decisions. It does not
 create a transport, open a connection, resolve credentials, or approve live
 provider use.
+
+`FakePiKVMObserveTransport` accepts the policy object for future boundary
+compatibility, but it still performs no network IO.
