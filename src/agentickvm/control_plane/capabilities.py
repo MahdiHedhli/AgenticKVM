@@ -189,6 +189,12 @@ DEFAULT_CAPABILITIES: tuple[Capability, ...] = (
         RiskLevel.MEDIUM,
     ),
     _capability(
+        "observe.boot_status",
+        "Observe boot status",
+        "Read boot phase or boot override status.",
+        RiskLevel.LOW,
+    ),
+    _capability(
         "input.mouse_move",
         "Move mouse",
         "Move the remote pointer inside session scope.",
@@ -206,6 +212,12 @@ DEFAULT_CAPABILITIES: tuple[Capability, ...] = (
         "Type text through a remote input device.",
         RiskLevel.HIGH,
         dangerous=True,
+    ),
+    _capability(
+        "input.keyboard_key",
+        "Send keyboard key",
+        "Send one non-secret key through a remote input device.",
+        RiskLevel.MEDIUM,
     ),
     _capability(
         "input.keyboard_shortcut",
@@ -247,6 +259,14 @@ DEFAULT_CAPABILITIES: tuple[Capability, ...] = (
         "power.force_restart",
         "Force restart",
         "Force an immediate target restart.",
+        RiskLevel.CRITICAL,
+        dangerous=True,
+        destructive=True,
+    ),
+    _capability(
+        "power.power_cycle",
+        "Power cycle",
+        "Force a target off and back on.",
         RiskLevel.CRITICAL,
         dangerous=True,
         destructive=True,

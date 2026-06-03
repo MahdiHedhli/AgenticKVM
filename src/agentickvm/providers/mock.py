@@ -19,6 +19,7 @@ class MockProviderState:
 
     power_state: str = "off"
     screen_text: str = "AgenticKVM mock screen"
+    boot_status: str = "mock firmware prompt"
     mounted_media: str | None = None
     boot_override: str | None = None
     input_events: list[dict[str, Any]] = field(default_factory=list)
@@ -41,6 +42,12 @@ class MockProvider(Provider):
 
     def __init__(self) -> None:
         self.requests: list[ProviderActionRequest] = []
+        self.state = MockProviderState()
+
+    def reset(self) -> None:
+        """Reset mock requests and fake target state."""
+
+        self.requests.clear()
         self.state = MockProviderState()
 
     def execute_authorized(
@@ -100,6 +107,11 @@ class MockProvider(Provider):
             data["sensors"] = [{"name": "mock-temp", "value": 25, "unit": "C"}]
         elif request.capability == "observe.event_logs":
             data["events"] = list(self.state.simulated_events)
+        elif request.capability == "observe.boot_status":
+            data["boot_status"] = {
+                "phase": self.state.boot_status,
+                "boot_override": self.state.boot_override,
+            }
         elif request.capability.startswith("input."):
             event = {"capability": request.capability, "parameters": parameters}
             self.state.input_events.append(event)
@@ -111,7 +123,11 @@ class MockProvider(Provider):
             self.state.power_state = "off"
             self._record_simulated_event(request)
             data["power_state"] = self.state.power_state
-        elif request.capability in {"power.graceful_restart", "power.force_restart"}:
+        elif request.capability in {
+            "power.graceful_restart",
+            "power.force_restart",
+            "power.power_cycle",
+        }:
             self.state.power_state = "on"
             self._record_simulated_event(request)
             data["power_state"] = self.state.power_state
@@ -163,6 +179,7 @@ class MockProvider(Provider):
     def _state_summary(self) -> dict[str, Any]:
         return {
             "power_state": self.state.power_state,
+            "boot_status": self.state.boot_status,
             "mounted_media": self.state.mounted_media,
             "boot_override": self.state.boot_override,
             "input_event_count": len(self.state.input_events),
