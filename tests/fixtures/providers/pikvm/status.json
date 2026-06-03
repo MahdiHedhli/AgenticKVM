@@ -1,5 +1,7 @@
 {
   "health": "ok",
+  "fixture": true,
+  "transport": "fake",
   "streamer": {
     "state": "online",
     "resolution": "1280x720"

@@ -54,6 +54,7 @@ def test_provider_modules_are_mock_or_offline_observe_scaffolds() -> None:
         "errors.py",
         "mock.py",
         "pikvm.py",
+        "pikvm_transport.py",
         "placeholders.py",
         "redfish.py",
         "registry.py",
@@ -61,7 +62,12 @@ def test_provider_modules_are_mock_or_offline_observe_scaffolds() -> None:
         "transports.py",
     }
     assert MockProvider.is_real_hardware is False
-    transport_source = (provider_dir / "transports.py").read_text(encoding="utf-8")
+    transport_source = "\n".join(
+        [
+            (provider_dir / "transports.py").read_text(encoding="utf-8"),
+            (provider_dir / "pikvm_transport.py").read_text(encoding="utf-8"),
+        ]
+    )
     for forbidden_import in (
         "import requests",
         "import urllib",

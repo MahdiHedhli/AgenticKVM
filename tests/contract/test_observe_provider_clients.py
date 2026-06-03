@@ -11,6 +11,15 @@ from agentickvm.providers.pikvm import (
     PiKVMObserveClient,
     default_pikvm_fake_transport,
 )
+from agentickvm.providers.pikvm_transport import (
+    PIKVM_BOOT_STATUS_PATH,
+    PIKVM_EVENT_LOGS_PATH,
+    PIKVM_HARDWARE_INVENTORY_PATH,
+    PIKVM_HEALTH_PATH,
+    PIKVM_POWER_STATE_PATH,
+    PIKVM_SCREENSHOT_METADATA_PATH,
+    PIKVM_SCREEN_STATE_PATH,
+)
 from agentickvm.providers.redfish import (
     REDFISH_OBSERVE_CAPABILITIES,
     RedfishObserveClient,
@@ -39,12 +48,17 @@ def test_fake_transport_rejects_non_get_methods() -> None:
 def test_pikvm_client_reads_fixture_backed_observations() -> None:
     transport = FakeTransport(
         {
-            ("GET", "/api/status"): _fixture("pikvm", "status.json"),
-            ("GET", "/api/screen"): _fixture("pikvm", "screen.json"),
-            ("GET", "/api/power"): _fixture("pikvm", "power.json"),
-            ("GET", "/api/boot"): _fixture("pikvm", "boot.json"),
-            ("GET", "/api/inventory"): {"provider": "pikvm"},
-            ("GET", "/api/events"): {"events": []},
+            ("GET", PIKVM_HEALTH_PATH): _fixture("pikvm", "status.json"),
+            ("GET", PIKVM_SCREEN_STATE_PATH): _fixture("pikvm", "screen.json"),
+            ("GET", PIKVM_SCREENSHOT_METADATA_PATH): {
+                "artifact": {"kind": "screenshot", "storage": "metadata-only"},
+                "sensitive": True,
+                "raw_bytes_included": False,
+            },
+            ("GET", PIKVM_POWER_STATE_PATH): _fixture("pikvm", "power.json"),
+            ("GET", PIKVM_BOOT_STATUS_PATH): _fixture("pikvm", "boot.json"),
+            ("GET", PIKVM_HARDWARE_INVENTORY_PATH): {"provider": "pikvm"},
+            ("GET", PIKVM_EVENT_LOGS_PATH): {"events": []},
         }
     )
     client = PiKVMObserveClient(transport=transport)

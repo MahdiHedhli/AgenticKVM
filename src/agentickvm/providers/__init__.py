@@ -36,6 +36,12 @@ from agentickvm.providers.pikvm import (
     PiKVMObserveProvider,
     default_pikvm_fake_transport,
 )
+from agentickvm.providers.pikvm_transport import (
+    FakePiKVMObserveTransport,
+    PiKVMLiveObserveTransportUnavailable,
+    PiKVMObserveTransport,
+    redact_pikvm_observe_payload,
+)
 from agentickvm.providers.placeholders import (
     DisabledRealProviderPlaceholder,
     OBSERVE_ONLY_REAL_PROVIDER_CAPABILITIES,
@@ -67,14 +73,17 @@ from agentickvm.providers.transport_policy import (
 __all__ = [
     "EXECUTABLE_PROVIDER_TYPES",
     "DisabledRealProviderPlaceholder",
+    "FakePiKVMObserveTransport",
     "KNOWN_PROVIDER_TYPES",
     "MockProvider",
     "OBSERVE_ONLY_REAL_PROVIDER_CAPABILITIES",
     "PIKVM_OBSERVE_CAPABILITIES",
     "PLACEHOLDER_PROVIDER_TYPES",
     "PiKVMProviderPlaceholder",
+    "PiKVMLiveObserveTransportUnavailable",
     "PiKVMObserveClient",
     "PiKVMObserveProvider",
+    "PiKVMObserveTransport",
     "PROVIDER_ERROR_TYPES",
     "Provider",
     "ProviderActionRequest",
@@ -114,4 +123,5 @@ __all__ = [
     "UnsupportedCapabilityError",
     "default_pikvm_fake_transport",
     "default_redfish_fake_transport",
+    "redact_pikvm_observe_payload",
 ]

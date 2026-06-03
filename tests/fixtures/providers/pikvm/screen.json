@@ -1,5 +1,6 @@
 {
   "kind": "text_snapshot",
   "content": "PiKVM fixture screen",
-  "sensitive": true
+  "sensitive": true,
+  "source": "synthetic-fixture"
 }

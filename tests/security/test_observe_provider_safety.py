@@ -52,6 +52,7 @@ def test_pikvm_client_exposes_observe_only_methods() -> None:
         "hardware_inventory",
         "power_state",
         "screen",
+        "screenshot_metadata",
         "status",
     }
 

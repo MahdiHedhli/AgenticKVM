@@ -17,6 +17,19 @@ from agentickvm.providers.base import (
     ProviderStatus,
     ProviderValidationResult,
 )
+from agentickvm.providers.errors import ProviderError
+from agentickvm.providers.pikvm_transport import (
+    FakePiKVMObserveTransport,
+    PIKVM_BOOT_STATUS_PATH,
+    PIKVM_EVENT_LOGS_PATH,
+    PIKVM_HARDWARE_INVENTORY_PATH,
+    PIKVM_HEALTH_PATH,
+    PIKVM_POWER_STATE_PATH,
+    PIKVM_SCREENSHOT_METADATA_PATH,
+    PIKVM_SCREEN_STATE_PATH,
+    PiKVMObserveTransport,
+)
+from agentickvm.providers.transport_policy import TransportSecurityPolicy
 from agentickvm.providers.transports import FakeTransport
 
 PIKVM_OBSERVE_CAPABILITIES = frozenset(
@@ -37,6 +50,60 @@ def default_pikvm_fake_transport() -> FakeTransport:
 
     return FakeTransport(
         {
+            (
+                "GET",
+                PIKVM_HEALTH_PATH,
+            ): {
+                "health": "ok",
+                "fixture": True,
+                "transport": "fake",
+                "streamer": {"state": "online", "resolution": "1280x720"},
+                "atx": {"power": "on"},
+            },
+            (
+                "GET",
+                PIKVM_SCREEN_STATE_PATH,
+            ): {
+                "kind": "text_snapshot",
+                "content": "PiKVM fixture screen",
+                "sensitive": True,
+                "source": "synthetic-fixture",
+            },
+            (
+                "GET",
+                PIKVM_SCREENSHOT_METADATA_PATH,
+            ): {
+                "artifact": {
+                    "kind": "screenshot",
+                    "content_type": "image/png",
+                    "byte_length": 128,
+                    "storage": "metadata-only",
+                    "target_id": "fixture-target",
+                },
+                "sensitive": True,
+                "raw_bytes_included": False,
+            },
+            ("GET", PIKVM_POWER_STATE_PATH): {"power_state": "on"},
+            ("GET", PIKVM_BOOT_STATUS_PATH): {"boot_status": "firmware_prompt"},
+            (
+                "GET",
+                PIKVM_HARDWARE_INVENTORY_PATH,
+            ): {
+                "provider": "pikvm",
+                "model": "PiKVM fixture",
+                "capture": "fixture",
+            },
+            (
+                "GET",
+                PIKVM_EVENT_LOGS_PATH,
+            ): {
+                "events": [
+                    {
+                        "severity": "info",
+                        "message": "fixture streamer online",
+                    }
+                ]
+            },
             (
                 "GET",
                 "/api/status",
@@ -84,41 +151,54 @@ class PiKVMObserveClient:
     def __init__(
         self,
         *,
-        transport: FakeTransport,
+        transport: FakeTransport | None = None,
+        observe_transport: PiKVMObserveTransport | None = None,
+        policy: TransportSecurityPolicy | None = None,
         timeout_seconds: float = 2.0,
     ) -> None:
-        self.transport = transport
+        if transport is None and observe_transport is None:
+            raise ValueError("PiKVM observe client requires an injected fake transport")
+        self.transport = transport or getattr(observe_transport, "transport", None)
+        self.observe_transport = observe_transport or FakePiKVMObserveTransport(
+            transport=transport,
+            policy=policy or TransportSecurityPolicy(read_timeout_seconds=timeout_seconds),
+        )
         self.timeout_seconds = timeout_seconds
 
     def status(self) -> Mapping[str, Any]:
         """Read fake PiKVM status."""
 
-        return self._get("/api/status")
+        return self.observe_transport.get_health()
 
     def screen(self) -> Mapping[str, Any]:
         """Read fake PiKVM screen metadata."""
 
-        return self._get("/api/screen")
+        return self.observe_transport.get_screen_state()
+
+    def screenshot_metadata(self) -> Mapping[str, Any]:
+        """Read fake PiKVM screenshot artifact metadata."""
+
+        return self.observe_transport.get_screenshot_metadata()
 
     def power_state(self) -> Mapping[str, Any]:
         """Read fake PiKVM power state."""
 
-        return self._get("/api/power")
+        return self.observe_transport.get_power_state()
 
     def boot_status(self) -> Mapping[str, Any]:
         """Read fake PiKVM boot status."""
 
-        return self._get("/api/boot")
+        return self.observe_transport.get_boot_status()
 
     def hardware_inventory(self) -> Mapping[str, Any]:
         """Read fake PiKVM inventory."""
 
-        return self._get("/api/inventory")
+        return self.observe_transport.get_hardware_inventory()
 
     def event_logs(self) -> Mapping[str, Any]:
         """Read fake PiKVM event logs."""
 
-        return self._get("/api/events")
+        return self.observe_transport.get_event_logs()
 
     def _get(self, path: str) -> Mapping[str, Any]:
         return MappingProxyType(
@@ -199,23 +279,35 @@ class PiKVMObserveProvider(Provider):
             return self._result(request, ok=False, message=validation.message)
 
         self.requests.append(request)
-        if request.capability == "observe.status":
-            data = {"status": self.client.status()}
-        elif request.capability in {"observe.screen", "observe.screenshot"}:
-            data = {"screen": self.client.screen()}
-        elif request.capability == "observe.power_state":
-            data = {"power_state": self.client.power_state()["power_state"]}
-        elif request.capability == "observe.hardware_inventory":
-            data = {"inventory": self.client.hardware_inventory()}
-        elif request.capability == "observe.event_logs":
-            data = {"events": list(self.client.event_logs()["events"])}
-        elif request.capability == "observe.boot_status":
-            data = {"boot_status": self.client.boot_status()["boot_status"]}
-        else:
-            return self._result(
-                request,
-                ok=False,
-                message="Unsupported PiKVM observe-only capability",
+        try:
+            if request.capability == "observe.status":
+                data = {"status": self.client.status()}
+            elif request.capability == "observe.screen":
+                data = {"screen": self.client.screen()}
+            elif request.capability == "observe.screenshot":
+                data = {
+                    "screen": self.client.screen(),
+                    "screenshot": self.client.screenshot_metadata(),
+                }
+            elif request.capability == "observe.power_state":
+                data = {"power_state": self.client.power_state()["power_state"]}
+            elif request.capability == "observe.hardware_inventory":
+                data = {"inventory": self.client.hardware_inventory()}
+            elif request.capability == "observe.event_logs":
+                data = {"events": list(self.client.event_logs()["events"])}
+            elif request.capability == "observe.boot_status":
+                data = {"boot_status": self.client.boot_status()["boot_status"]}
+            else:
+                return self._result(
+                    request,
+                    ok=False,
+                    message="Unsupported PiKVM observe-only capability",
+                )
+        except ProviderError as exc:
+            return exc.to_provider_result(
+                request=request,
+                provider_id=self.provider_id,
+                provider_type=self.provider_kind,
             )
 
         safe_data = {
