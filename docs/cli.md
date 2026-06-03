@@ -15,6 +15,9 @@ agentickvm call --target mock-host --tool get_power_state
 
 The CLI emits JSON for tests and future automation.
 
+Provider execution results are returned in the normalized provider result
+envelope under `data.provider_result`.
+
 With an explicit fixture-mode test config, the CLI can exercise fake
 PiKVM/Redfish observe-only providers:
 
@@ -51,6 +54,8 @@ The CLI flow is:
 
 Real provider CLI usage remains deferred. Live PiKVM or Redfish CLI usage
 remains deferred until manual smoke gates pass.
+
+The CLI does not resolve credential references.
 
 ## Consistency
 

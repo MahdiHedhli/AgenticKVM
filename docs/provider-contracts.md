@@ -61,6 +61,10 @@ contract tests. They are not live providers: they require injected fake
 transports, declare `is_real_hardware=false`, return
 `performed_on_hardware=false`, and support observe capabilities only.
 
+Provider conformance tests now cover metadata, disabled behavior, unsupported
+capabilities, observe-only restrictions, fake transport use, redaction, and
+interface-level provider bypass prevention.
+
 ## Readiness Gates
 
 Real provider readiness is specified in
@@ -68,6 +72,11 @@ Real provider readiness is specified in
 to observe-only capabilities and still requires manual smoke docs, mock-only CI,
 secret-safe config, audit behavior, timeout behavior, and human approval before
 live testing.
+
+Provider result normalization, provider error taxonomy, transport security
+policy, credential reference policy, live observe ADR, and MCP SDK adapter
+research are now part of the readiness surface. They do not implement live
+transport.
 
 ## Provider-Specific Risk
 

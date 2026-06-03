@@ -42,6 +42,9 @@
 - Add PiKVM and Redfish observe-only specs, fake transports, fixture-backed
   adapters, disabled config placeholders, CLI/MCP fixture tests, and manual
   smoke docs.
+- Add provider conformance suite, normalized provider result envelope, provider
+  error taxonomy, transport security policy model, credential reference
+  contract, live observe ADR, and MCP SDK adapter research.
 - Keep CI mock-only.
 - Require manual smoke docs and human approval before live testing.
 
@@ -51,6 +54,8 @@
 - Implement the smallest safe observe-only live adapter slice after readiness
   gates pass.
 - Add opt-in lab tests outside CI.
+- Status: not started; live transport remains blocked on operator approval,
+  transport/TLS design review, and manual smoke gates.
 
 ## 6. Redfish Provider
 
@@ -58,6 +63,8 @@
 - Implement the smallest safe GET-only observe live adapter slice after
   readiness gates pass.
 - Add opt-in lab tests outside CI.
+- Status: not started; live transport remains blocked on operator approval,
+  transport/TLS design review, and manual smoke gates.
 
 ## 7. Operator Approval UX
 

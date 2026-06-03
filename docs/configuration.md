@@ -66,3 +66,10 @@ PiKVM and Redfish fixture mode is available for offline tests only:
 Fixture mode builds a fake observe-only adapter with no live transport and no
 credentials. Placeholder examples keep `fixture_mode` false and `enabled`
 false.
+
+## Credential References
+
+Provider entries may include a future `credential_ref` value using an approved
+scheme such as `keychain://`, `file://`, `env://`, `vault://`, or `prompt://`.
+The current loader validates the reference but does not resolve it. Raw
+credential fields remain rejected.

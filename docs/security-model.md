@@ -32,6 +32,10 @@ Configuration must not contain raw credentials or secret-shaped keys. The
 current loader rejects keys such as `password`, `token`, `api_key`, `secret`,
 `private_key`, `credential`, `bearer`, and `session_cookie`.
 
+The only credential-shaped config key currently allowed is `credential_ref`.
+It validates future reference syntax and is not resolved by tests or the
+current runtime.
+
 ## Scope
 
 Target and session scope must be explicit for dangerous or destructive actions.
@@ -52,6 +56,10 @@ Redfish transport rejects non-GET methods. The provider modules do not define a
 live transport implementation, and placeholder configs remain disabled by
 default.
 
+Transport security policy defaults to TLS verification enabled, no redirects,
+GET-only Redfish first slice, observe-only PiKVM first slice, bounded response
+size, and no retry for unsafe or mutating capabilities.
+
 ## Emergency Stop
 
 Emergency stop must not be disableable by an agent-controlled request. Future
@@ -68,3 +76,6 @@ The local JSONL audit scaffold writes only to an explicitly configured file
 path. Test coverage uses temporary directories only. JSONL records are redacted
 before write and include a simple previous-hash/event-hash chain for
 tamper-evidence.
+
+Provider errors and provider results normalize into structured envelopes before
+CLI/MCP output. Secret-shaped fields and credential references are redacted.

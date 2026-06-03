@@ -90,6 +90,7 @@ approval.
 - Returned params and provider results are redacted before MCP output.
 - The current scaffold supports the mock provider plus explicit fixture-mode
   PiKVM/Redfish observe providers for offline tests only.
+- Provider results use the normalized provider result envelope.
 - CLI/MCP equivalent requests are covered by a status consistency matrix.
 
 ## Deferred Work
@@ -99,3 +100,6 @@ approval.
 - Live provider MCP tests.
 - Live operator approval transport.
 - Live provider registry selection beyond disabled placeholders.
+
+The MCP SDK adapter spec exists as docs-only research in
+`specs/006-mcp-sdk-adapter/`. No SDK dependency or live server has been added.

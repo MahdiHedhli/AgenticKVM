@@ -44,3 +44,9 @@ It is not available in tests.
 Future live network attempts must emit audit events that include redacted
 transport policy summary, method, capability, provider, target, TLS policy, and
 timeout policy.
+
+## Current Implementation
+
+`TransportSecurityPolicy` validates defaults and retry decisions. It does not
+create a transport, open a connection, resolve credentials, or approve live
+provider use.

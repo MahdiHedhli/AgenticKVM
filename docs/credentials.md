@@ -17,6 +17,9 @@ Allowed future patterns:
 The current config loader validates `credential_ref` syntax but does not resolve
 the reference. Tests must not read environment secrets.
 
+`credential_ref` values are omitted from provider and target registry summaries.
+Audit redaction treats credential reference fields as sensitive.
+
 ## Disallowed
 
 - raw passwords

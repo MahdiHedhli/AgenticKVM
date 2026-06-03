@@ -43,3 +43,9 @@ CLI and MCP should surface normalized provider results with:
 
 Provider errors do not authorize retries, approvals, or target changes by
 themselves.
+
+## Current Implementation
+
+The taxonomy is implemented in `src/agentickvm/providers/errors.py` and covered
+by unit plus CLI/MCP consistency tests. It is ready for future live providers to
+use, but no live provider transport exists yet.
