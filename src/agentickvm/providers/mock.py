@@ -54,9 +54,8 @@ class MockProvider(Provider):
         self,
         request: ProviderActionRequest,
     ) -> ProviderActionResult:
-        self.requests.append(request)
-
-        if not self.supports(request.capability):
+        validation = self.validate_authorized(request)
+        if not validation.ok:
             return ProviderActionResult(
                 ok=False,
                 provider_id=self.provider_id,
@@ -64,10 +63,11 @@ class MockProvider(Provider):
                 action=request.action,
                 target_id=request.target_id,
                 performed_on_hardware=False,
-                message="Unsupported mock capability; no hardware action performed.",
+                message=f"{validation.message}; no hardware action performed.",
                 data={"mock": True, "performed": False},
             )
 
+        self.requests.append(request)
         data = self._simulate(request)
         return ProviderActionResult(
             ok=True,

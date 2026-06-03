@@ -243,11 +243,11 @@ class RedfishObserveProvider(Provider):
         self,
         request: ProviderActionRequest,
     ) -> ProviderActionResult:
-        self.requests.append(request)
         validation = self.validate_authorized(request)
         if not validation.ok:
             return self._result(request, ok=False, message=validation.message)
 
+        self.requests.append(request)
         if request.capability == "observe.status":
             data = {
                 "service_root": self.client.service_root(),

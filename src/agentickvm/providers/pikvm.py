@@ -194,11 +194,11 @@ class PiKVMObserveProvider(Provider):
         self,
         request: ProviderActionRequest,
     ) -> ProviderActionResult:
-        self.requests.append(request)
         validation = self.validate_authorized(request)
         if not validation.ok:
             return self._result(request, ok=False, message=validation.message)
 
+        self.requests.append(request)
         if request.capability == "observe.status":
             data = {"status": self.client.status()}
         elif request.capability in {"observe.screen", "observe.screenshot"}:

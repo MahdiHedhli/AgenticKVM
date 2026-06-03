@@ -467,3 +467,32 @@
 - blockers: none for repo-local fake-provider readiness work; live provider
   work remains blocked on operator approval, credentials strategy, timeout/TLS
   design, and manual smoke gates
+
+## 2026-06-03T16:48:10Z
+
+- selected maturity level: Maturity 6, live observe readiness hardening
+- selected task: add provider conformance tests, normalized provider observe
+  result shapes, provider error taxonomy, live observe transport ADR,
+  transport security policy, credential reference strategy, refined manual
+  smoke gates, and MCP SDK adapter research
+- why this task is safe: all work is repo-local and offline; tests use mock
+  providers, fake transports, and fixtures only; no live transport, hardware
+  calls, credentials, or SDK dependency are introduced; CLI/MCP authority still
+  routes through registries and `ControlPlane`
+- files expected to change:
+  - `src/agentickvm/providers/`
+  - `src/agentickvm/config/`
+  - `tests/contract/`
+  - `tests/security/`
+  - `tests/unit/`
+  - `docs/provider-conformance.md`
+  - `docs/provider-errors.md`
+  - `docs/transport-security.md`
+  - `docs/credentials.md`
+  - `docs/adr/`
+  - `docs/manual-smoke/`
+  - `specs/003-real-provider-readiness/contracts/`
+  - `specs/006-mcp-sdk-adapter/`
+  - `docs/heartbeat-log.md`
+- tests expected to run:
+  - `uv run --with pytest --python python3.13 python -m pytest`
