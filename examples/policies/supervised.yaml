@@ -1,0 +1,85 @@
+version: "0.1"
+name: supervised
+description: Operator-supervised mode where dangerous actions are gated.
+mode: Supervised
+defaults:
+  unknown_capability: deny
+  unmatched_capability: deny
+  audit: mandatory
+  secrets: redact_by_default
+scope:
+  targets: []
+  sessions: []
+  allow_real_hardware: false
+rules:
+  - capability: observe.*
+    family: observe
+    decision: allow_with_limits
+    limits:
+      read_only: true
+      redact_secrets: true
+  - capability: input.*
+    family: input
+    decision: ask_once_per_session
+    requires_explicit_scope: true
+    requires_explanation: true
+  - capability: power.force
+    family: power
+    decision: ask_each_time
+    dangerous: true
+    requires_explicit_scope: true
+    requires_explanation: true
+  - capability: media.mount_iso
+    family: media
+    decision: ask_each_time
+    dangerous: true
+    requires_explicit_scope: true
+    requires_explanation: true
+  - capability: firmware.update
+    family: firmware
+    decision: ask_each_time
+    dangerous: true
+    requires_explicit_scope: true
+    requires_explanation: true
+  - capability: storage.wipe
+    family: storage
+    decision: ask_each_time
+    dangerous: true
+    requires_explicit_scope: true
+    requires_explanation: true
+  - capability: secrets.raw_reveal
+    family: secrets
+    decision: ask_each_time
+    dangerous: true
+    requires_explicit_scope: true
+    requires_explanation: true
+dangerous_actions:
+  - force power actions
+  - NMI
+  - BMC reset
+  - arbitrary ISO mount
+  - boot override
+  - BIOS changes
+  - firmware updates
+  - network/BMC IP changes
+  - BMC credential changes
+  - disk format/wipe/repartition
+  - backup restore
+  - encryption changes
+  - raw secret reveal
+  - untrusted script/playbook execution
+  - external webhook calls
+  - subagent spawning
+hard_invariants:
+  - Agent cannot change its own policy.
+  - Agent cannot disable audit logging.
+  - Agent cannot disable emergency stop.
+  - Agent cannot silently expand target scope.
+  - Agent cannot silently add credentials.
+  - Agent cannot reveal raw secrets by default.
+  - Agent cannot persist new background services without logging them.
+  - Agent cannot move to another target unless it is inside session scope.
+  - Agent cannot erase audit artifacts.
+  - Agent cannot hide material risk from the operator.
+  - Agent cannot run destructive OOB actions against real hardware unless target and session scope explicitly allow it.
+  - Agent cannot treat provider-specific reset, boot, firmware, or storage actions as generic low-risk actions.

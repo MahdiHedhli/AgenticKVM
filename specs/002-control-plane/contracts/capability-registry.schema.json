@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentickvm.dev/schemas/capability-registry.schema.json",
+  "title": "AgenticKVM Capability Registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "capabilities"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "family",
+          "action",
+          "title",
+          "description",
+          "risk",
+          "dangerous",
+          "destructive"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*$"
+          },
+          "family": {
+            "$ref": "#/$defs/capabilityFamily"
+          },
+          "action": {
+            "type": "string",
+            "minLength": 1
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1
+          },
+          "risk": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "critical"]
+          },
+          "dangerous": {
+            "type": "boolean"
+          },
+          "destructive": {
+            "type": "boolean"
+          },
+          "required_scope": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["target", "session", "credential", "parameter", "time"]
+            },
+            "uniqueItems": true
+          },
+          "approval_recommendation": {
+            "type": "string",
+            "enum": [
+              "deny",
+              "ask_each_time",
+              "ask_once_per_session",
+              "allow",
+              "allow_with_limits"
+            ]
+          },
+          "audit_fields": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            },
+            "uniqueItems": true
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "capabilityFamily": {
+      "type": "string",
+      "enum": [
+        "session",
+        "observe",
+        "input",
+        "power",
+        "media",
+        "boot",
+        "bios",
+        "firmware",
+        "storage",
+        "network",
+        "bmc",
+        "secrets",
+        "runtime"
+      ]
+    }
+  }
+}

@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentickvm.dev/schemas/policy.schema.json",
+  "title": "AgenticKVM Policy",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "name", "mode", "defaults", "rules"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "description": {
+      "type": "string"
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["Observe", "Assisted", "Supervised", "Full Control", "Custom"]
+    },
+    "defaults": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unknown_capability", "audit", "secrets"],
+      "properties": {
+        "unknown_capability": {
+          "const": "deny"
+        },
+        "unmatched_capability": {
+          "$ref": "#/$defs/policyDecision"
+        },
+        "audit": {
+          "const": "mandatory"
+        },
+        "secrets": {
+          "const": "redact_by_default"
+        }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "targets": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "sessions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "allow_real_hardware": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["capability", "decision"],
+        "properties": {
+          "capability": {
+            "type": "string",
+            "minLength": 1
+          },
+          "family": {
+            "$ref": "#/$defs/capabilityFamily"
+          },
+          "decision": {
+            "$ref": "#/$defs/policyDecision"
+          },
+          "dangerous": {
+            "type": "boolean"
+          },
+          "requires_explicit_scope": {
+            "type": "boolean"
+          },
+          "requires_explanation": {
+            "type": "boolean"
+          },
+          "limits": {
+            "type": "object"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "dangerous_actions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    },
+    "hard_invariants": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    }
+  },
+  "$defs": {
+    "policyDecision": {
+      "type": "string",
+      "enum": [
+        "deny",
+        "ask_each_time",
+        "ask_once_per_session",
+        "allow",
+        "allow_with_limits"
+      ]
+    },
+    "capabilityFamily": {
+      "type": "string",
+      "enum": [
+        "session",
+        "observe",
+        "input",
+        "power",
+        "media",
+        "boot",
+        "bios",
+        "firmware",
+        "storage",
+        "network",
+        "bmc",
+        "secrets",
+        "runtime"
+      ]
+    }
+  }
+}

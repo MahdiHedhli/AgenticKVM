@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agentickvm.dev/schemas/approval-request.schema.json",
+  "title": "AgenticKVM Approval Request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "created_at",
+    "expires_at",
+    "session_id",
+    "requester",
+    "capability",
+    "target_scope",
+    "policy_decision",
+    "operator_message",
+    "material_risks",
+    "proposed_audit_event_id"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "session_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "requester": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "id"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["agent", "operator", "service", "test"]
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "capability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "family", "action"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "family": {
+          "$ref": "#/$defs/capabilityFamily"
+        },
+        "action": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "target_scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["targets"],
+      "properties": {
+        "targets": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "allow_real_hardware": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "policy_decision": {
+      "type": "string",
+      "enum": ["ask_each_time", "ask_once_per_session"]
+    },
+    "operator_message": {
+      "type": "string",
+      "minLength": 1
+    },
+    "material_risks": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "limits": {
+      "type": "object"
+    },
+    "proposed_audit_event_id": {
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "$defs": {
+    "capabilityFamily": {
+      "type": "string",
+      "enum": [
+        "session",
+        "observe",
+        "input",
+        "power",
+        "media",
+        "boot",
+        "bios",
+        "firmware",
+        "storage",
+        "network",
+        "bmc",
+        "secrets",
+        "runtime"
+      ]
+    }
+  }
+}
