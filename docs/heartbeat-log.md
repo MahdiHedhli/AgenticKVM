@@ -400,3 +400,39 @@
   - `tests/security/`
 - tests expected to run:
   - `uv run --with pytest --python python3.13 python -m pytest`
+
+## 2026-06-03T13:36:44Z
+
+- selected maturity level: Maturity 6, provider-specific observe-only
+  readiness
+- selected task: add PiKVM and Redfish observe-only specs, fake transport
+  client contracts, mocked observe-only provider adapters, safe disabled config
+  placeholders, CLI/MCP mocked integration tests, and manual smoke
+  documentation
+- why this task is safe: all implementation is repo-local and fixture-backed;
+  real providers remain disabled by default, no live network transport is
+  introduced, tests do not read credentials or environment secrets, and all
+  CLI/MCP paths continue through provider registry, target registry, and
+  `ControlPlane`
+- files expected to change:
+  - `specs/004-pikvm-observe-only/`
+  - `specs/005-redfish-observe-only/`
+  - `src/agentickvm/providers/`
+  - `src/agentickvm/config/`
+  - `src/agentickvm/mcp/registry.py`
+  - `examples/config/`
+  - `tests/fixtures/providers/`
+  - `tests/unit/`
+  - `tests/contract/`
+  - `tests/security/`
+  - `docs/manual-smoke/`
+  - `docs/provider-contracts.md`
+  - `docs/provider-registry.md`
+  - `docs/configuration.md`
+  - `docs/cli.md`
+  - `docs/mcp-tools.md`
+  - `docs/roadmap.md`
+  - `docs/security-model.md`
+  - `docs/heartbeat-log.md`
+- tests expected to run:
+  - `uv run --with pytest --python python3.13 python -m pytest`
