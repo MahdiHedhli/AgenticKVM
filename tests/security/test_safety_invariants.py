@@ -51,6 +51,7 @@ def test_provider_modules_are_mock_or_offline_observe_scaffolds() -> None:
     assert provider_files <= {
         "__init__.py",
         "base.py",
+        "errors.py",
         "mock.py",
         "pikvm.py",
         "placeholders.py",
