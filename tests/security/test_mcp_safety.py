@@ -1,6 +1,12 @@
 import inspect
 
-from agentickvm.control_plane import ControlMode, InMemoryAuditSink, mode_preset
+from agentickvm.control_plane import (
+    ControlMode,
+    InMemoryAuditSink,
+    TargetDefinition,
+    TargetRegistry,
+    mode_preset,
+)
 from agentickvm.mcp import (
     MCPResultStatus,
     MCPRouter,
@@ -8,8 +14,7 @@ from agentickvm.mcp import (
     MCPToolRequest,
 )
 from agentickvm.mcp import router as router_module
-from agentickvm.providers import MockProvider
-from agentickvm.control_plane import ControlPlane
+from agentickvm.providers import MockProvider, ProviderEntry, ProviderRegistry
 
 
 class BadMappingRegistry:
@@ -26,12 +31,29 @@ class BadMappingRegistry:
 def _router(mode: ControlMode = ControlMode.FULL_CONTROL):
     sink = InMemoryAuditSink()
     provider = MockProvider()
-    control_plane = ControlPlane(
-        policy=mode_preset(mode),
-        provider=provider,
-        audit_sink=sink,
+    provider_registry = ProviderRegistry(
+        [
+            ProviderEntry(
+                provider_id="mock",
+                provider_type="mock",
+                provider=provider,
+            )
+        ]
     )
-    return MCPRouter(control_plane=control_plane), provider, sink
+    target_registry = TargetRegistry(
+        provider_registry=provider_registry,
+        targets=[TargetDefinition(target_id="lab-a", provider_id="mock")],
+    )
+    return (
+        MCPRouter(
+            provider_registry=provider_registry,
+            target_registry=target_registry,
+            policy=mode_preset(mode),
+            audit_sink=sink,
+        ),
+        provider,
+        sink,
+    )
 
 
 def _request(tool_name: str, **params) -> MCPToolRequest:
@@ -54,7 +76,13 @@ def test_mcp_router_source_does_not_call_provider_directly() -> None:
 
 def test_mapped_unknown_capability_fails_closed_without_provider_call() -> None:
     router, provider, sink = _router(ControlMode.FULL_CONTROL)
-    router = MCPRouter(control_plane=router.control_plane, registry=BadMappingRegistry())
+    router = MCPRouter(
+        provider_registry=router.provider_registry,
+        target_registry=router.target_registry,
+        policy=router.policy,
+        audit_sink=router.audit_sink,
+        registry=BadMappingRegistry(),
+    )
 
     result = router.handle_tool_request(_request("bad_mapping"))
 

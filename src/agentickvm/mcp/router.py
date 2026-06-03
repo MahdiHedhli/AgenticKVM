@@ -6,14 +6,19 @@ from agentickvm.control_plane import (
     Actor,
     ActorType,
     CapabilityRef,
+    CapabilityPolicy,
+    CapabilityRegistry,
     CapabilityRequest,
     ControlPlane,
     ControlPlaneResult,
     ControlPlaneStatus,
+    DEFAULT_CAPABILITY_REGISTRY,
+    InMemoryAuditSink,
     PolicyDecision,
     build_audit_event,
 )
-from agentickvm.control_plane.audit import AuditEventType
+from agentickvm.control_plane.audit import AuditEventType, AuditSink
+from agentickvm.control_plane.targets import TargetRegistry, TargetRegistryError
 from agentickvm.mcp.models import (
     MCPResultStatus,
     MCPToolRequest,
@@ -24,6 +29,7 @@ from agentickvm.mcp.registry import (
     DEFAULT_MCP_TOOL_REGISTRY,
     MCPToolRegistry,
 )
+from agentickvm.providers.registry import ProviderRegistry, ProviderRegistryError
 
 
 class MCPRouter:
@@ -32,25 +38,24 @@ class MCPRouter:
     def __init__(
         self,
         *,
-        control_plane: ControlPlane,
+        provider_registry: ProviderRegistry,
+        target_registry: TargetRegistry,
+        policy: CapabilityPolicy,
+        audit_sink: AuditSink | None = None,
         registry: MCPToolRegistry = DEFAULT_MCP_TOOL_REGISTRY,
+        capability_registry: CapabilityRegistry = DEFAULT_CAPABILITY_REGISTRY,
+        control_plane_factory: type[ControlPlane] = ControlPlane,
     ) -> None:
-        self.control_plane = control_plane
+        self.provider_registry = provider_registry
+        self.target_registry = target_registry
+        self.policy = policy
+        self.audit_sink = audit_sink or InMemoryAuditSink()
         self.registry = registry
+        self.capability_registry = capability_registry
+        self.control_plane_factory = control_plane_factory
 
     def handle_tool_request(self, request: MCPToolRequest) -> MCPToolResult:
         """Validate, map, and route a tool-style request."""
-
-        if request.provider != self.control_plane.provider.provider_id:
-            self._audit_validation_error(request, "unknown MCP provider")
-            return MCPToolResult(
-                status=MCPResultStatus.VALIDATION_ERROR,
-                tool_name=request.tool_name,
-                capability=None,
-                target=request.target,
-                provider=request.provider,
-                reason="unknown MCP provider",
-            )
 
         tool = self.registry.get(request.tool_name)
         if tool is None:
@@ -60,11 +65,11 @@ class MCPRouter:
                 tool_name=request.tool_name,
                 capability=None,
                 target=request.target,
-                provider=request.provider,
+                provider=request.provider or "",
                 reason="unknown MCP tool",
             )
 
-        capability = self.control_plane.registry.get(tool.capability_id)
+        capability = self.capability_registry.get(tool.capability_id)
         if capability is None:
             self._audit_validation_error(
                 request,
@@ -75,8 +80,54 @@ class MCPRouter:
                 tool_name=request.tool_name,
                 capability=tool.capability_id,
                 target=request.target,
-                provider=request.provider,
+                provider=request.provider or "",
                 reason="unknown mapped capability",
+            )
+
+        try:
+            target = self.target_registry.resolve_enabled(
+                request.target,
+                mode=self.policy.mode,
+            )
+        except TargetRegistryError as exc:
+            self._audit_validation_error(request, str(exc))
+            return MCPToolResult(
+                status=MCPResultStatus.VALIDATION_ERROR,
+                tool_name=request.tool_name,
+                capability=tool.capability_id,
+                target=request.target,
+                provider=request.provider or "",
+                reason=str(exc),
+            )
+
+        if request.provider is not None:
+            try:
+                self.target_registry.validate_provider_match(
+                    request.target,
+                    request.provider,
+                )
+            except TargetRegistryError as exc:
+                self._audit_validation_error(request, str(exc))
+                return MCPToolResult(
+                    status=MCPResultStatus.VALIDATION_ERROR,
+                    tool_name=request.tool_name,
+                    capability=tool.capability_id,
+                    target=request.target,
+                    provider=request.provider,
+                    reason=str(exc),
+                )
+
+        try:
+            provider = self.provider_registry.resolve_enabled(target.provider_id)
+        except ProviderRegistryError as exc:
+            self._audit_validation_error(request, str(exc))
+            return MCPToolResult(
+                status=MCPResultStatus.VALIDATION_ERROR,
+                tool_name=request.tool_name,
+                capability=tool.capability_id,
+                target=request.target,
+                provider=target.provider_id,
+                reason=str(exc),
             )
 
         capability_request = CapabilityRequest(
@@ -89,15 +140,21 @@ class MCPRouter:
             parameters=request.params,
             credential_id=_credential_id_from_request(request),
         )
+        control_plane = self.control_plane_factory(
+            policy=self.policy,
+            provider=provider,
+            audit_sink=self.audit_sink,
+            registry=self.capability_registry,
+        )
         try:
-            result: ControlPlaneResult = self.control_plane.handle(capability_request)
+            result: ControlPlaneResult = control_plane.handle(capability_request)
         except ValueError as exc:
             return MCPToolResult(
                 status=MCPResultStatus.POLICY_ERROR,
                 tool_name=request.tool_name,
                 capability=tool.capability_id,
                 target=request.target,
-                provider=request.provider,
+                provider=target.provider_id,
                 reason=str(exc),
             )
         except RuntimeError as exc:
@@ -106,13 +163,14 @@ class MCPRouter:
                 tool_name=request.tool_name,
                 capability=tool.capability_id,
                 target=request.target,
-                provider=request.provider,
+                provider=target.provider_id,
                 reason=str(exc),
             )
 
         return mcp_result_from_control_plane(
             request=request,
             capability_id=tool.capability_id,
+            provider_id=target.provider_id,
             result=result,
         )
 
@@ -131,7 +189,7 @@ class MCPRouter:
             intended_effect=f"MCP validation error: {reason}",
             parameters=request.params,
         )
-        capability = self.control_plane.registry.require("runtime.noop")
+        capability = self.capability_registry.require("runtime.noop")
         capability_ref = CapabilityRef.from_capability(capability)
         event = build_audit_event(
             event_type=AuditEventType.RESULT_RETURNED,
@@ -144,7 +202,7 @@ class MCPRouter:
             request={"tool_name": request.tool_name, "params": dict(request.params)},
             result={"status": ControlPlaneStatus.DENIED.value, "reason": reason},
         )
-        self.control_plane.audit_sink.emit(event)
+        self.audit_sink.emit(event)
 
 
 def _credential_id_from_request(request: MCPToolRequest) -> str | None:

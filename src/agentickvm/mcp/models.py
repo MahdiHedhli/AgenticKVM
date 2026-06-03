@@ -39,7 +39,7 @@ class MCPToolRequest:
     session_id: str
     requester_id: str
     params: Mapping[str, Any] = field(default_factory=dict)
-    provider: str = "mock"
+    provider: str | None = None
     requested_mode: ControlMode | str | None = None
     policy_ref: str | None = None
     approval_context: Mapping[str, Any] = field(default_factory=dict)
@@ -103,6 +103,7 @@ def mcp_result_from_control_plane(
     *,
     request: MCPToolRequest,
     capability_id: str,
+    provider_id: str,
     result: ControlPlaneResult,
 ) -> MCPToolResult:
     """Translate a control-plane result into an MCP-safe result."""
@@ -113,7 +114,7 @@ def mcp_result_from_control_plane(
             tool_name=request.tool_name,
             capability=capability_id,
             target=request.target,
-            provider=request.provider,
+            provider=provider_id,
             reason=result.decision.reason,
             risks=result.decision.material_risks,
         )
@@ -126,7 +127,7 @@ def mcp_result_from_control_plane(
             tool_name=request.tool_name,
             capability=capability_id,
             target=request.target,
-            provider=request.provider,
+            provider=provider_id,
             reason=result.message,
             data={
                 "params_preview": dict(preview),
@@ -146,7 +147,7 @@ def mcp_result_from_control_plane(
             tool_name=request.tool_name,
             capability=capability_id,
             target=request.target,
-            provider=request.provider,
+            provider=provider_id,
             reason=result.message,
             data=dict(safe_data),
             risks=result.decision.material_risks,
@@ -161,7 +162,7 @@ def mcp_result_from_control_plane(
         tool_name=request.tool_name,
         capability=capability_id,
         target=request.target,
-        provider=request.provider,
+        provider=provider_id,
         reason=result.message,
         data=dict(safe_data),
         risks=result.decision.material_risks,
