@@ -78,6 +78,26 @@ DEFAULT_MCP_TOOLS: tuple[MCPToolDefinition, ...] = (
         description="Read target power state.",
     ),
     MCPToolDefinition(
+        tool_name="get_hardware_inventory",
+        capability_id="observe.hardware_inventory",
+        description="Read non-secret hardware inventory.",
+    ),
+    MCPToolDefinition(
+        tool_name="get_sensors",
+        capability_id="observe.sensors",
+        description="Read sensor summary.",
+    ),
+    MCPToolDefinition(
+        tool_name="get_event_logs",
+        capability_id="observe.event_logs",
+        description="Read event log summary.",
+    ),
+    MCPToolDefinition(
+        tool_name="get_boot_status",
+        capability_id="observe.boot_status",
+        description="Read boot status.",
+    ),
+    MCPToolDefinition(
         tool_name="power_on",
         capability_id="power.on",
         description="Power on an in-scope target.",

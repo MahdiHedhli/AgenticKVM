@@ -148,6 +148,7 @@ class PiKVMObserveProvider(Provider):
         self.provider_id = provider_id
         self.enabled = enabled
         self.client = client
+        self.requests: list[ProviderActionRequest] = []
         self.is_real_hardware = client is None
         self.risk_class = (
             "real_hardware_disabled"
@@ -193,6 +194,7 @@ class PiKVMObserveProvider(Provider):
         self,
         request: ProviderActionRequest,
     ) -> ProviderActionResult:
+        self.requests.append(request)
         validation = self.validate_authorized(request)
         if not validation.ok:
             return self._result(request, ok=False, message=validation.message)

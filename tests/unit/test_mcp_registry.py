@@ -6,6 +6,13 @@ from agentickvm.mcp import DEFAULT_MCP_TOOL_REGISTRY, MCPToolDefinition, MCPTool
 def test_known_mcp_tools_map_to_expected_capabilities() -> None:
     assert DEFAULT_MCP_TOOL_REGISTRY.capability_for("observe_screen") == "observe.screenshot"
     assert DEFAULT_MCP_TOOL_REGISTRY.capability_for("get_power_state") == "observe.power_state"
+    assert (
+        DEFAULT_MCP_TOOL_REGISTRY.capability_for("get_hardware_inventory")
+        == "observe.hardware_inventory"
+    )
+    assert DEFAULT_MCP_TOOL_REGISTRY.capability_for("get_sensors") == "observe.sensors"
+    assert DEFAULT_MCP_TOOL_REGISTRY.capability_for("get_event_logs") == "observe.event_logs"
+    assert DEFAULT_MCP_TOOL_REGISTRY.capability_for("get_boot_status") == "observe.boot_status"
     assert DEFAULT_MCP_TOOL_REGISTRY.capability_for("power_on") == "power.on"
     assert DEFAULT_MCP_TOOL_REGISTRY.capability_for("graceful_restart") == "power.graceful_restart"
     assert DEFAULT_MCP_TOOL_REGISTRY.capability_for("force_restart") == "power.force_restart"
