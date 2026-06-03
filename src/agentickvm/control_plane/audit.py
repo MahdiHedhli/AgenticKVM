@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from enum import StrEnum
+from pathlib import Path
 from types import MappingProxyType
 from typing import Any, Mapping, Protocol
 from uuid import uuid4
@@ -124,6 +127,60 @@ class InMemoryAuditSink:
         self.events.append(event)
 
 
+class LocalJSONLAuditSink:
+    """Local JSONL audit sink with a tamper-evident hash chain."""
+
+    def __init__(self, path: str | Path) -> None:
+        self.path = Path(path)
+        if self.path.exists() and self.path.is_dir():
+            raise ValueError("Audit path must be a file")
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self._previous_hash = _last_event_hash(self.path)
+
+    def emit(self, event: AuditEvent) -> None:
+        """Append a redacted audit event to JSONL."""
+
+        event_payload = _redacted_event_payload(event)
+        unsigned_record = {
+            "previous_hash": self._previous_hash,
+            "event": event_payload,
+        }
+        event_hash = _hash_mapping(unsigned_record)
+        record = {
+            **unsigned_record,
+            "event_hash": event_hash,
+        }
+        with self.path.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(record, sort_keys=True, separators=(",", ":")))
+            handle.write("\n")
+        self._previous_hash = event_hash
+
+
+def verify_audit_chain(path: str | Path) -> bool:
+    """Return whether a JSONL audit hash chain verifies."""
+
+    audit_path = Path(path)
+    previous_hash: str | None = None
+    if not audit_path.exists():
+        return True
+
+    with audit_path.open("r", encoding="utf-8") as handle:
+        for line in handle:
+            record = json.loads(line)
+            expected_previous = record.get("previous_hash")
+            if expected_previous != previous_hash:
+                return False
+            expected_hash = record.get("event_hash")
+            unsigned_record = {
+                "previous_hash": expected_previous,
+                "event": record.get("event"),
+            }
+            if expected_hash != _hash_mapping(unsigned_record):
+                return False
+            previous_hash = expected_hash
+    return True
+
+
 def redact_mapping(values: Mapping[str, Any]) -> tuple[Mapping[str, Any], tuple[str, ...]]:
     """Return a redacted copy of a mapping and the redacted paths."""
 
@@ -131,7 +188,20 @@ def redact_mapping(values: Mapping[str, Any]) -> tuple[Mapping[str, Any], tuple[
 
     def redact_value(path: str, key: str, value: Any) -> Any:
         lowered = key.lower()
-        if any(token in lowered for token in ("password", "secret", "token", "otp")):
+        if any(
+            token in lowered
+            for token in (
+                "password",
+                "secret",
+                "token",
+                "otp",
+                "api_key",
+                "private_key",
+                "credential",
+                "bearer",
+                "session_cookie",
+            )
+        ):
             redactions.append(path)
             return "[REDACTED]"
         if lowered == "text":
@@ -201,3 +271,37 @@ def build_audit_event(
         redactions=tuple(redactions),
         material_risks=material_risks,
     )
+
+
+def _redacted_event_payload(event: AuditEvent) -> dict[str, Any]:
+    payload = event.to_dict()
+    redactions = set(payload.get("redactions", []))
+    for section in ("request", "result", "approval"):
+        section_value = payload.get(section)
+        if isinstance(section_value, Mapping):
+            redacted, paths = redact_mapping(section_value)
+            payload[section] = dict(redacted)
+            redactions.update(f"{section}.{path}" for path in paths)
+    payload["redactions"] = sorted(redactions)
+    return payload
+
+
+def _hash_mapping(value: Mapping[str, Any]) -> str:
+    encoded = json.dumps(
+        value,
+        sort_keys=True,
+        separators=(",", ":"),
+        default=str,
+    ).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _last_event_hash(path: Path) -> str | None:
+    if not path.exists():
+        return None
+    last_hash: str | None = None
+    with path.open("r", encoding="utf-8") as handle:
+        for line in handle:
+            if line.strip():
+                last_hash = json.loads(line).get("event_hash")
+    return last_hash

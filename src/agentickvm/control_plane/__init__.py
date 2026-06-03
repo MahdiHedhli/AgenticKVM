@@ -139,9 +139,11 @@ from agentickvm.control_plane.audit import (  # noqa: E402
     AuditEventType,
     AuditSink,
     InMemoryAuditSink,
+    LocalJSONLAuditSink,
     ProviderRef,
     build_audit_event,
     redact_mapping,
+    verify_audit_chain,
 )
 from agentickvm.control_plane.engine import (  # noqa: E402
     CapabilityRequest,
@@ -172,6 +174,7 @@ __all__ = [
     "HARD_INVARIANTS",
     "InMemoryAuditSink",
     "INTERNAL_DECISIONS",
+    "LocalJSONLAuditSink",
     "ProviderRef",
     "REQUIRED_FLOW",
     "SessionApprovalGrant",
@@ -201,4 +204,5 @@ __all__ = [
     "load_policy_file",
     "mode_preset",
     "redact_mapping",
+    "verify_audit_chain",
 ]
