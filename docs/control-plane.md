@@ -6,16 +6,21 @@ execution.
 ## Request Lifecycle
 
 1. Interface receives an agent or operator request.
-2. Interface creates a capability request.
-3. Capability registry resolves the capability family and risk.
-4. Policy engine evaluates the request.
-5. Approval broker asks the operator if required.
-6. Provider adapter executes the authorized request.
-7. Audit writer records structured events.
-8. Result returns to the caller.
+2. Provider registry validates the configured provider.
+3. Target registry validates the configured target and provider match.
+4. Interface creates a capability request.
+5. Capability registry resolves the capability family and risk.
+6. Policy engine evaluates the request.
+7. Approval broker asks the operator if required.
+8. Provider adapter executes the authorized request.
+9. Audit writer records structured events.
+10. Result returns to the caller.
 
 MCP requests follow the same lifecycle. The MCP router maps tool names to
-capability ids and calls `ControlPlane`; it does not call providers directly.
+capability ids, resolves the target/provider through registries, and calls
+`ControlPlane`; it does not call providers directly.
+
+CLI requests follow the same lifecycle through the MCP-style router.
 
 ## Visible Modes
 
@@ -38,6 +43,9 @@ Unknown capability behavior is always `deny`.
 
 Unknown MCP tool names and MCP mappings to unknown capabilities also fail
 closed.
+
+Unknown providers, unknown targets, disabled providers, disabled targets, and
+provider/target mismatches also fail closed before provider execution.
 
 ## Capability Families
 

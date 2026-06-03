@@ -18,10 +18,14 @@
 - Expand safe mock provider behavior.
 - Add mock fixtures for capability families.
 - Add contract tests for provider execution boundaries.
+- Add explicit provider registry and target registry.
+- Add safe mock-only config loading.
+- Add a mock-only CLI adapter over the same control-plane path.
 
 ## 3. MCP Interface
 
 - Add MCP tools that submit capability requests.
+- Resolve MCP targets and providers through explicit registries.
 - Prove MCP tools cannot call providers directly.
 - Add contract tests for tool-to-control-plane routing.
 - Keep live MCP SDK server and client integration deferred until the internal

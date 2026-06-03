@@ -2,7 +2,8 @@
 
 AgenticKVM's MCP interface is currently an internal scaffold. It defines
 MCP-style request and response models, a tool-to-capability registry, and a
-router that delegates every request to `ControlPlane`.
+router that resolves configured targets/providers and delegates every request
+to `ControlPlane`.
 
 No live MCP SDK server is implemented yet.
 
@@ -14,13 +15,15 @@ safe, scoped, approved, or allowed.
 Every MCP action must flow through:
 
 1. MCP tool request
-2. capability request
-3. ControlPlane
-4. policy decision
-5. approval if required
-6. provider adapter only if allowed
-7. audit event
-8. structured MCP result
+2. target registry validation
+3. provider registry validation
+4. capability request
+5. ControlPlane
+6. policy decision
+7. approval if required
+8. provider adapter only if allowed
+9. audit event
+10. structured MCP result
 
 The bad pattern is:
 
@@ -31,7 +34,7 @@ MCP tool -> provider
 The required pattern is:
 
 ```text
-MCP tool -> capability request -> ControlPlane -> policy/approval/audit -> provider
+MCP tool -> registries -> capability request -> ControlPlane -> policy/approval/audit -> provider
 ```
 
 ## Tool Registry
@@ -73,6 +76,10 @@ approval.
 
 - Unknown MCP tools fail closed.
 - Unknown capability mappings fail closed.
+- Unknown targets fail closed.
+- Unknown providers fail closed.
+- Request provider values must match the target's configured provider.
+- Disabled providers and disabled targets fail closed.
 - Requested mode in an MCP request cannot self-escalate the active policy.
 - Raw secret reveal is denied by default.
 - Denied and approval-required requests do not reach the provider.
@@ -85,4 +92,4 @@ approval.
 - MCP client integration tests.
 - Real provider MCP tests.
 - Approval response handling in the router.
-- Provider registry selection beyond the mock provider.
+- Live provider registry selection beyond disabled placeholders.

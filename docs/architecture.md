@@ -9,24 +9,43 @@ Policy is the authority boundary. Interfaces and providers are not.
 
 All action paths must follow:
 
-1. agent/tool request
-2. capability request
-3. policy decision
-4. operator approval if required
-5. provider adapter
-6. structured audit event
-7. result
+1. agent/tool/CLI request
+2. provider registry validation
+3. target registry validation
+4. capability request
+5. policy decision
+6. operator approval if required
+7. provider adapter
+8. structured audit event
+9. result
 
 ## Layers
 
 ### Interface Layer
 
 MCP tools, CLI commands, API handlers, and agent workflows live here. Their job
-is to describe intent and submit capability requests to the control plane. They
-must not import or call provider adapters directly.
+is to describe intent, resolve configured providers and targets, and submit
+capability requests to the control plane. They must not import or call provider
+adapters directly.
 
 The current MCP scaffold provides internal MCP-style models, a tool registry,
-and a router. It does not start a live MCP server yet.
+and a router that uses provider and target registries. It does not start a live
+MCP server yet.
+
+The current CLI adapter uses the same mock-only registry and control-plane path
+as MCP.
+
+### Provider Registry
+
+The provider registry stores explicit provider entries. Unknown providers,
+duplicate providers, disabled providers, and unsupported provider types fail
+closed. The mock provider is the only default executable provider.
+
+### Target Registry
+
+The target registry stores explicit target entries. Unknown targets, disabled
+targets, targets referencing unknown providers, and provider/target mismatches
+fail closed.
 
 ### Control Plane
 
@@ -61,8 +80,11 @@ The current implementation includes:
 - capability registry and policy decision engine
 - approval and audit models
 - control-plane router for mock provider execution
+- provider registry and target registry
+- safe mock-only config loader
 - safe stateful mock provider
 - MCP-style models, registry, and router
+- mock-only CLI adapter
 - offline tests
 
 Real provider implementations and live MCP SDK testing remain deferred.

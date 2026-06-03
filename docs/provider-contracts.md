@@ -11,6 +11,9 @@ provider-neutral requests and return structured provider-neutral results.
 - supported capabilities
 - whether it can touch real hardware
 
+Provider declarations enter through the provider registry. Config cannot name an
+arbitrary class, module, factory, or import path to create a provider.
+
 ## Provider Must Not Decide
 
 - visible mode
@@ -32,10 +35,18 @@ Providers should fail closed when:
 - credentials are missing
 - provider-specific operation cannot be mapped safely
 
+The provider registry fails closed before adapter execution when a provider is
+unknown, duplicated, disabled, unsupported, or represented only as a disabled
+real-provider placeholder.
+
 ## Mock First
 
 Every real provider should be preceded by mock behavior and contract tests. The
 mock provider must not make network, device, or hardware calls.
+
+The mock provider is currently the only default executable provider. PiKVM,
+Redfish, and other real providers remain disabled placeholders until their
+readiness gates are met.
 
 ## Provider-Specific Risk
 
