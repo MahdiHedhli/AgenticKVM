@@ -57,6 +57,12 @@ from agentickvm.providers.registry import (
     ProviderRegistry,
     ProviderRegistryError,
 )
+from agentickvm.providers.transport_policy import (
+    RETRYABLE_ERROR_CODES,
+    UNSAFE_CAPABILITY_PREFIXES,
+    TransportPolicyError,
+    TransportSecurityPolicy,
+)
 
 __all__ = [
     "EXECUTABLE_PROVIDER_TYPES",
@@ -96,11 +102,15 @@ __all__ = [
     "ProviderUnsafeOperationError",
     "ProviderValidationResult",
     "REDFISH_OBSERVE_CAPABILITIES",
+    "RETRYABLE_ERROR_CODES",
     "RealProviderNotEnabledError",
     "RedfishObserveClient",
     "RedfishObserveProvider",
     "RedfishProviderPlaceholder",
     "TargetNotFoundError",
+    "TransportPolicyError",
+    "TransportSecurityPolicy",
+    "UNSAFE_CAPABILITY_PREFIXES",
     "UnsupportedCapabilityError",
     "default_pikvm_fake_transport",
     "default_redfish_fake_transport",

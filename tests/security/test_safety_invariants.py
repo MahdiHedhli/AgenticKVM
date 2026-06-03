@@ -57,6 +57,7 @@ def test_provider_modules_are_mock_or_offline_observe_scaffolds() -> None:
         "placeholders.py",
         "redfish.py",
         "registry.py",
+        "transport_policy.py",
         "transports.py",
     }
     assert MockProvider.is_real_hardware is False
