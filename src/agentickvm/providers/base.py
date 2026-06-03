@@ -51,18 +51,83 @@ class ProviderActionResult:
     data: Mapping[str, Any] = field(default_factory=dict)
 
 
+@dataclass(frozen=True)
+class ProviderStatus:
+    """Safe provider status summary."""
+
+    provider_id: str
+    provider_kind: str
+    enabled: bool
+    is_real_hardware: bool
+    risk_class: str
+    supported_capabilities: tuple[str, ...]
+    message: str
+
+
+@dataclass(frozen=True)
+class ProviderValidationResult:
+    """Dry-run validation result before provider execution."""
+
+    ok: bool
+    provider_id: str
+    capability: str
+    message: str
+
+
 class Provider(ABC):
     """Abstract provider adapter."""
 
     provider_id: str
     provider_kind: str
+    enabled: bool = True
     is_real_hardware: bool
+    risk_class: str = "unknown"
     supported_capabilities: frozenset[str]
 
     def supports(self, capability: str) -> bool:
         """Return whether the adapter has a mapping for a capability."""
 
         return capability in self.supported_capabilities
+
+    def status(self) -> ProviderStatus:
+        """Return a safe provider status summary without network calls."""
+
+        return ProviderStatus(
+            provider_id=self.provider_id,
+            provider_kind=self.provider_kind,
+            enabled=self.enabled,
+            is_real_hardware=self.is_real_hardware,
+            risk_class=self.risk_class,
+            supported_capabilities=tuple(sorted(self.supported_capabilities)),
+            message="provider status is local only",
+        )
+
+    def validate_authorized(
+        self,
+        request: ProviderActionRequest,
+    ) -> ProviderValidationResult:
+        """Validate an authorized provider request without executing it."""
+
+        if not self.enabled:
+            return ProviderValidationResult(
+                ok=False,
+                provider_id=self.provider_id,
+                capability=request.capability,
+                message="provider is disabled",
+            )
+        if not self.supports(request.capability):
+            return ProviderValidationResult(
+                ok=False,
+                provider_id=self.provider_id,
+                capability=request.capability,
+                message="unsupported capability",
+            )
+        return ProviderValidationResult(
+            ok=True,
+            provider_id=self.provider_id,
+            capability=request.capability,
+            message="provider request is locally valid",
+        )
 
     @abstractmethod
     def execute_authorized(

@@ -48,7 +48,13 @@ def test_no_real_provider_adapters_exist_in_bootstrap() -> None:
     provider_dir = ROOT / "src" / "agentickvm" / "providers"
     provider_files = {path.name for path in provider_dir.glob("*.py")}
 
-    assert provider_files == {"__init__.py", "base.py", "mock.py", "registry.py"}
+    assert provider_files == {
+        "__init__.py",
+        "base.py",
+        "mock.py",
+        "placeholders.py",
+        "registry.py",
+    }
     assert MockProvider.is_real_hardware is False
 
 
