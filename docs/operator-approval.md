@@ -29,6 +29,25 @@ The operator may approve a matching capability, target scope, and parameter
 shape for the active session. Reuse must be audited and must not silently expand
 scope.
 
+## Approval Resumption
+
+The current implementation supports an in-memory, mock-only approval resumption
+model for tests and bootstrap flows. A grant is tied to:
+
+- approval request id
+- approval response id
+- session id
+- target id
+- provider id
+- capability id
+- parameter fingerprint
+- expiration time
+- one-time or session scope
+
+One-time grants are consumed after one matching execution. Session grants can be
+reused only for the same session, target, provider, capability, and parameter
+fingerprint. Consumed approvals emit an `approval_consumed` audit event.
+
 ## Approval Cannot Grant
 
 Approval cannot grant capabilities outside policy, change hard invariants,

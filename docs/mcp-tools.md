@@ -85,11 +85,12 @@ approval.
 - Denied and approval-required requests do not reach the provider.
 - Returned params and provider results are redacted before MCP output.
 - The current scaffold uses the mock provider only.
+- CLI/MCP equivalent requests are covered by a status consistency matrix.
 
 ## Deferred Work
 
 - Live MCP SDK server adapter.
 - MCP client integration tests.
 - Real provider MCP tests.
-- Approval response handling in the router.
+- Live operator approval transport.
 - Live provider registry selection beyond disabled placeholders.

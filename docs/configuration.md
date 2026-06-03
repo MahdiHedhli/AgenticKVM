@@ -39,6 +39,8 @@ Config must not contain secrets. The loader rejects secret-shaped keys such as:
 - `secret`
 - `private_key`
 - `credential`
+- `bearer`
+- `session_cookie`
 
 Config also rejects dynamic import keys such as `class`, `module`, `factory`,
 and `import`. Provider classes are not loaded from config.
@@ -48,3 +50,6 @@ and `import`. Provider classes are not loaded from config.
 Real provider entries remain deferred. They may be represented as disabled
 placeholders with no endpoints and no credentials, but they are not executable
 by default.
+
+Enabled real provider entries are rejected until future provider-specific gates
+explicitly allow them.

@@ -79,12 +79,16 @@ The current implementation includes:
 
 - capability registry and policy decision engine
 - approval and audit models
+- mock-only approval resumption model
+- local JSONL audit persistence scaffold
 - control-plane router for mock provider execution
 - provider registry and target registry
 - safe mock-only config loader
 - safe stateful mock provider
+- disabled real-provider placeholders
 - MCP-style models, registry, and router
 - mock-only CLI adapter
+- CLI/MCP consistency matrix
 - offline tests
 
 Real provider implementations and live MCP SDK testing remain deferred.

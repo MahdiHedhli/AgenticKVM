@@ -21,6 +21,8 @@
 - Add explicit provider registry and target registry.
 - Add safe mock-only config loading.
 - Add a mock-only CLI adapter over the same control-plane path.
+- Add expanded mock observation, input, power, media, boot, BMC, network, and
+  storage contract coverage.
 
 ## 3. MCP Interface
 
@@ -28,28 +30,37 @@
 - Resolve MCP targets and providers through explicit registries.
 - Prove MCP tools cannot call providers directly.
 - Add contract tests for tool-to-control-plane routing.
+- Add CLI/MCP consistency matrix for mock-target actions.
 - Keep live MCP SDK server and client integration deferred until the internal
   router, schemas, safety tests, and mock provider path are stable.
 
-## 4. PiKVM Provider
+## 4. Real Provider Readiness
+
+- Add readiness gates before any real provider implementation.
+- Add disabled placeholder provider contracts.
+- Require observe-only first slice.
+- Keep CI mock-only.
+- Require manual smoke docs and human approval before live testing.
+
+## 5. PiKVM Provider
 
 - Write PiKVM provider spec.
 - Implement the smallest safe observe-only adapter slice.
 - Add opt-in lab tests outside CI.
 
-## 5. Redfish Provider
+## 6. Redfish Provider
 
 - Write Redfish provider spec.
 - Implement observe and narrowly scoped power actions.
 - Add opt-in lab tests outside CI.
 
-## 6. Operator Approval UX
+## 7. Operator Approval UX
 
 - Implement explainable prompts.
 - Support approval reuse inside exact session scope.
 - Add audit and expiration tests.
 
-## 7. Hardening And Public Beta
+## 8. Hardening And Public Beta
 
 - Add threat-model test cases.
 - Add provider conformance suite.

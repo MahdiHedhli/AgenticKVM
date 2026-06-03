@@ -30,7 +30,7 @@ not a default behavior in any mode, including Full Control.
 
 Configuration must not contain raw credentials or secret-shaped keys. The
 current loader rejects keys such as `password`, `token`, `api_key`, `secret`,
-`private_key`, and `credential`.
+`private_key`, `credential`, `bearer`, and `session_cookie`.
 
 ## Scope
 
@@ -58,3 +58,8 @@ preference.
 Audit events must exist for denied, allowed, approval-requested, approved,
 failed, and executed requests. An agent cannot disable audit or erase audit
 artifacts.
+
+The local JSONL audit scaffold writes only to an explicitly configured file
+path. Test coverage uses temporary directories only. JSONL records are redacted
+before write and include a simple previous-hash/event-hash chain for
+tamper-evidence.

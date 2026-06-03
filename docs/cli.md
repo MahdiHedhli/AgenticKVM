@@ -39,3 +39,9 @@ The CLI flow is:
 8. structured JSON result
 
 Real provider CLI usage remains deferred.
+
+## Consistency
+
+CLI and MCP status behavior is covered by `docs/interface-consistency.md` and
+contract tests. Equivalent mock-target requests must return the same status for
+the same mode and tool.
