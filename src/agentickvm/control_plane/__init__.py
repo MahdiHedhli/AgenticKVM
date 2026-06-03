@@ -112,6 +112,11 @@ from agentickvm.control_plane.policy import (  # noqa: E402
     load_policy_file,
     mode_preset,
 )
+from agentickvm.control_plane.targets import (  # noqa: E402
+    TargetDefinition,
+    TargetRegistry,
+    TargetRegistryError,
+)
 from agentickvm.control_plane.approvals import (  # noqa: E402
     Actor,
     ActorType,
@@ -179,6 +184,9 @@ __all__ = [
     "RiskLevel",
     "SessionScope",
     "TargetScope",
+    "TargetDefinition",
+    "TargetRegistry",
+    "TargetRegistryError",
     "build_approval_request",
     "build_audit_event",
     "default_decision_for_unknown_capability",

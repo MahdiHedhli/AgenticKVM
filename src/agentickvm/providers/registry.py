@@ -13,7 +13,6 @@ from types import MappingProxyType
 from typing import Any, Iterable, Mapping
 
 from agentickvm.providers.base import Provider
-from agentickvm.providers.mock import MockProvider
 
 EXECUTABLE_PROVIDER_TYPES = frozenset({"mock"})
 PLACEHOLDER_PROVIDER_TYPES = frozenset(
@@ -90,6 +89,8 @@ class ProviderRegistry:
     @classmethod
     def mock_only(cls, *, provider_id: str = "mock") -> ProviderRegistry:
         """Return a registry with one enabled safe mock provider."""
+
+        from agentickvm.providers.mock import MockProvider
 
         return cls(
             [
