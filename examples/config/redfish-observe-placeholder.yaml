@@ -1,0 +1,36 @@
+{
+  "version": "0.1",
+  "providers": [
+    {
+      "id": "redfish-observe-placeholder",
+      "type": "redfish",
+      "enabled": false,
+      "description": "Disabled Redfish observe-only placeholder; no live calls",
+      "metadata": {
+        "base_url_placeholder": "https://bmc.example.invalid",
+        "timeout_seconds": 2,
+        "tls_verify": true,
+        "fixture_mode": false,
+        "auth_reference_name": "operator-managed-reference"
+      }
+    }
+  ],
+  "targets": [
+    {
+      "id": "redfish-observe-target",
+      "provider": "redfish-observe-placeholder",
+      "enabled": false,
+      "name": "Redfish Observe Placeholder",
+      "environment": "lab-placeholder",
+      "labels": ["redfish", "observe-only", "placeholder"],
+      "risk_tier": "high",
+      "allowed_modes": ["Observe"],
+      "metadata": {
+        "description": "disabled observe-only placeholder"
+      }
+    }
+  ],
+  "default_policy": {
+    "mode": "Observe"
+  }
+}

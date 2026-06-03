@@ -12,6 +12,8 @@ from agentickvm.config import (
     mock_only_config,
 )
 from agentickvm.providers import ProviderRegistryError
+from agentickvm.providers.pikvm import PiKVMObserveProvider
+from agentickvm.providers.redfish import RedfishObserveProvider
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -95,4 +97,113 @@ def test_invalid_config_fails_closed(tmp_path) -> None:
     path.write_text(json.dumps(["not", "an", "object"]), encoding="utf-8")
 
     with pytest.raises(ConfigValidationError, match="object"):
+        load_config(path)
+
+
+@pytest.mark.parametrize(
+    ("filename", "provider_id", "target_id"),
+    [
+        (
+            "pikvm-observe-placeholder.yaml",
+            "pikvm-observe-placeholder",
+            "pikvm-observe-target",
+        ),
+        (
+            "redfish-observe-placeholder.yaml",
+            "redfish-observe-placeholder",
+            "redfish-observe-target",
+        ),
+        (
+            "lab-observe-only.example.yaml",
+            "pikvm-lab-placeholder",
+            "pikvm-lab-observe",
+        ),
+    ],
+)
+def test_observe_only_provider_placeholder_configs_load_disabled(
+    filename: str,
+    provider_id: str,
+    target_id: str,
+) -> None:
+    config = load_config(ROOT / "examples" / "config" / filename)
+    runtime = build_runtime(config)
+
+    provider_entry = runtime.provider_registry.require(provider_id)
+    target_entry = runtime.target_registry.require(target_id)
+
+    assert provider_entry.enabled is False
+    assert provider_entry.provider is None
+    assert target_entry.enabled is False
+    with pytest.raises(ProviderRegistryError, match="disabled"):
+        runtime.provider_registry.resolve_enabled(provider_id)
+
+
+@pytest.mark.parametrize(
+    ("provider_type", "adapter_type"),
+    [
+        ("pikvm", PiKVMObserveProvider),
+        ("redfish", RedfishObserveProvider),
+    ],
+)
+def test_fixture_mode_config_can_build_explicit_fake_provider(
+    provider_type: str,
+    adapter_type: type,
+    tmp_path,
+) -> None:
+    path = tmp_path / f"{provider_type}-fixture.yaml"
+    path.write_text(
+        json.dumps(
+            {
+                "providers": [
+                    {
+                        "id": f"{provider_type}-fixture",
+                        "type": provider_type,
+                        "enabled": True,
+                        "metadata": {"fixture_mode": True},
+                    }
+                ],
+                "targets": [
+                    {
+                        "id": f"{provider_type}-target",
+                        "provider": f"{provider_type}-fixture",
+                        "enabled": True,
+                        "allowed_modes": ["Observe"],
+                    }
+                ],
+                "default_policy": {"mode": "Observe"},
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    runtime = build_runtime(load_config(path))
+    provider = runtime.provider_registry.resolve_enabled(f"{provider_type}-fixture")
+    target = runtime.target_registry.resolve_enabled(f"{provider_type}-target")
+
+    assert isinstance(provider, adapter_type)
+    assert provider.is_real_hardware is False
+    assert provider.risk_class == "test_fake_observe_only"
+    assert target.provider_id == f"{provider_type}-fixture"
+
+
+def test_enabled_real_provider_without_fixture_mode_still_rejected(tmp_path) -> None:
+    path = tmp_path / "redfish-real.yaml"
+    path.write_text(
+        json.dumps(
+            {
+                "providers": [
+                    {
+                        "id": "redfish-real",
+                        "type": "redfish",
+                        "enabled": True,
+                        "metadata": {"fixture_mode": False},
+                    }
+                ],
+                "targets": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="not executable"):
         load_config(path)

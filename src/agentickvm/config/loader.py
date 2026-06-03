@@ -30,8 +30,14 @@ from agentickvm.control_plane import (
 )
 from agentickvm.providers import (
     MockProvider,
+    PiKVMObserveClient,
+    PiKVMObserveProvider,
     ProviderEntry,
     ProviderRegistry,
+    RedfishObserveClient,
+    RedfishObserveProvider,
+    default_pikvm_fake_transport,
+    default_redfish_fake_transport,
 )
 
 
@@ -145,9 +151,7 @@ def build_provider_registry(config: AgenticKVMConfig) -> ProviderRegistry:
 
     entries: list[ProviderEntry] = []
     for provider in config.providers:
-        adapter = None
-        if provider.enabled and provider.type == "mock":
-            adapter = MockProvider()
+        adapter = _provider_adapter_from_config(provider)
         entries.append(
             ProviderEntry(
                 provider_id=provider.id,
@@ -159,6 +163,27 @@ def build_provider_registry(config: AgenticKVMConfig) -> ProviderRegistry:
             )
         )
     return ProviderRegistry(entries)
+
+
+def _provider_adapter_from_config(provider: ProviderConfig) -> Any | None:
+    if not provider.enabled:
+        return None
+    if provider.type == "mock":
+        return MockProvider()
+    fixture_mode = bool(provider.metadata.get("fixture_mode", False))
+    if provider.type == "pikvm" and fixture_mode:
+        return PiKVMObserveProvider(
+            provider_id=provider.id,
+            enabled=True,
+            client=PiKVMObserveClient(transport=default_pikvm_fake_transport()),
+        )
+    if provider.type == "redfish" and fixture_mode:
+        return RedfishObserveProvider(
+            provider_id=provider.id,
+            enabled=True,
+            client=RedfishObserveClient(transport=default_redfish_fake_transport()),
+        )
+    return None
 
 
 def build_target_registry(

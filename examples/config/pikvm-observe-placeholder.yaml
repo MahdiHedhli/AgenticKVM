@@ -1,0 +1,36 @@
+{
+  "version": "0.1",
+  "providers": [
+    {
+      "id": "pikvm-observe-placeholder",
+      "type": "pikvm",
+      "enabled": false,
+      "description": "Disabled PiKVM observe-only placeholder; no live calls",
+      "metadata": {
+        "base_url_placeholder": "https://pikvm.example.invalid",
+        "timeout_seconds": 2,
+        "tls_verify": true,
+        "fixture_mode": false,
+        "auth_reference_name": "operator-managed-reference"
+      }
+    }
+  ],
+  "targets": [
+    {
+      "id": "pikvm-observe-target",
+      "provider": "pikvm-observe-placeholder",
+      "enabled": false,
+      "name": "PiKVM Observe Placeholder",
+      "environment": "lab-placeholder",
+      "labels": ["pikvm", "observe-only", "placeholder"],
+      "risk_tier": "high",
+      "allowed_modes": ["Observe"],
+      "metadata": {
+        "description": "disabled observe-only placeholder"
+      }
+    }
+  ],
+  "default_policy": {
+    "mode": "Observe"
+  }
+}

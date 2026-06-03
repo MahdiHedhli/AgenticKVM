@@ -1,0 +1,62 @@
+{
+  "version": "0.1",
+  "providers": [
+    {
+      "id": "pikvm-lab-placeholder",
+      "type": "pikvm",
+      "enabled": false,
+      "description": "Disabled PiKVM lab placeholder; enable only after live smoke gates",
+      "metadata": {
+        "base_url_placeholder": "https://pikvm.example.invalid",
+        "timeout_seconds": 2,
+        "tls_verify": true,
+        "fixture_mode": false,
+        "auth_reference_name": "operator-managed-reference"
+      }
+    },
+    {
+      "id": "redfish-lab-placeholder",
+      "type": "redfish",
+      "enabled": false,
+      "description": "Disabled Redfish lab placeholder; enable only after live smoke gates",
+      "metadata": {
+        "base_url_placeholder": "https://bmc.example.invalid",
+        "timeout_seconds": 2,
+        "tls_verify": true,
+        "fixture_mode": false,
+        "auth_reference_name": "operator-managed-reference"
+      }
+    }
+  ],
+  "targets": [
+    {
+      "id": "pikvm-lab-observe",
+      "provider": "pikvm-lab-placeholder",
+      "enabled": false,
+      "name": "PiKVM Lab Observe Target",
+      "environment": "lab",
+      "labels": ["pikvm", "observe-only"],
+      "risk_tier": "high",
+      "allowed_modes": ["Observe"],
+      "metadata": {
+        "description": "future operator-approved observe-only target"
+      }
+    },
+    {
+      "id": "redfish-lab-observe",
+      "provider": "redfish-lab-placeholder",
+      "enabled": false,
+      "name": "Redfish Lab Observe Target",
+      "environment": "lab",
+      "labels": ["redfish", "observe-only"],
+      "risk_tier": "high",
+      "allowed_modes": ["Observe"],
+      "metadata": {
+        "description": "future operator-approved observe-only target"
+      }
+    }
+  ],
+  "default_policy": {
+    "mode": "Observe"
+  }
+}
