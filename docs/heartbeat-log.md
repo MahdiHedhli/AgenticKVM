@@ -40,6 +40,26 @@
   mock provider execution
 - blockers: none for repo-local approval/audit model work
 
+## 2026-06-03T03:43:40Z
+
+- selected maturity level: Maturity 2, Approval and Audit Core
+- selected task: add approval request/response models, session-scoped approval
+  grants, emergency stop state, audit event model, redaction helper, and an
+  in-memory audit sink
+- why this task is safe: repo-local model code only, no provider calls, no real
+  hardware, no secrets, and it strengthens the required policy/approval/audit
+  path before any interface can execute actions
+- files expected to change:
+  - `src/agentickvm/control_plane/__init__.py`
+  - `src/agentickvm/control_plane/approvals.py`
+  - `src/agentickvm/control_plane/audit.py`
+  - `tests/unit/test_approvals.py`
+  - `tests/unit/test_audit.py`
+  - `tests/security/test_audit_redaction.py`
+  - `docs/heartbeat-log.md`
+- tests expected to run:
+  - `uv run --with pytest --python python3.13 python -m pytest`
+
 ### Result
 
 - timestamp: 2026-06-03T03:38:34Z
