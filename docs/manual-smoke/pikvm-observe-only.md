@@ -6,9 +6,12 @@ in CI and must not be used until real-provider readiness gates are satisfied.
 ## Prerequisites
 
 - Explicit operator approval for one isolated lab target.
+- Live observe gate completed.
+- One provider and one target only.
 - Observe-only session scope.
 - PiKVM provider disabled by default until the operator enables it locally.
-- Credentials supplied through an approved secret reference outside repo config.
+- Config stored outside the repo.
+- Credentials supplied through an approved `credential_ref`, never raw config.
 - Audit output path explicitly configured.
 - Timeout and TLS verification behavior reviewed before the test.
 
@@ -67,10 +70,14 @@ Audit artifacts must not be erased or hidden after the test.
 
 Stop immediately if:
 
+- there is any unexpected write prompt
+- there is an auth error or authorization error
 - a command would send keyboard or mouse input
 - a command would power, reset, mount media, or change boot behavior
 - a certificate warning is unexpected
+- a redirect appears unexpectedly
 - a timeout repeats
+- the response shape is unknown
 - output contains raw secret material
 - audit events are missing
 - the target is not the approved isolated lab machine
@@ -81,3 +88,4 @@ Stop immediately if:
 - Remove local secret references from the operator machine if no longer needed.
 - Archive audit artifacts according to the local test plan.
 - Do not commit local live config or credentials.
+- Confirm no repo changes include secrets.
