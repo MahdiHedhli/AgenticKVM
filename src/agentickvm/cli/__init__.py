@@ -1,10 +1,16 @@
-"""CLI placeholder for AgenticKVM."""
+"""AgenticKVM CLI entry point."""
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 
-def main() -> int:
-    """Bootstrap CLI entry point."""
+from agentickvm.cli.main import main as _main
 
-    print("AgenticKVM bootstrap CLI: control-plane implementation pending.")
-    return 0
+
+def main(argv: Sequence[str] | None = None) -> int:
+    """Run the CLI."""
+
+    return _main(argv)
+
+
+__all__ = ["main"]
