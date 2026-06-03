@@ -87,9 +87,9 @@ def test_mcp_observes_redfish_fake_target_power_state_and_sensors() -> None:
 
     assert isinstance(provider, RedfishObserveProvider)
     assert power.status == MCPResultStatus.OK
-    assert power.data["provider_result"]["power_state"] == "On"
+    assert power.data["provider_result"]["data"]["power_state"] == "On"
     assert sensors.status == MCPResultStatus.OK
-    assert sensors.data["provider_result"]["sensors"][0]["Name"] == "CPU Temp"
+    assert sensors.data["provider_result"]["data"]["sensors"][0]["Name"] == "CPU Temp"
     assert [request.capability_id for request in SpyControlPlane.handled] == [
         "observe.power_state",
         "observe.sensors",
@@ -108,9 +108,12 @@ def test_mcp_observes_pikvm_fake_target_screen_and_status() -> None:
 
     assert isinstance(provider, PiKVMObserveProvider)
     assert screen.status == MCPResultStatus.OK
-    assert screen.data["provider_result"]["screen"]["content"] == "PiKVM fixture screen"
+    assert (
+        screen.data["provider_result"]["data"]["screen"]["content"]
+        == "PiKVM fixture screen"
+    )
     assert status.status == MCPResultStatus.OK
-    assert status.data["provider_result"]["status"]["health"] == "ok"
+    assert status.data["provider_result"]["data"]["status"]["health"] == "ok"
     assert [request.capability_id for request in SpyControlPlane.handled] == [
         "observe.screenshot",
         "observe.status",
@@ -211,10 +214,10 @@ def test_cli_calls_redfish_fake_observe_power_state_and_sensors(tmp_path, capsys
 
     assert power_code == 0
     assert power["status"] == "ok"
-    assert power["data"]["provider_result"]["power_state"] == "On"
+    assert power["data"]["provider_result"]["data"]["power_state"] == "On"
     assert sensors_code == 0
     assert sensors["status"] == "ok"
-    assert sensors["data"]["provider_result"]["sensors"][0]["Name"] == "CPU Temp"
+    assert sensors["data"]["provider_result"]["data"]["sensors"][0]["Name"] == "CPU Temp"
 
 
 def test_cli_calls_pikvm_fake_observe_screen_and_status(tmp_path, capsys) -> None:
@@ -247,10 +250,13 @@ def test_cli_calls_pikvm_fake_observe_screen_and_status(tmp_path, capsys) -> Non
 
     assert screen_code == 0
     assert screen["status"] == "ok"
-    assert screen["data"]["provider_result"]["screen"]["content"] == "PiKVM fixture screen"
+    assert (
+        screen["data"]["provider_result"]["data"]["screen"]["content"]
+        == "PiKVM fixture screen"
+    )
     assert status_code == 0
     assert status["status"] == "ok"
-    assert status["data"]["provider_result"]["status"]["health"] == "ok"
+    assert status["data"]["provider_result"]["data"]["status"]["health"] == "ok"
 
 
 def test_cli_mutating_call_against_fake_provider_denies(tmp_path, capsys) -> None:

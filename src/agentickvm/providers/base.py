@@ -49,6 +49,34 @@ class ProviderActionResult:
     performed_on_hardware: bool
     message: str
     data: Mapping[str, Any] = field(default_factory=dict)
+    provider_type: str | None = None
+    warnings: tuple[str, ...] = ()
+    redacted: bool = True
+    error_code: str | None = None
+    error_message: str | None = None
+    retryable: bool = False
+    timestamp: str | None = None
+
+    def normalized(self) -> dict[str, Any]:
+        """Return a provider-neutral, secret-redacted result envelope."""
+
+        payload: dict[str, Any] = {
+            "status": "ok" if self.ok else "error",
+            "provider_id": self.provider_id,
+            "provider_type": self.provider_type or self.provider_id,
+            "target": self.target_id,
+            "capability": self.capability,
+            "data": _redact_value(dict(self.data)),
+            "warnings": list(self.warnings),
+            "redacted": self.redacted,
+            "error_code": self.error_code,
+            "error_message": _redact_value(self.error_message or ""),
+            "retryable": self.retryable,
+            "performed_on_hardware": self.performed_on_hardware,
+        }
+        if self.timestamp is not None:
+            payload["timestamp"] = self.timestamp
+        return payload
 
 
 @dataclass(frozen=True)
@@ -135,3 +163,20 @@ class Provider(ABC):
         request: ProviderActionRequest,
     ) -> ProviderActionResult:
         """Execute an already-authorized request."""
+
+
+def _redact_value(value: Any) -> Any:
+    if isinstance(value, Mapping):
+        redacted: dict[str, Any] = {}
+        for key, child in value.items():
+            lowered = str(key).lower()
+            if any(fragment in lowered for fragment in ("secret", "password", "token")):
+                redacted[str(key)] = "[REDACTED]"
+            else:
+                redacted[str(key)] = _redact_value(child)
+        return redacted
+    if isinstance(value, list):
+        return [_redact_value(item) for item in value]
+    if isinstance(value, tuple):
+        return tuple(_redact_value(item) for item in value)
+    return value

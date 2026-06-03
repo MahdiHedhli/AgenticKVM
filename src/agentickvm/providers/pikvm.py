@@ -248,6 +248,9 @@ class PiKVMObserveProvider(Provider):
             performed_on_hardware=False,
             message=message,
             data=data or {"provider": "pikvm", "fixture": True, "performed": False},
+            provider_type=self.provider_kind,
+            error_code=None if ok else "unsupported_capability",
+            error_message=None if ok else message,
         )
 
 

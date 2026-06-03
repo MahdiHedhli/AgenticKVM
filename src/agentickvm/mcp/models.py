@@ -140,7 +140,7 @@ def mcp_result_from_control_plane(
 
     if result.status == ControlPlaneStatus.FAILED:
         provider_result = result.provider_result
-        data = {"provider_result": provider_result.data if provider_result else {}}
+        data = {"provider_result": provider_result.normalized() if provider_result else {}}
         safe_data, redactions = redact_mapping(data)
         return MCPToolResult(
             status=MCPResultStatus.PROVIDER_ERROR,
@@ -155,7 +155,7 @@ def mcp_result_from_control_plane(
         )
 
     provider_result = result.provider_result
-    data = {"provider_result": provider_result.data if provider_result else {}}
+    data = {"provider_result": provider_result.normalized() if provider_result else {}}
     safe_data, redactions = redact_mapping(data)
     return MCPToolResult(
         status=MCPResultStatus.OK,

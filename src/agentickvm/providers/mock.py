@@ -65,6 +65,9 @@ class MockProvider(Provider):
                 performed_on_hardware=False,
                 message=f"{validation.message}; no hardware action performed.",
                 data={"mock": True, "performed": False},
+                provider_type=self.provider_kind,
+                error_code="unsupported_capability",
+                error_message=validation.message,
             )
 
         self.requests.append(request)
@@ -78,6 +81,7 @@ class MockProvider(Provider):
             performed_on_hardware=False,
             message="Mock provider recorded authorized request; no hardware action performed.",
             data=data,
+            provider_type=self.provider_kind,
         )
 
     def _simulate(self, request: ProviderActionRequest) -> dict[str, Any]:
