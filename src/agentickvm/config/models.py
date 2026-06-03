@@ -7,6 +7,7 @@ from types import MappingProxyType
 from typing import Any, Mapping
 
 from agentickvm.control_plane.decisions import ControlMode, normalize_control_mode
+from agentickvm.config.validation import validate_credential_reference
 from agentickvm.providers.registry import KNOWN_PROVIDER_TYPES
 
 
@@ -18,14 +19,19 @@ class ProviderConfig:
     type: str
     enabled: bool = True
     description: str | None = None
+    credential_ref: str | None = None
     metadata: Mapping[str, Any] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         provider_type = self.type.strip().lower()
         if provider_type not in KNOWN_PROVIDER_TYPES:
             raise ValueError(f"Unknown provider type: {self.type}")
+        credential_ref = self.credential_ref
+        if credential_ref is not None:
+            credential_ref = validate_credential_reference(credential_ref)
         object.__setattr__(self, "id", self.id.strip())
         object.__setattr__(self, "type", provider_type)
+        object.__setattr__(self, "credential_ref", credential_ref)
         object.__setattr__(self, "metadata", MappingProxyType(dict(self.metadata)))
 
 

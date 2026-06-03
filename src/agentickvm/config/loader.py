@@ -218,6 +218,7 @@ def _provider_config(item: Any) -> ProviderConfig:
         type=_required_str(item, "type"),
         enabled=bool(item.get("enabled", True)),
         description=item.get("description"),
+        credential_ref=item.get("credential_ref"),
         metadata=_mapping(item.get("metadata", {}), "provider metadata"),
     )
 

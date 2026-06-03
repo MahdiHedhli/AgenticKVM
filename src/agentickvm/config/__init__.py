@@ -15,12 +15,15 @@ from agentickvm.config.models import (
     TargetConfig,
 )
 from agentickvm.config.validation import (
+    ALLOWED_CREDENTIAL_REF_SCHEMES,
     ConfigValidationError,
     reject_unsafe_config_keys,
+    validate_credential_reference,
 )
 
 __all__ = [
     "AgenticKVMConfig",
+    "ALLOWED_CREDENTIAL_REF_SCHEMES",
     "ConfigRuntime",
     "ConfigValidationError",
     "ProviderConfig",
@@ -32,4 +35,5 @@ __all__ = [
     "load_config",
     "mock_only_config",
     "reject_unsafe_config_keys",
+    "validate_credential_reference",
 ]
