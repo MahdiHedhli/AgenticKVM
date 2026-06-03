@@ -263,3 +263,39 @@
   - `docs/heartbeat-log.md`
 - tests expected to run:
   - `uv run --with pytest --python python3.13 python -m pytest`
+
+## 2026-06-03T07:05:15Z
+
+- selected maturity level: Maturity 4 follow-on, provider/target/config/CLI
+  safety scaffold
+- selected task: add explicit provider registry, target registry, safe
+  mock-only config loading, MCP target/provider resolution, and a mock-only CLI
+  adapter
+- why this task is safe: repo-local code only, mock provider remains the only
+  default executable provider, unknown providers and targets fail closed, no
+  real provider network calls are introduced, and CLI/MCP execution continues
+  through `ControlPlane`
+- files expected to change:
+  - `src/agentickvm/providers/registry.py`
+  - `src/agentickvm/providers/__init__.py`
+  - `src/agentickvm/control_plane/targets.py`
+  - `src/agentickvm/control_plane/__init__.py`
+  - `src/agentickvm/config/`
+  - `src/agentickvm/mcp/models.py`
+  - `src/agentickvm/mcp/router.py`
+  - `src/agentickvm/cli/main.py`
+  - `src/agentickvm/cli/__init__.py`
+  - `examples/config/`
+  - `docs/configuration.md`
+  - `docs/provider-registry.md`
+  - `docs/target-registry.md`
+  - `docs/cli.md`
+  - `docs/mcp-tools.md`
+  - `docs/architecture.md`
+  - `docs/security-model.md`
+  - `docs/roadmap.md`
+  - `docs/heartbeat-log.md`
+  - `tests/unit/`
+  - `tests/security/`
+- tests expected to run:
+  - `uv run --with pytest --python python3.13 python -m pytest`
