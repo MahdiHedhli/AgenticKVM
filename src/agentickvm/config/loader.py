@@ -213,7 +213,7 @@ def build_target_registry(
 def _provider_config(item: Any) -> ProviderConfig:
     if not isinstance(item, Mapping):
         raise ConfigValidationError("Provider entries must be objects")
-    return ProviderConfig(
+    provider = ProviderConfig(
         id=_required_str(item, "id"),
         type=_required_str(item, "type"),
         enabled=bool(item.get("enabled", True)),
@@ -221,6 +221,8 @@ def _provider_config(item: Any) -> ProviderConfig:
         credential_ref=item.get("credential_ref"),
         metadata=_mapping(item.get("metadata", {}), "provider metadata"),
     )
+    _validate_provider_metadata(provider)
+    return provider
 
 
 def _target_config(item: Any) -> TargetConfig:
@@ -251,6 +253,36 @@ def _mapping(value: Any, name: str) -> Mapping[str, Any]:
     if not isinstance(value, Mapping):
         raise ConfigValidationError(f"{name} must be an object")
     return value
+
+
+def _validate_provider_metadata(provider: ProviderConfig) -> None:
+    if provider.type not in {"pikvm", "redfish"}:
+        return
+
+    metadata = provider.metadata
+    fixture_mode = bool(metadata.get("fixture_mode", False))
+    live_mode = bool(metadata.get("live_mode", False))
+    if fixture_mode and live_mode:
+        raise ConfigValidationError(
+            f"Provider {provider.id} cannot be both fixture_mode and live_mode"
+        )
+    if metadata.get("tls_verify", True) is False and not metadata.get(
+        "allow_insecure_tls",
+        False,
+    ):
+        raise ConfigValidationError(
+            f"Provider {provider.id} disables TLS verification without explicit override"
+        )
+    if fixture_mode:
+        transport = str(metadata.get("transport", "fake")).lower()
+        if transport not in {"fake", "fixture"}:
+            raise ConfigValidationError(
+                f"Provider {provider.id} fixture_mode requires fake transport"
+            )
+    if provider.enabled and provider.type == "pikvm" and not fixture_mode:
+        raise ConfigValidationError(
+            "Enabled PiKVM live provider config is not allowed before live smoke gates"
+        )
 
 
 __all__ = [

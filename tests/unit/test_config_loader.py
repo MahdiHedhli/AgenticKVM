@@ -207,3 +207,123 @@ def test_enabled_real_provider_without_fixture_mode_still_rejected(tmp_path) -> 
 
     with pytest.raises(ValueError, match="not executable"):
         load_config(path)
+
+
+def test_pikvm_fixture_example_loads_fake_only_provider() -> None:
+    runtime = build_runtime(
+        load_config(ROOT / "examples" / "config" / "pikvm-observe-fixture.yaml")
+    )
+
+    provider = runtime.provider_registry.resolve_enabled("pikvm-fixture")
+    target = runtime.target_registry.resolve_enabled("pikvm-fixture-target")
+
+    assert isinstance(provider, PiKVMObserveProvider)
+    assert provider.is_real_hardware is False
+    assert provider.risk_class == "test_fake_observe_only"
+    assert target.provider_id == "pikvm-fixture"
+    assert runtime.policy.mode.value == "Observe"
+
+
+def test_pikvm_placeholder_credential_ref_is_redacted_and_unresolved(monkeypatch) -> None:
+    monkeypatch.setenv("AGENTICKVM_PIKVM_PASSWORD", "must-not-be-read")
+
+    runtime = build_runtime(
+        load_config(ROOT / "examples" / "config" / "pikvm-observe-placeholder.yaml")
+    )
+
+    provider_entry = runtime.provider_registry.require("pikvm-observe-placeholder")
+    assert provider_entry.enabled is False
+    assert "credential_ref" not in repr(runtime.provider_registry.list_summaries())
+    assert "must-not-be-read" not in repr(runtime)
+
+
+def test_pikvm_fixture_mode_cannot_be_combined_with_live_mode(tmp_path) -> None:
+    path = tmp_path / "pikvm-confused.yaml"
+    path.write_text(
+        json.dumps(
+            {
+                "providers": [
+                    {
+                        "id": "pikvm-confused",
+                        "type": "pikvm",
+                        "enabled": True,
+                        "metadata": {"fixture_mode": True, "live_mode": True},
+                    }
+                ],
+                "targets": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ConfigValidationError, match="cannot be both"):
+        load_config(path)
+
+
+def test_pikvm_live_provider_enabled_config_rejected_before_smoke_gates(tmp_path) -> None:
+    path = tmp_path / "pikvm-live.yaml"
+    path.write_text(
+        json.dumps(
+            {
+                "providers": [
+                    {
+                        "id": "pikvm-live",
+                        "type": "pikvm",
+                        "enabled": True,
+                        "metadata": {"fixture_mode": False, "live_mode": True},
+                    }
+                ],
+                "targets": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ConfigValidationError, match="live provider config is not allowed"):
+        load_config(path)
+
+
+def test_pikvm_config_rejects_insecure_tls_without_explicit_override(tmp_path) -> None:
+    path = tmp_path / "pikvm-insecure.yaml"
+    path.write_text(
+        json.dumps(
+            {
+                "providers": [
+                    {
+                        "id": "pikvm-fixture",
+                        "type": "pikvm",
+                        "enabled": True,
+                        "metadata": {"fixture_mode": True, "tls_verify": False},
+                    }
+                ],
+                "targets": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ConfigValidationError, match="TLS verification"):
+        load_config(path)
+
+
+def test_pikvm_fixture_mode_requires_fake_transport(tmp_path) -> None:
+    path = tmp_path / "pikvm-bad-transport.yaml"
+    path.write_text(
+        json.dumps(
+            {
+                "providers": [
+                    {
+                        "id": "pikvm-fixture",
+                        "type": "pikvm",
+                        "enabled": True,
+                        "metadata": {"fixture_mode": True, "transport": "live"},
+                    }
+                ],
+                "targets": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ConfigValidationError, match="requires fake transport"):
+        load_config(path)

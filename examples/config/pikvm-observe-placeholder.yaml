@@ -6,12 +6,18 @@
       "type": "pikvm",
       "enabled": false,
       "description": "Disabled PiKVM observe-only placeholder; no live calls",
+      "credential_ref": "prompt://pikvm-observe-placeholder",
       "metadata": {
         "base_url_placeholder": "https://pikvm.example.invalid",
-        "timeout_seconds": 2,
+        "connect_timeout_seconds": 2,
+        "read_timeout_seconds": 5,
+        "total_timeout_seconds": 10,
         "tls_verify": true,
+        "allow_insecure_tls": false,
         "fixture_mode": false,
-        "auth_reference_name": "operator-managed-reference"
+        "live_mode": false,
+        "artifact_output_path": "/tmp/agentickvm-pikvm-artifacts",
+        "audit_path": "/tmp/agentickvm-pikvm-audit.jsonl"
       }
     }
   ],

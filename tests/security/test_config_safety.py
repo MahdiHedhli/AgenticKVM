@@ -77,3 +77,16 @@ def test_provider_observe_placeholder_examples_contain_no_secret_like_keys(
 
     assert all(provider.enabled is False for provider in config.providers)
     assert all(target.enabled is False for target in config.targets)
+
+
+def test_pikvm_fixture_example_is_fake_only_and_secret_free() -> None:
+    config = load_config(ROOT / "examples" / "config" / "pikvm-observe-fixture.yaml")
+
+    assert config.providers[0].enabled is True
+    assert config.providers[0].metadata["fixture_mode"] is True
+    assert config.providers[0].metadata["live_mode"] is False
+    assert config.providers[0].metadata["transport"] == "fake"
+    assert config.providers[0].metadata["tls_verify"] is True
+    assert config.providers[0].credential_ref is None
+    assert "password" not in repr(config).lower()
+    assert "token" not in repr(config).lower()

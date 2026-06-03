@@ -1,0 +1,42 @@
+{
+  "version": "0.1",
+  "providers": [
+    {
+      "id": "pikvm-fixture",
+      "type": "pikvm",
+      "enabled": true,
+      "description": "Fixture-backed PiKVM observe provider for offline tests only",
+      "metadata": {
+        "fixture_mode": true,
+        "live_mode": false,
+        "transport": "fake",
+        "base_url_placeholder": "https://pikvm.example.invalid",
+        "connect_timeout_seconds": 2,
+        "read_timeout_seconds": 5,
+        "total_timeout_seconds": 10,
+        "tls_verify": true,
+        "allow_insecure_tls": false,
+        "artifact_output_path": "/tmp/agentickvm-pikvm-fixture-artifacts",
+        "audit_path": "/tmp/agentickvm-pikvm-fixture-audit.jsonl"
+      }
+    }
+  ],
+  "targets": [
+    {
+      "id": "pikvm-fixture-target",
+      "provider": "pikvm-fixture",
+      "enabled": true,
+      "name": "PiKVM Fixture Target",
+      "environment": "fixture",
+      "labels": ["pikvm", "observe-only", "fixture"],
+      "risk_tier": "low",
+      "allowed_modes": ["Observe"],
+      "metadata": {
+        "description": "offline fixture target only"
+      }
+    }
+  ],
+  "default_policy": {
+    "mode": "Observe"
+  }
+}
