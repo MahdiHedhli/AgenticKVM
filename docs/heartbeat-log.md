@@ -436,3 +436,34 @@
   - `docs/heartbeat-log.md`
 - tests expected to run:
   - `uv run --with pytest --python python3.13 python -m pytest`
+
+### Result
+
+- timestamp: 2026-06-03T13:50:24Z
+- commits:
+  - `326207b` docs: add PiKVM observe-only provider spec
+  - `0919e6f` docs: add Redfish observe-only provider spec
+  - `feb09ae` feat: add observe-only provider client interfaces
+  - `20019b7` feat: add observe-only provider config placeholders
+  - `eaf6b20` test: add mocked PiKVM Redfish CLI MCP integration
+  - `070e5c1` docs: add observe-only provider manual smoke guides
+- files changed:
+  - PiKVM and Redfish observe-only specs
+  - fake provider transports, clients, and observe adapters
+  - disabled provider config placeholders and fixture-mode config support
+  - CLI/MCP provider-specific fixture integration tests
+  - provider readiness, smoke, roadmap, security, config, CLI, and MCP docs
+- tests run:
+  - `uv run --with pytest --python python3.13 python -m pytest`
+- result: 219 passed
+- risks found:
+  - PiKVM and Redfish remain fixture-backed only; no live transport exists
+  - fixture mode is suitable for tests and demos only, not live provider use
+  - screenshot and event-log observations can contain sensitive material once
+    live providers exist and need redaction policy review
+  - live MCP SDK adapter and live approval transport remain deferred
+- next recommended task: add provider conformance tests and a docs-only live
+  transport design ADR before implementing any observe-only network transport
+- blockers: none for repo-local fake-provider readiness work; live provider
+  work remains blocked on operator approval, credentials strategy, timeout/TLS
+  design, and manual smoke gates
