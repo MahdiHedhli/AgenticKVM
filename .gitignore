@@ -10,3 +10,10 @@ uv.lock
 dist/
 build/
 *.egg-info/
+artifacts/
+agentickvm-artifacts/
+screenshots/
+*.screenshot.png
+*.screenshot.jpg
+*.screenshot.jpeg
+*.screenshot.webp

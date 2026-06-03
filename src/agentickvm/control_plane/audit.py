@@ -188,6 +188,15 @@ def redact_mapping(values: Mapping[str, Any]) -> tuple[Mapping[str, Any], tuple[
 
     def redact_value(path: str, key: str, value: Any) -> Any:
         lowered = key.lower()
+        raw_byte_field = lowered != "raw_bytes_included" and any(
+            token in lowered
+            for token in (
+                "raw_bytes",
+                "image_bytes",
+                "raw_image",
+                "screenshot_bytes",
+            )
+        )
         if any(
             token in lowered
             for token in (
@@ -201,7 +210,7 @@ def redact_mapping(values: Mapping[str, Any]) -> tuple[Mapping[str, Any], tuple[
                 "bearer",
                 "session_cookie",
             )
-        ):
+        ) or raw_byte_field:
             redactions.append(path)
             return "[REDACTED]"
         if lowered == "text":

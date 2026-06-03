@@ -1,5 +1,9 @@
 """Provider interfaces for AgenticKVM."""
 
+from agentickvm.providers.artifacts import (
+    ArtifactPolicyError,
+    ScreenshotArtifactPolicy,
+)
 from agentickvm.providers.base import (
     Provider,
     ProviderActionRequest,
@@ -72,6 +76,7 @@ from agentickvm.providers.transport_policy import (
 
 __all__ = [
     "EXECUTABLE_PROVIDER_TYPES",
+    "ArtifactPolicyError",
     "DisabledRealProviderPlaceholder",
     "FakePiKVMObserveTransport",
     "KNOWN_PROVIDER_TYPES",
@@ -116,6 +121,7 @@ __all__ = [
     "RedfishObserveClient",
     "RedfishObserveProvider",
     "RedfishProviderPlaceholder",
+    "ScreenshotArtifactPolicy",
     "TargetNotFoundError",
     "TransportPolicyError",
     "TransportSecurityPolicy",
