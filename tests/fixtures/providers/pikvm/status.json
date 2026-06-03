@@ -1,0 +1,10 @@
+{
+  "health": "ok",
+  "streamer": {
+    "state": "online",
+    "resolution": "1280x720"
+  },
+  "atx": {
+    "power": "on"
+  }
+}

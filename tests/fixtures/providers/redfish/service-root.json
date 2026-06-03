@@ -1,0 +1,9 @@
+{
+  "RedfishVersion": "1.17.0",
+  "Systems": {
+    "@odata.id": "/redfish/v1/Systems"
+  },
+  "Managers": {
+    "@odata.id": "/redfish/v1/Managers"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "Members": [
+    {
+      "Name": "CPU Temp",
+      "Reading": 38,
+      "ReadingUnits": "C",
+      "Status": {
+        "Health": "OK"
+      }
+    }
+  ]
+}

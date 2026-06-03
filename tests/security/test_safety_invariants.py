@@ -44,18 +44,29 @@ def test_full_control_hard_invariants_are_present() -> None:
     assert any("cannot reveal raw secrets by default" in item for item in HARD_INVARIANTS)
 
 
-def test_no_real_provider_adapters_exist_in_bootstrap() -> None:
+def test_provider_modules_are_mock_or_offline_observe_scaffolds() -> None:
     provider_dir = ROOT / "src" / "agentickvm" / "providers"
     provider_files = {path.name for path in provider_dir.glob("*.py")}
 
-    assert provider_files == {
+    assert provider_files <= {
         "__init__.py",
         "base.py",
         "mock.py",
+        "pikvm.py",
         "placeholders.py",
+        "redfish.py",
         "registry.py",
+        "transports.py",
     }
     assert MockProvider.is_real_hardware is False
+    transport_source = (provider_dir / "transports.py").read_text(encoding="utf-8")
+    for forbidden_import in (
+        "import requests",
+        "import urllib",
+        "import http.client",
+        "import socket",
+    ):
+        assert forbidden_import not in transport_source
 
 
 def test_provider_contract_forbids_policy_ownership() -> None:

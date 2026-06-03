@@ -159,6 +159,12 @@ DEFAULT_CAPABILITIES: tuple[Capability, ...] = (
         RiskLevel.LOW,
     ),
     _capability(
+        "observe.screen",
+        "Observe screen",
+        "Read provider-neutral screen metadata or text without input.",
+        RiskLevel.MEDIUM,
+    ),
+    _capability(
         "observe.screenshot",
         "Observe screenshot",
         "Capture or retrieve a current screen observation.",

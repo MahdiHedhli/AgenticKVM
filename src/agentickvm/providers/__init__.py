@@ -8,12 +8,24 @@ from agentickvm.providers.base import (
     ProviderValidationResult,
 )
 from agentickvm.providers.mock import MockProvider
+from agentickvm.providers.pikvm import (
+    PIKVM_OBSERVE_CAPABILITIES,
+    PiKVMObserveClient,
+    PiKVMObserveProvider,
+    default_pikvm_fake_transport,
+)
 from agentickvm.providers.placeholders import (
     DisabledRealProviderPlaceholder,
     OBSERVE_ONLY_REAL_PROVIDER_CAPABILITIES,
     PiKVMProviderPlaceholder,
     RealProviderNotEnabledError,
     RedfishProviderPlaceholder,
+)
+from agentickvm.providers.redfish import (
+    REDFISH_OBSERVE_CAPABILITIES,
+    RedfishObserveClient,
+    RedfishObserveProvider,
+    default_redfish_fake_transport,
 )
 from agentickvm.providers.registry import (
     EXECUTABLE_PROVIDER_TYPES,
@@ -30,8 +42,11 @@ __all__ = [
     "KNOWN_PROVIDER_TYPES",
     "MockProvider",
     "OBSERVE_ONLY_REAL_PROVIDER_CAPABILITIES",
+    "PIKVM_OBSERVE_CAPABILITIES",
     "PLACEHOLDER_PROVIDER_TYPES",
     "PiKVMProviderPlaceholder",
+    "PiKVMObserveClient",
+    "PiKVMObserveProvider",
     "Provider",
     "ProviderActionRequest",
     "ProviderActionResult",
@@ -40,6 +55,11 @@ __all__ = [
     "ProviderRegistryError",
     "ProviderStatus",
     "ProviderValidationResult",
+    "REDFISH_OBSERVE_CAPABILITIES",
     "RealProviderNotEnabledError",
+    "RedfishObserveClient",
+    "RedfishObserveProvider",
     "RedfishProviderPlaceholder",
+    "default_pikvm_fake_transport",
+    "default_redfish_fake_transport",
 ]

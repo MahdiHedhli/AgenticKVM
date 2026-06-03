@@ -1,0 +1,18 @@
+{
+  "Id": "System.Embedded.1",
+  "Name": "Redfish fixture system",
+  "PowerState": "On",
+  "Status": {
+    "State": "Enabled",
+    "Health": "OK"
+  },
+  "Boot": {
+    "BootSourceOverrideTarget": "None"
+  },
+  "ProcessorSummary": {
+    "Count": 2
+  },
+  "MemorySummary": {
+    "TotalSystemMemoryGiB": 64
+  }
+}

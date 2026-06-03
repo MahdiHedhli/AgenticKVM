@@ -21,6 +21,7 @@ OBSERVE_ONLY_REAL_PROVIDER_CAPABILITIES = frozenset(
         "observe.sensors",
         "observe.event_logs",
         "observe.boot_status",
+        "observe.screen",
         "observe.screenshot",
     }
 )

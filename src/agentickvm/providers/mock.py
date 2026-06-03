@@ -91,7 +91,7 @@ class MockProvider(Provider):
 
         if request.capability == "observe.status":
             data["state"] = self._state_summary()
-        elif request.capability == "observe.screenshot":
+        elif request.capability in {"observe.screen", "observe.screenshot"}:
             data["screen"] = {
                 "kind": "text_snapshot",
                 "content": self.state.screen_text,

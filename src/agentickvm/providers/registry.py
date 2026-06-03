@@ -15,6 +15,7 @@ from typing import Any, Iterable, Mapping
 from agentickvm.providers.base import Provider
 
 EXECUTABLE_PROVIDER_TYPES = frozenset({"mock"})
+TEST_FIXTURE_PROVIDER_RISK_CLASS = "test_fake_observe_only"
 PLACEHOLDER_PROVIDER_TYPES = frozenset(
     {
         "pikvm",
@@ -71,7 +72,11 @@ class ProviderEntry:
             raise ProviderRegistryError(f"Unknown provider type: {self.provider_type}")
         if _contains_secret_key(self.metadata):
             raise ProviderRegistryError("Provider metadata must not contain secrets")
-        if self.enabled and provider_type not in EXECUTABLE_PROVIDER_TYPES:
+        if (
+            self.enabled
+            and provider_type not in EXECUTABLE_PROVIDER_TYPES
+            and not _is_test_fixture_adapter(self.provider, provider_type)
+        ):
             raise ProviderRegistryError(
                 f"Provider type {provider_type} is not executable in this lane"
             )
@@ -85,6 +90,13 @@ class ProviderEntry:
             if self.provider.provider_kind != provider_type:
                 raise ProviderRegistryError(
                     "Provider adapter type does not match configured provider type"
+                )
+            if (
+                provider_type not in EXECUTABLE_PROVIDER_TYPES
+                and not _is_test_fixture_adapter(self.provider, provider_type)
+            ):
+                raise ProviderRegistryError(
+                    f"Provider type {provider_type} is not executable in this lane"
                 )
 
         object.__setattr__(self, "provider_id", provider_id)
@@ -145,7 +157,7 @@ class ProviderRegistry:
                     "id": provider.provider_id,
                     "type": provider.provider_type,
                     "enabled": provider.enabled,
-                    "executable": provider.enabled and provider.provider is not None,
+                    "executable": _is_executable_entry(provider),
                     "description": provider.description,
                 }
             )
@@ -181,7 +193,7 @@ class ProviderRegistry:
         provider = self.require(provider_id)
         if not provider.enabled:
             raise ProviderRegistryError(f"Provider is disabled: {provider_id}")
-        if provider.provider_type not in EXECUTABLE_PROVIDER_TYPES:
+        if not _is_executable_entry(provider):
             raise ProviderRegistryError(
                 f"Provider type {provider.provider_type} is not executable"
             )
@@ -203,6 +215,25 @@ def _contains_secret_key(value: Any) -> bool:
     return False
 
 
+def _is_test_fixture_adapter(provider: Provider | None, provider_type: str) -> bool:
+    if provider is None:
+        return False
+    return (
+        provider.provider_kind == provider_type
+        and provider.enabled
+        and provider.is_real_hardware is False
+        and provider.risk_class == TEST_FIXTURE_PROVIDER_RISK_CLASS
+    )
+
+
+def _is_executable_entry(provider: ProviderEntry) -> bool:
+    if not provider.enabled or provider.provider is None:
+        return False
+    if provider.provider_type in EXECUTABLE_PROVIDER_TYPES:
+        return True
+    return _is_test_fixture_adapter(provider.provider, provider.provider_type)
+
+
 __all__ = [
     "EXECUTABLE_PROVIDER_TYPES",
     "KNOWN_PROVIDER_TYPES",
@@ -210,4 +241,5 @@ __all__ = [
     "ProviderEntry",
     "ProviderRegistry",
     "ProviderRegistryError",
+    "TEST_FIXTURE_PROVIDER_RISK_CLASS",
 ]
