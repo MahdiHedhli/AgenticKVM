@@ -16,6 +16,39 @@
 
 ### Result
 
+- timestamp: 2026-06-03T06:18:58Z
+- commit hash: `c3e87b10b295ee39a60f951735cdc8b2fda67101`
+- files changed:
+  - `src/agentickvm/mcp/models.py`
+  - `src/agentickvm/mcp/registry.py`
+  - `src/agentickvm/mcp/router.py`
+  - `src/agentickvm/mcp/__init__.py`
+  - `src/agentickvm/control_plane/capabilities.py`
+  - `src/agentickvm/providers/mock.py`
+  - `tests/unit/test_mcp_registry.py`
+  - `tests/unit/test_mcp_router.py`
+  - `tests/security/test_mcp_safety.py`
+  - `docs/mcp-tools.md`
+  - `docs/architecture.md`
+  - `docs/control-plane.md`
+  - `docs/roadmap.md`
+  - `docs/heartbeat-log.md`
+- tests run:
+  - `uv run --with pytest --python python3.13 python -m pytest`
+- result: 64 passed
+- risks found:
+  - live MCP SDK server adapter remains deferred
+  - router supports only the configured mock provider for now
+  - approval responses are still not consumed to resume gated execution
+  - provider registry and target registry are not implemented yet
+- next recommended task: add an MCP SDK server adapter or, preferably first,
+  add provider/target registry scaffolding so router provider selection remains
+  explicit and mock-only by default
+- blockers: none for repo-local scaffold work; real provider MCP testing remains
+  deferred
+
+### Result
+
 - timestamp: 2026-06-03T03:50:46Z
 - commit hash: `79c097a225a1280053ab8f177120f2441bd6b58c`
 - files changed:
