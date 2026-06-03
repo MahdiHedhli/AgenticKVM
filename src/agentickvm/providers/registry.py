@@ -29,6 +29,18 @@ PLACEHOLDER_PROVIDER_TYPES = frozenset(
 KNOWN_PROVIDER_TYPES = EXECUTABLE_PROVIDER_TYPES | PLACEHOLDER_PROVIDER_TYPES
 
 _PROVIDER_ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9_.:-]{0,127}$")
+_SECRET_KEY_FRAGMENTS = frozenset(
+    {
+        "password",
+        "token",
+        "api_key",
+        "secret",
+        "private_key",
+        "credential",
+        "bearer",
+        "session_cookie",
+    }
+)
 
 
 class ProviderRegistryError(ValueError):
@@ -57,6 +69,8 @@ class ProviderEntry:
             raise ProviderRegistryError(f"Invalid provider id: {self.provider_id!r}")
         if provider_type not in KNOWN_PROVIDER_TYPES:
             raise ProviderRegistryError(f"Unknown provider type: {self.provider_type}")
+        if _contains_secret_key(self.metadata):
+            raise ProviderRegistryError("Provider metadata must not contain secrets")
         if self.enabled and provider_type not in EXECUTABLE_PROVIDER_TYPES:
             raise ProviderRegistryError(
                 f"Provider type {provider_type} is not executable in this lane"
@@ -122,6 +136,22 @@ class ProviderRegistry:
 
         return tuple(self._providers[key] for key in sorted(self._providers))
 
+    def list_summaries(self) -> tuple[Mapping[str, Any], ...]:
+        """Return metadata-free provider summaries for external interfaces."""
+
+        return tuple(
+            MappingProxyType(
+                {
+                    "id": provider.provider_id,
+                    "type": provider.provider_type,
+                    "enabled": provider.enabled,
+                    "executable": provider.enabled and provider.provider is not None,
+                    "description": provider.description,
+                }
+            )
+            for provider in self.list()
+        )
+
     def get(self, provider_id: str) -> ProviderEntry | None:
         """Return a provider entry, or None if unknown."""
 
@@ -158,6 +188,19 @@ class ProviderRegistry:
         if provider.provider is None:
             raise ProviderRegistryError(f"Provider has no executable adapter: {provider_id}")
         return provider.provider
+
+
+def _contains_secret_key(value: Any) -> bool:
+    if isinstance(value, Mapping):
+        for key, child in value.items():
+            lowered = str(key).lower()
+            if any(fragment in lowered for fragment in _SECRET_KEY_FRAGMENTS):
+                return True
+            if _contains_secret_key(child):
+                return True
+    elif isinstance(value, (list, tuple, set, frozenset)):
+        return any(_contains_secret_key(item) for item in value)
+    return False
 
 
 __all__ = [

@@ -230,7 +230,7 @@ def test_disabled_provider_cannot_execute_through_mcp() -> None:
     result = router.handle_tool_request(_request("get_status"))
 
     assert result.status == MCPResultStatus.VALIDATION_ERROR
-    assert result.reason == "Provider is disabled: mock"
+    assert result.reason == "Target lab-a references non-executable provider mock"
     assert provider.requests == []
 
 

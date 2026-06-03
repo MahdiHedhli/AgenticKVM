@@ -12,6 +12,8 @@ SUSPICIOUS_CONFIG_KEY_FRAGMENTS = frozenset(
         "secret",
         "private_key",
         "credential",
+        "bearer",
+        "session_cookie",
     }
 )
 

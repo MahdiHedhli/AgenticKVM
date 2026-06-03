@@ -98,36 +98,11 @@ def _parser() -> argparse.ArgumentParser:
 
 
 def _providers_payload(runtime: Any) -> dict[str, Any]:
-    return {
-        "providers": [
-            {
-                "id": provider.provider_id,
-                "type": provider.provider_type,
-                "enabled": provider.enabled,
-                "executable": provider.enabled and provider.provider is not None,
-                "description": provider.description,
-            }
-            for provider in runtime.provider_registry.list()
-        ]
-    }
+    return {"providers": [dict(item) for item in runtime.provider_registry.list_summaries()]}
 
 
 def _targets_payload(runtime: Any) -> dict[str, Any]:
-    return {
-        "targets": [
-            {
-                "id": target.target_id,
-                "provider": target.provider_id,
-                "enabled": target.enabled,
-                "name": target.name,
-                "environment": target.environment,
-                "labels": list(target.labels),
-                "risk_tier": target.risk_tier,
-                "allowed_modes": [mode.value for mode in sorted(target.allowed_modes)],
-            }
-            for target in runtime.target_registry.list()
-        ]
-    }
+    return {"targets": [dict(item) for item in runtime.target_registry.list_summaries()]}
 
 
 def _params_from_cli(values: Sequence[str]) -> dict[str, str]:

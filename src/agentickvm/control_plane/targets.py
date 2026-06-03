@@ -24,6 +24,8 @@ _SECRET_KEY_FRAGMENTS = frozenset(
         "secret",
         "private_key",
         "credential",
+        "bearer",
+        "session_cookie",
     }
 )
 
@@ -112,6 +114,25 @@ class TargetRegistry:
 
         return tuple(self._targets[key] for key in sorted(self._targets))
 
+    def list_summaries(self) -> tuple[Mapping[str, Any], ...]:
+        """Return metadata-free target summaries for external interfaces."""
+
+        return tuple(
+            MappingProxyType(
+                {
+                    "id": target.target_id,
+                    "provider": target.provider_id,
+                    "enabled": target.enabled,
+                    "name": target.name,
+                    "environment": target.environment,
+                    "labels": list(target.labels),
+                    "risk_tier": target.risk_tier,
+                    "allowed_modes": [mode.value for mode in sorted(target.allowed_modes)],
+                }
+            )
+            for target in self.list()
+        )
+
     def get(self, target_id: str) -> TargetDefinition | None:
         """Return a target entry, or None if unknown."""
 
@@ -136,7 +157,13 @@ class TargetRegistry:
         target = self.require(target_id)
         if not target.enabled:
             raise TargetRegistryError(f"Target is disabled: {target_id}")
-        self.provider_registry.require(target.provider_id)
+        try:
+            self.provider_registry.resolve_enabled(target.provider_id)
+        except ValueError as exc:
+            raise TargetRegistryError(
+                f"Target {target_id} references non-executable provider "
+                f"{target.provider_id}"
+            ) from exc
         if mode is not None:
             self.validate_mode_allowed(target_id, mode)
         return target
