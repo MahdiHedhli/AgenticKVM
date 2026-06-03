@@ -37,6 +37,25 @@
   policy before mock provider execution and emits audit events
 - blockers: none for a repo-local mock-only orchestration slice
 
+## 2026-06-03T03:46:45Z
+
+- selected maturity level: Maturity 3, Mock Provider gated execution
+- selected task: add a minimal control-plane orchestrator that evaluates policy,
+  returns approval-pending for gated actions, calls only the mock provider for
+  allowed actions, and emits audit events
+- why this task is safe: uses only the existing safe mock provider, introduces
+  no real provider behavior, strengthens the tool-to-policy-to-provider path,
+  and tests that denied/gated actions do not reach the provider
+- files expected to change:
+  - `src/agentickvm/control_plane/__init__.py`
+  - `src/agentickvm/control_plane/engine.py`
+  - `src/agentickvm/providers/mock.py`
+  - `tests/unit/test_control_plane_engine.py`
+  - `tests/security/test_control_plane_gates.py`
+  - `docs/heartbeat-log.md`
+- tests expected to run:
+  - `uv run --with pytest --python python3.13 python -m pytest`
+
 ### Result
 
 - timestamp: 2026-06-03T03:43:17Z

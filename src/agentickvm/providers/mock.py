@@ -19,9 +19,10 @@ class MockProvider(Provider):
         {
             "session.start",
             "observe.status",
-            "input.keyboard",
+            "input.keyboard_type",
             "runtime.noop",
-            "power.force",
+            "power.force_off",
+            "media.eject",
         }
     )
 

@@ -134,6 +134,12 @@ from agentickvm.control_plane.audit import (  # noqa: E402
     build_audit_event,
     redact_mapping,
 )
+from agentickvm.control_plane.engine import (  # noqa: E402
+    CapabilityRequest,
+    ControlPlane,
+    ControlPlaneResult,
+    ControlPlaneStatus,
+)
 
 __all__ = [
     "Actor",
@@ -160,8 +166,12 @@ __all__ = [
     "UNKNOWN_CAPABILITY_DECISION",
     "Capability",
     "CapabilityRef",
+    "CapabilityRequest",
     "CapabilityPolicy",
     "CapabilityRegistry",
+    "ControlPlane",
+    "ControlPlaneResult",
+    "ControlPlaneStatus",
     "ControlMode",
     "PolicyDecision",
     "PolicyDecisionResult",
