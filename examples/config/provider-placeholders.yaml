@@ -1,0 +1,54 @@
+{
+  "version": "0.1",
+  "providers": [
+    {
+      "id": "mock",
+      "type": "mock",
+      "enabled": true,
+      "description": "Safe in-memory mock provider"
+    },
+    {
+      "id": "pikvm-placeholder",
+      "type": "pikvm",
+      "enabled": false,
+      "description": "Disabled placeholder; no endpoint or credentials"
+    },
+    {
+      "id": "redfish-placeholder",
+      "type": "redfish",
+      "enabled": false,
+      "description": "Disabled placeholder; no endpoint or credentials"
+    }
+  ],
+  "targets": [
+    {
+      "id": "mock-host",
+      "provider": "mock",
+      "enabled": true,
+      "name": "Mock Host",
+      "environment": "local",
+      "labels": ["mock", "safe"],
+      "risk_tier": "low",
+      "allowed_modes": ["Observe", "Supervised", "Full Control"],
+      "metadata": {
+        "description": "safe mock target"
+      }
+    },
+    {
+      "id": "disabled-pikvm-target",
+      "provider": "pikvm-placeholder",
+      "enabled": false,
+      "name": "Disabled PiKVM Placeholder",
+      "environment": "placeholder",
+      "labels": ["placeholder"],
+      "risk_tier": "high",
+      "allowed_modes": ["Observe"],
+      "metadata": {
+        "description": "disabled placeholder only"
+      }
+    }
+  ],
+  "default_policy": {
+    "mode": "Supervised"
+  }
+}
