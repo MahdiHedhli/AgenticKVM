@@ -45,6 +45,9 @@
 - Add provider conformance suite, normalized provider result envelope, provider
   error taxonomy, transport security policy model, credential reference
   contract, live observe ADR, and MCP SDK adapter research.
+- Add PiKVM-specific live observe ADR, fake-only transport boundary, fixture
+  contracts, config hardening, and screenshot artifact safety checks before any
+  live PiKVM client code.
 - Keep CI mock-only.
 - Require manual smoke docs and human approval before live testing.
 
@@ -62,9 +65,12 @@
 - Write Redfish provider spec.
 - Implement the smallest safe GET-only observe live adapter slice after
   readiness gates pass.
+- Follow the same fake-first transport injection and fixture contract pattern
+  proven by PiKVM before adding Redfish live code.
 - Add opt-in lab tests outside CI.
 - Status: not started; live transport remains blocked on operator approval,
-  transport/TLS design review, and manual smoke gates.
+  transport/TLS design review, Redfish live observe ADR, and manual smoke
+  gates.
 
 ## 7. Operator Approval UX
 

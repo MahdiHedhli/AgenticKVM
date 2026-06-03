@@ -78,6 +78,29 @@ policy, credential reference policy, live observe ADR, and MCP SDK adapter
 research are now part of the readiness surface. They do not implement live
 transport.
 
+## Redfish Live Observe Parity Path
+
+Redfish live observe transport should follow the same fake-first pattern being
+defined for PiKVM:
+
+- provider-specific ADR before live code
+- injected fake transport first
+- fixture contracts for expected responses and errors
+- disabled live transport by default
+- explicit local config outside the repo
+- credential references only
+- audit and redaction before interface output
+- no CI live network access
+
+The first Redfish live slice remains GET-only. `POST`, `PATCH`, `DELETE`,
+action URIs such as `ComputerSystem.Reset`, virtual media insert/eject, boot
+override, BIOS changes, firmware updates, storage actions, account changes,
+network changes, and secret reveal remain out of scope.
+
+Redfish live implementation is deferred until the PiKVM observe boundary is
+proven with fake transport contracts and an operator-reviewed manual smoke
+plan.
+
 ## Provider-Specific Risk
 
 Reset, boot, firmware, storage, power, BMC, and credential operations can vary
@@ -90,7 +113,7 @@ be downgraded to generic low-risk operations.
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Mock | Default executable safe provider | All current mock observations plus fake state families | Fake only and policy-gated | Built-in and example config enabled | Unit, contract, security | Not applicable | Mock-only | Continue provider conformance tests |
 | PiKVM | Offline observe fixture adapter plus disabled placeholder | `observe.status`, `observe.screen`, `observe.screenshot`, `observe.power_state`, `observe.hardware_inventory`, `observe.event_logs`, `observe.boot_status` | Unsupported, denied by policy, or provider-error without hardware action | Disabled placeholder examples; explicit fixture mode for tests | Fake transport, contract, CLI/MCP tests | Deferred, manual only | Fixtures only | Live transport spec and operator-approved smoke |
-| Redfish | Offline observe fixture adapter plus disabled placeholder | `observe.status`, `observe.power_state`, `observe.hardware_inventory`, `observe.sensors`, `observe.event_logs`, `observe.boot_status` | Unsupported, denied by policy, or provider-error without hardware action; fake transport rejects non-GET | Disabled placeholder examples; explicit fixture mode for tests | Fake GET transport, contract, CLI/MCP tests | Deferred, manual only | Fixtures only | GET-only live transport spec and operator-approved smoke |
+| Redfish | Offline observe fixture adapter plus disabled placeholder; live transport deferred behind PiKVM parity path | `observe.status`, `observe.power_state`, `observe.hardware_inventory`, `observe.sensors`, `observe.event_logs`, `observe.boot_status` | Unsupported, denied by policy, or provider-error without hardware action; fake transport rejects non-GET | Disabled placeholder examples; explicit fixture mode for tests | Fake GET transport, contract, CLI/MCP tests | Deferred, manual only | Fixtures only | Redfish live observe ADR after PiKVM boundary is proven |
 | iLO placeholder | Disabled placeholder | Future observe-only subset | Unimplemented and non-executable | Placeholder only | Placeholder safety tests | Not started | Disabled | Provider-specific observe spec |
 | iDRAC placeholder | Disabled placeholder | Future observe-only subset | Unimplemented and non-executable | Placeholder only | Placeholder safety tests | Not started | Disabled | Provider-specific observe spec |
 | Supermicro/IPMI placeholder | Disabled placeholder | Future observe-only subset | Unimplemented and non-executable | Placeholder only | Placeholder safety tests | Not started | Disabled | Provider-specific observe spec |
