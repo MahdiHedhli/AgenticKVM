@@ -53,6 +53,74 @@
     decision, production audit-store backend decision, and proof that mock-only
     CI cannot reach live providers
 
+## 2026-06-04T06:16:07Z
+
+- selected maturity level: Maturity 4 MCP dependency readiness with Maturity 2
+  approval/audit and Maturity 6 real-provider-readiness guardrails
+- selected task: perform a docs-first MCP SDK dependency and security review
+  framework against AgenticKVM host conformance, approval, audit-store,
+  provider-error, artifact, transport, packaging, and supply-chain requirements
+  before selecting or adding any live MCP server dependency
+- why this task is safe: this lane is docs/spec/test only; it does not install
+  dependencies, open listeners, implement a live server, enable live providers,
+  touch hardware, use credentials, resolve credential refs, or weaken
+  `ControlPlane` routing
+- files expected to change:
+  - `docs/mcp-sdk-dependency-review.md`
+  - `docs/mcp-sdk-candidate-matrix.md`
+  - `docs/adr/`
+  - `docs/mcp-live-server-acceptance.md`
+  - `docs/mcp-host-compatibility.md`
+  - `docs/mcp-sdk-adapter.md`
+  - `docs/audit-store.md`
+  - `docs/security-model.md`
+  - `docs/roadmap.md`
+  - `specs/006-mcp-sdk-adapter/contracts/`
+  - `tests/contract/`
+  - `tests/security/`
+  - `docs/heartbeat-log.md`
+- tests expected to run:
+  - `uv run --with pytest --python python3.13 python -m pytest`
+
+### Result
+
+- timestamp: 2026-06-04T15:57:05Z
+- commits:
+  - `5835388` docs: expand MCP SDK dependency review framework
+  - `fc98b91` docs: add MCP SDK candidate matrix
+  - `6bd396f` docs: add live MCP server boundary ADR
+  - `161db0c` docs: add live MCP server acceptance gate
+  - `95b13d4` test: add MCP dependency gate documentation checks
+  - `7528d89` docs: integrate audit-store gates into MCP dependency review
+- files changed:
+  - MCP SDK dependency review framework and contract
+  - MCP SDK candidate matrix with official-source facts and unresolved TODOs
+  - Proposed live MCP server boundary ADR
+  - live MCP server acceptance gate docs and spec contract
+  - documentation gate tests for dependency and server acceptance requirements
+  - audit-store gate integration across dependency review, live acceptance,
+    audit-store, security, and roadmap docs
+- tests run:
+  - `uv run --with pytest --python python3.13 python -m pytest`
+- result: 490 passed
+- risks found:
+  - no MCP SDK dependency is selected or added
+  - no live MCP server exists
+  - no live providers, live network calls, credential resolution, real
+    hardware paths, or remote desktop behavior were added
+  - official Python MCP SDK appears eligible only for a future offline trial;
+    dependency tree, logging behavior, adapter fit, and packaging risk remain
+    unresolved
+  - production audit backend and checkpoint-signing decisions remain deferred
+- next recommended task: run an operator-reviewed MCP SDK trial plan in a
+  separate mock-only branch, or write a production audit backend ADR before any
+  live server dependency is added
+- blockers:
+  - dependency selection still requires candidate evidence completion,
+    packaging/supply-chain review, live server transport decision, mock-only
+    SDK-backed adapter proof, and full host/audit conformance through the
+    adapter
+
 ## 2026-06-04T02:32:55Z
 
 ### Result

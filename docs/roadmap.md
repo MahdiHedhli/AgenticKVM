@@ -46,6 +46,10 @@
   detection, export/import verification, retention policy validation, audit
   failure fail-closed coverage, and host audit conformance fixtures before live
   MCP server dependency selection.
+- Add MCP SDK dependency/security review framework, candidate matrix, live MCP
+  server boundary ADR, live-server acceptance gate, dependency gate tests, and
+  audit-store gate integration before selecting or adding a live SDK/server
+  dependency.
 - Keep live MCP SDK server and client integration deferred until dependency,
   packaging, host integration, and security questions are settled.
 
