@@ -1,0 +1,9 @@
+{
+  "status": "validation_error",
+  "tool_name": "unknown_tool",
+  "capability": null,
+  "target": "mock-host",
+  "provider": "",
+  "has_approval_request": false,
+  "reason_present": true
+}

@@ -1,0 +1,18 @@
+{
+  "status": "ok",
+  "tool_name": "observe_screen",
+  "capability": "observe.screenshot",
+  "target": "pikvm-fixture-target",
+  "provider": "pikvm-fixture",
+  "has_approval_request": false,
+  "provider_result": {
+    "status": "ok",
+    "provider_id": "pikvm-fixture",
+    "provider_type": "pikvm",
+    "capability": "observe.screenshot",
+    "performed_on_hardware": false,
+    "error_code": null,
+    "retryable": false,
+    "has_artifact_metadata": true
+  }
+}

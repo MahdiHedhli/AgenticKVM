@@ -1,0 +1,17 @@
+{
+  "status": "ok",
+  "tool_name": "get_power_state",
+  "capability": "observe.power_state",
+  "target": "mock-host",
+  "provider": "mock",
+  "has_approval_request": false,
+  "provider_result": {
+    "status": "ok",
+    "provider_id": "mock",
+    "provider_type": "mock",
+    "capability": "observe.power_state",
+    "performed_on_hardware": false,
+    "error_code": null,
+    "retryable": false
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "status": "provider_error",
+  "tool_name": "get_power_state",
+  "capability": "observe.power_state",
+  "target": "error-target",
+  "provider": "error-provider",
+  "has_approval_request": false,
+  "provider_result": {
+    "status": "error",
+    "provider_id": "error-provider",
+    "provider_type": "mock",
+    "capability": "observe.power_state",
+    "performed_on_hardware": false,
+    "error_code": "provider_timeout",
+    "retryable": true
+  }
+}

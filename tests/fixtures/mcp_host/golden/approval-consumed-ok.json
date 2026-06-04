@@ -1,0 +1,17 @@
+{
+  "status": "ok",
+  "tool_name": "force_restart",
+  "capability": "power.force_restart",
+  "target": "mock-host",
+  "provider": "mock",
+  "has_approval_request": false,
+  "provider_result": {
+    "status": "ok",
+    "provider_id": "mock",
+    "provider_type": "mock",
+    "capability": "power.force_restart",
+    "performed_on_hardware": false,
+    "error_code": null,
+    "retryable": false
+  }
+}

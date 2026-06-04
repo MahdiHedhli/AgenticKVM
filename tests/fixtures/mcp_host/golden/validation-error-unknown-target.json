@@ -1,0 +1,9 @@
+{
+  "status": "validation_error",
+  "tool_name": "get_power_state",
+  "capability": "observe.power_state",
+  "target": "missing-target",
+  "provider": "",
+  "has_approval_request": false,
+  "reason_present": true
+}

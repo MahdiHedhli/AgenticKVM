@@ -1,0 +1,9 @@
+{
+  "status": "denied",
+  "tool_name": "reveal_secret",
+  "capability": "secrets.raw_reveal",
+  "target": "mock-host",
+  "provider": "mock",
+  "has_approval_request": false,
+  "reason_present": true
+}
