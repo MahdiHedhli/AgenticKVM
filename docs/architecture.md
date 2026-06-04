@@ -36,6 +36,10 @@ The current MCP SDK adapter scaffold is dependency-free and mock-only by
 default. It translates JSON-like tool calls into `MCPToolRequest` and delegates
 to the existing MCP router.
 
+The current MCP host compatibility layer is dependency-free, mock-only, and
+local. It models future host behavior by wrapping the MCP SDK adapter; it does
+not open a listener, import a live MCP SDK, or call providers directly.
+
 The current CLI adapter uses the same mock-only registry and control-plane path
 as MCP.
 
@@ -102,6 +106,7 @@ The current implementation includes:
 - fixture-backed PiKVM and Redfish observe-only adapters
 - MCP-style models, registry, and router
 - dependency-free mock-only MCP SDK adapter scaffold
+- dependency-free mock-only MCP host compatibility layer
 - mock-only CLI adapter
 - CLI/MCP consistency matrix
 - offline tests

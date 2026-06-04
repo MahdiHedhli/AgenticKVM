@@ -69,9 +69,9 @@ Provider conformance tests now cover metadata, disabled behavior, unsupported
 capabilities, observe-only restrictions, fake transport use, redaction, and
 interface-level provider bypass prevention.
 
-CLI, MCP router, and the mock-only MCP SDK adapter are interface layers. They
-must not call providers directly and must route through registries and
-`ControlPlane`.
+CLI, MCP router, the mock-only MCP SDK adapter, and the mock-only MCP host
+compatibility layer are interface layers. They must not call providers directly
+and must route through registries and `ControlPlane`.
 
 ## Readiness Gates
 
@@ -82,9 +82,9 @@ secret-safe config, audit behavior, timeout behavior, and human approval before
 live testing.
 
 Provider result normalization, provider error taxonomy, transport security
-policy, credential reference policy, live observe ADR, and MCP SDK adapter
-research are now part of the readiness surface. They do not implement live
-transport.
+policy, credential reference policy, live observe ADR, MCP SDK adapter
+research, and the mock-only MCP host compatibility contract are now part of the
+readiness surface. They do not implement live transport.
 
 ## Redfish Live Observe Parity Path
 
