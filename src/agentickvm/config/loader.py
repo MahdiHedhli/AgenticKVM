@@ -22,6 +22,8 @@ from agentickvm.config.validation import (
     reject_unsafe_config_keys,
 )
 from agentickvm.control_plane import (
+    ApprovalStore,
+    AuditSink,
     CapabilityPolicy,
     InMemoryAuditSink,
     TargetDefinition,
@@ -49,7 +51,8 @@ class ConfigRuntime:
     provider_registry: ProviderRegistry
     target_registry: TargetRegistry
     policy: CapabilityPolicy
-    audit_sink: InMemoryAuditSink
+    audit_sink: AuditSink
+    approval_store: ApprovalStore
 
 
 def mock_only_config() -> AgenticKVMConfig:
@@ -129,7 +132,8 @@ def config_from_mapping(raw: Mapping[str, Any]) -> AgenticKVMConfig:
 def build_runtime(
     config: AgenticKVMConfig | None = None,
     *,
-    audit_sink: InMemoryAuditSink | None = None,
+    audit_sink: AuditSink | None = None,
+    approval_store: ApprovalStore | None = None,
 ) -> ConfigRuntime:
     """Build safe runtime objects from config."""
 
@@ -143,6 +147,7 @@ def build_runtime(
         target_registry=target_registry,
         policy=policy,
         audit_sink=audit_sink or InMemoryAuditSink(),
+        approval_store=approval_store or ApprovalStore(),
     )
 
 

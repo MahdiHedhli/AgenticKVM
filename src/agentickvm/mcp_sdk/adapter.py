@@ -39,6 +39,7 @@ class MCPSDKAdapter:
             target_registry=self.runtime.target_registry,
             policy=self.runtime.policy,
             audit_sink=self.runtime.audit_sink,
+            approval_store=self.runtime.approval_store,
             registry=registry,
             control_plane_factory=control_plane_factory,
         )

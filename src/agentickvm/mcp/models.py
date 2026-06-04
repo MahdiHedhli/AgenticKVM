@@ -15,6 +15,7 @@ from agentickvm.control_plane import (
     ControlMode,
     ControlPlaneResult,
     ControlPlaneStatus,
+    fingerprint_parameters,
     redact_mapping,
 )
 
@@ -130,7 +131,9 @@ def mcp_result_from_control_plane(
             provider=provider_id,
             reason=result.message,
             data={
+                "approval_request": approval.to_dict() if approval is not None else {},
                 "params_preview": dict(preview),
+                "params_fingerprint": fingerprint_parameters(request.params),
                 "policy_decision": result.decision.decision.value,
             },
             approval_request_id=approval.id if approval is not None else None,
