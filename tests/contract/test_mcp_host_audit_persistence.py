@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from datetime import datetime, timedelta
 
 from agentickvm.control_plane import verify_audit_chain
 from agentickvm.mcp_sdk import (
@@ -18,18 +19,20 @@ def _event_types(path: Path) -> list[str]:
     return [record["event"]["event_type"] for record in _records(path)]
 
 
-def _approval_response(result):
+def _approval_response(result, *, decision=HostApprovalDecision.GRANTED, **overrides):
     approval = result["approval_request"]
     return {
         "request_id": approval["id"],
-        "decision": HostApprovalDecision.GRANTED.value,
+        "decision": decision.value,
         "operator_id": "operator-1",
         "scope": "one_time",
+        "decided_at": overrides.pop("decided_at", None),
         "session_id": approval["session_id"],
         "target": approval["target"],
         "provider": approval["provider"],
         "capability": approval["capability"],
         "params_fingerprint": approval["params_fingerprint"],
+        **overrides,
     }
 
 
@@ -115,6 +118,49 @@ def test_host_approval_lifecycle_and_consumption_are_audited(tmp_path) -> None:
     assert verify_audit_chain(audit_path) is True
 
 
+def test_host_denied_and_expired_approval_responses_are_audited(tmp_path) -> None:
+    audit_path = tmp_path / "host-approval-denied-expired.jsonl"
+    host = MCPHostCompatibilityLayer.mock_only(audit_path=audit_path)
+    denied_required = host.call_tool(
+        {
+            "tool_name": "force_restart",
+            "target": "mock-host",
+            "session_id": "host-audit-s1",
+            "requester_id": "host-test",
+            "correlation_id": "host-audit-denied",
+        }
+    )
+    denied = host.submit_approval_response(
+        _approval_response(denied_required, decision=HostApprovalDecision.DENIED)
+    )
+    expired_required = host.call_tool(
+        {
+            "tool_name": "force_restart",
+            "target": "mock-host",
+            "session_id": "host-audit-s1",
+            "requester_id": "host-test",
+            "correlation_id": "host-audit-expired",
+        }
+    )
+    expired_at = datetime.fromisoformat(
+        expired_required["approval_request"]["expires_at"]
+    )
+    expired = host.submit_approval_response(
+        _approval_response(
+            expired_required,
+            decided_at=(expired_at + timedelta(seconds=1)).isoformat(),
+        )
+    )
+
+    event_types = _event_types(audit_path)
+
+    assert denied["status"] == "approval_denied"
+    assert expired["status"] == "approval_expired"
+    assert "approval_denied" in event_types
+    assert "approval_expired" in event_types
+    assert verify_audit_chain(audit_path) is True
+
+
 def test_host_audit_hash_chain_detects_tampering(tmp_path) -> None:
     audit_path = tmp_path / "host-tamper.jsonl"
     host = MCPHostCompatibilityLayer.mock_only(audit_path=audit_path)
@@ -129,6 +175,45 @@ def test_host_audit_hash_chain_detects_tampering(tmp_path) -> None:
 
     tampered = audit_path.read_text(encoding="utf-8").replace("completed", "changed")
     audit_path.write_text(tampered, encoding="utf-8")
+
+    assert verify_audit_chain(audit_path) is False
+
+
+def test_host_audit_hash_chain_detects_middle_event_deletion(tmp_path) -> None:
+    audit_path = tmp_path / "host-deletion-tamper.jsonl"
+    host = MCPHostCompatibilityLayer.mock_only(audit_path=audit_path)
+    host.call_tool(
+        {
+            "tool_name": "get_status",
+            "target": "mock-host",
+            "session_id": "host-audit-s1",
+            "requester_id": "host-test",
+        }
+    )
+    lines = audit_path.read_text(encoding="utf-8").splitlines()
+    assert len(lines) > 3
+
+    audit_path.write_text("\n".join([lines[0], *lines[2:]]) + "\n", encoding="utf-8")
+
+    assert verify_audit_chain(audit_path) is False
+
+
+def test_host_audit_hash_chain_detects_event_reordering(tmp_path) -> None:
+    audit_path = tmp_path / "host-reorder-tamper.jsonl"
+    host = MCPHostCompatibilityLayer.mock_only(audit_path=audit_path)
+    host.call_tool(
+        {
+            "tool_name": "get_status",
+            "target": "mock-host",
+            "session_id": "host-audit-s1",
+            "requester_id": "host-test",
+        }
+    )
+    lines = audit_path.read_text(encoding="utf-8").splitlines()
+    assert len(lines) > 3
+    lines[1], lines[2] = lines[2], lines[1]
+
+    audit_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
     assert verify_audit_chain(audit_path) is False
 
