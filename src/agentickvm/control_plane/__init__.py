@@ -145,6 +145,13 @@ from agentickvm.control_plane.audit import (  # noqa: E402
     redact_mapping,
     verify_audit_chain,
 )
+from agentickvm.control_plane.audit_checkpoint import (  # noqa: E402
+    AuditCheckpoint,
+    AuditCheckpointError,
+    AuditCheckpointVerification,
+    create_audit_checkpoint,
+    verify_audit_checkpoint,
+)
 from agentickvm.control_plane.engine import (  # noqa: E402
     CapabilityRequest,
     ControlPlane,
@@ -164,6 +171,9 @@ __all__ = [
     "ApprovalStore",
     "AuditEvent",
     "AuditEventType",
+    "AuditCheckpoint",
+    "AuditCheckpointError",
+    "AuditCheckpointVerification",
     "AuditSink",
     "CAPABILITY_FAMILIES",
     "CONTROL_MODES",
@@ -199,10 +209,12 @@ __all__ = [
     "TargetRegistryError",
     "build_approval_request",
     "build_audit_event",
+    "create_audit_checkpoint",
     "default_decision_for_unknown_capability",
     "fingerprint_parameters",
     "load_policy_file",
     "mode_preset",
     "redact_mapping",
+    "verify_audit_checkpoint",
     "verify_audit_chain",
 ]
