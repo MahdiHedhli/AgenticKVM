@@ -14,6 +14,49 @@
 - tests expected to run:
   - `uv run --with pytest --python python3.13 python -m pytest`
 
+### Result
+
+- timestamp: 2026-06-04T00:10:11Z
+- commits:
+  - `2e982f5` feat: add mock-only MCP SDK adapter scaffold
+  - `bbf70b1` test: add MCP SDK adapter contract coverage
+  - `53a3b24` docs: update MCP SDK adapter quickstart and decision
+  - `c9a90c8` docs: add future provider taxonomy
+  - `913e399` docs: add in-band remote session provider spec
+  - `4e4c9a3` docs: document in-band provider approval risks
+  - `41b8ec2` docs: record MCP adapter and future provider roadmap progress
+- files changed:
+  - dependency-free `agentickvm.mcp_sdk` adapter scaffold
+  - MCP SDK adapter unit, contract, and security tests
+  - MCP SDK adapter quickstart and spec updates
+  - future provider taxonomy docs
+  - in-band remote session provider roadmap spec
+  - approval, artifact, architecture, provider, security, and roadmap docs
+- tests run:
+  - `uv run --with pytest --python python3.13 python -m pytest`
+- result: 326 passed
+- risks found:
+  - live MCP SDK server is still not implemented
+  - real MCP SDK dependency remains unselected
+  - M7 real provider slice is still not started
+  - live PiKVM transport remains gated
+  - RustDesk, VNC, RDP, MeshCentral, BrowserBridge, and desktop/session brokers
+    are roadmap-only
+  - no in-band provider registry placeholders were added; they remain deferred
+    pending risk review
+- next recommended task: either add a mock-only MCP host adapter compatibility
+  layer around the dependency-free adapter, or start the PiKVM live observe
+  implementation plan with operator-approved credential, TLS, audit-store, and
+  artifact decisions before writing network code
+- blockers:
+  - live SDK server work requires MCP SDK dependency selection and host
+    integration review
+  - live provider work requires operator approval, credential backend decision,
+    TLS/certificate decision, production audit-store decision, artifact
+    retention decision, and manual smoke gate completion
+  - in-band remote session provider placeholders require registry/config risk
+    review before code
+
 ## 2026-06-04T00:01:39Z
 
 - selected maturity level: Maturity 4/Maturity 6, mock-only MCP SDK adapter
