@@ -75,10 +75,12 @@ def default_pikvm_fake_transport() -> FakeTransport:
             ): {
                 "artifact": {
                     "kind": "screenshot",
+                    "sensitivity": "sensitive",
                     "content_type": "image/png",
                     "byte_length": 128,
                     "storage": "metadata-only",
                     "target_id": "fixture-target",
+                    "artifact_name": "screenshot-fixture-0001.png",
                 },
                 "sensitive": True,
                 "raw_bytes_included": False,

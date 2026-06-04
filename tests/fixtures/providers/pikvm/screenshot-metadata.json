@@ -1,6 +1,7 @@
 {
   "artifact": {
     "kind": "screenshot",
+    "sensitivity": "sensitive",
     "content_type": "image/png",
     "byte_length": 128,
     "storage": "metadata-only",

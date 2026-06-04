@@ -275,11 +275,7 @@ class ControlPlane:
             capability_ref=capability_ref,
             policy_decision=decision.decision,
             provider_ref=provider_ref,
-            result_payload={
-                "ok": provider_result.ok,
-                "performed_on_hardware": provider_result.performed_on_hardware,
-                "message": provider_result.message,
-            },
+            result_payload=_provider_audit_result_payload(provider_result),
             material_risks=decision.material_risks,
         )
         status = ControlPlaneStatus.COMPLETED if provider_result.ok else ControlPlaneStatus.FAILED
@@ -377,3 +373,44 @@ def _capability_ref(capability_id: str, capability: Capability | None) -> Capabi
         family=family,
         action=action or "unknown",
     )
+
+
+def _provider_audit_result_payload(
+    provider_result: ProviderActionResult,
+) -> Mapping[str, Any]:
+    """Return provider execution audit metadata without raw provider payloads."""
+
+    payload: dict[str, Any] = {
+        "ok": provider_result.ok,
+        "performed_on_hardware": provider_result.performed_on_hardware,
+        "message": provider_result.message,
+    }
+    if provider_result.error_code is not None:
+        payload["error_code"] = provider_result.error_code
+        payload["retryable"] = provider_result.retryable
+    artifacts = tuple(_artifact_metadata(provider_result.data))
+    if artifacts:
+        payload["artifacts"] = list(artifacts)
+    return payload
+
+
+def _artifact_metadata(value: Any) -> tuple[Mapping[str, Any], ...]:
+    """Extract metadata-only artifact entries from nested provider data."""
+
+    if isinstance(value, Mapping):
+        artifacts: list[Mapping[str, Any]] = []
+        artifact = value.get("artifact")
+        if isinstance(artifact, Mapping):
+            entry = dict(artifact)
+            if "raw_bytes_included" in value and "raw_bytes_included" not in entry:
+                entry["raw_bytes_included"] = value["raw_bytes_included"]
+            artifacts.append(entry)
+        for child in value.values():
+            artifacts.extend(_artifact_metadata(child))
+        return tuple(artifacts)
+    if isinstance(value, (list, tuple)):
+        artifacts: list[Mapping[str, Any]] = []
+        for item in value:
+            artifacts.extend(_artifact_metadata(item))
+        return tuple(artifacts)
+    return ()
