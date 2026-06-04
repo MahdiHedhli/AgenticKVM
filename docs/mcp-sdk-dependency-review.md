@@ -89,7 +89,9 @@ Each candidate must be scored before trial:
 
 Any `fail` on authority routing, audit, approval, provider bypass, secret
 handling, or CI isolation rejects the candidate. Any `unknown` in those areas
-holds the candidate.
+holds the candidate. Secret handling includes raw secrets, credential refs,
+tokens, screenshots, raw tool arguments, provider payloads, and any SDK logs or
+traces that could expose them.
 
 ## AgenticKVM Non-Negotiables
 

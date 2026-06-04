@@ -89,8 +89,8 @@ The live server must preserve:
 - retention policy constraints
 - redaction before persistence
 
-No raw screenshots, raw secrets, raw credential values, or raw provider payloads
-may be written to audit logs by default.
+No raw screenshots, no raw secrets, no raw credential values, and no raw
+provider payloads may be written to audit logs by default.
 
 ## Stop Conditions
 
