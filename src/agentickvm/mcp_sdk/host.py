@@ -218,14 +218,14 @@ class MCPHostCompatibilityLayer:
                 host_response.decision == HostApprovalDecision.EXPIRED
                 or host_response.decided_at >= pending.approval.expires_at
             ):
-                self._approval_states[host_response.request_id] = (
-                    HostApprovalResultStatus.EXPIRED
-                )
                 self._emit_approval_event(
                     AuditEventType.APPROVAL_EXPIRED,
                     pending=pending,
                     response=host_response,
                     result_status=HostApprovalResultStatus.EXPIRED,
+                )
+                self._approval_states[host_response.request_id] = (
+                    HostApprovalResultStatus.EXPIRED
                 )
                 return HostApprovalResult(
                     status=HostApprovalResultStatus.EXPIRED,
@@ -235,14 +235,14 @@ class MCPHostCompatibilityLayer:
                     response=host_response,
                 ).to_dict()
             if host_response.decision == HostApprovalDecision.DENIED:
-                self._approval_states[host_response.request_id] = (
-                    HostApprovalResultStatus.DENIED
-                )
                 self._emit_approval_event(
                     AuditEventType.APPROVAL_DENIED,
                     pending=pending,
                     response=host_response,
                     result_status=HostApprovalResultStatus.DENIED,
+                )
+                self._approval_states[host_response.request_id] = (
+                    HostApprovalResultStatus.DENIED
                 )
                 return HostApprovalResult(
                     status=HostApprovalResultStatus.DENIED,
@@ -264,14 +264,14 @@ class MCPHostCompatibilityLayer:
                 scope=ApprovalGrantScope(host_response.scope.value),
                 operator=Actor(type=ActorType.OPERATOR, id=host_response.operator_id),
             )
-            self._approval_store().add_action_grant(grant)
-            self._approval_states[host_response.request_id] = HostApprovalResultStatus.GRANTED
             self._emit_approval_event(
                 AuditEventType.APPROVAL_GRANTED,
                 pending=pending,
                 response=host_response,
                 result_status=HostApprovalResultStatus.GRANTED,
             )
+            self._approval_store().add_action_grant(grant)
+            self._approval_states[host_response.request_id] = HostApprovalResultStatus.GRANTED
             return HostApprovalResult(
                 status=HostApprovalResultStatus.GRANTED,
                 request_id=host_response.request_id,
