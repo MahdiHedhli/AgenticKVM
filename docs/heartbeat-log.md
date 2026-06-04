@@ -14,6 +14,37 @@
 - tests expected to run:
   - `uv run --with pytest --python python3.13 python -m pytest`
 
+## 2026-06-04T00:01:39Z
+
+- selected maturity level: Maturity 4/Maturity 6, mock-only MCP SDK adapter
+  and future provider taxonomy
+- selected task: implement a dependency-free mock-only MCP SDK adapter
+  scaffold over the existing `MCPRouter`, add contract/security coverage, and
+  document future OOB, in-band remote desktop, and browser/session provider
+  taxonomy including RustDesk, VNC, RDP, and MeshCentral
+- why this task is safe: the repo has no MCP SDK dependency selected; the
+  adapter will be an internal JSON-safe translator over existing registries,
+  policy, approval/audit, and `ControlPlane`; tests use built-in mock config,
+  fixture config, in-memory adapters, and no live network, credentials,
+  remote desktop software, real hardware, or provider bypass
+- files expected to change:
+  - `src/agentickvm/mcp_sdk/`
+  - `tests/contract/`
+  - `tests/security/`
+  - `docs/mcp-sdk-adapter.md`
+  - `docs/mcp-sdk-adapter-quickstart.md`
+  - `docs/provider-taxonomy.md`
+  - `docs/security-model.md`
+  - `docs/provider-contracts.md`
+  - `docs/provider-registry.md`
+  - `docs/architecture.md`
+  - `docs/roadmap.md`
+  - `docs/heartbeat-log.md`
+  - `specs/006-mcp-sdk-adapter/`
+  - `specs/007-inband-remote-session-providers/`
+- tests expected to run:
+  - `uv run --with pytest --python python3.13 python -m pytest`
+
 ### Result
 
 - timestamp: 2026-06-03T23:11:13Z
