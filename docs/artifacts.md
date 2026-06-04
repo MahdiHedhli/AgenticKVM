@@ -4,6 +4,9 @@ AgenticKVM treats screenshots and screen observations as sensitive artifacts.
 They can contain passwords, recovery keys, hostnames, IP addresses, customer
 data, boot prompts, installer screens, and console sessions.
 
+Future remote desktop streams, session thumbnails, clipboard captures, and
+screen recordings are also sensitive artifacts.
+
 ## Current State
 
 The repository implements metadata-only screenshot artifact safety checks. It
@@ -22,6 +25,8 @@ Tests use synthetic fixtures and temporary directories only.
 - Screenshot metadata must carry a sensitivity label.
 - Raw screenshot bytes must be redacted from audit and external output.
 - Live screenshots remain blocked until the manual smoke gate is approved.
+- Future remote desktop stream artifacts remain blocked until an in-band
+  provider spec defines consent, retention, redaction, and audit behavior.
 
 ## Paths
 
@@ -47,6 +52,8 @@ Audit must not record:
 
 - raw image bytes
 - raw screen contents
+- raw stream contents
+- clipboard contents
 - credentials
 - cookies
 - bearer values

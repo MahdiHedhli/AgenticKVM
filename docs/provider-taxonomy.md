@@ -98,6 +98,14 @@ For RustDesk, VNC, RDP, and MeshCentral:
 - user notification or consent may be required depending on environment
 - credentials must use references and must not be revealed to the model
 
+Input/control, clipboard, file transfer, command execution, and unattended
+remote desktop behavior must return `approval_required` or `denied` until
+provider-specific specs, tests, and operator approval behavior are implemented.
+
+Audit must record session metadata requests, denials, approvals, provider
+attempts, and results. It must not record raw streams, clipboard contents, file
+contents, credentials, or raw remote desktop secrets.
+
 ## Roadmap Status
 
 RustDesk, VNC, RDP, MeshCentral, BrowserBridge, and desktop/session brokers are

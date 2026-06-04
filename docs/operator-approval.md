@@ -58,3 +58,31 @@ outside session scope.
 
 Dangerous actions in Supervised mode require explainable approval and explicit
 scope. Approval text must not hide material risk.
+
+## MCP SDK Adapter
+
+The mock-only MCP SDK adapter preserves `approval_required` results from the
+existing MCP router. It does not auto-approve, resume approvals, or create
+approval grants.
+
+Future live SDK/server adapters must preserve the same behavior: approval is a
+first-class result returned to the caller, not permission to continue
+execution.
+
+## Future In-Band Provider Risks
+
+For future RustDesk, VNC, RDP, MeshCentral, BrowserBridge, or desktop/session
+providers, the following actions require explicit capability mapping and
+explainable approval before implementation:
+
+- keyboard and mouse control
+- clipboard read or write
+- file transfer
+- remote command execution
+- remote access agent install, update, or settings changes
+- privilege escalation
+- unattended control of production desktops
+- screenshot or stream capture when policy requires approval
+
+Approval must state whether the OS user is expected to be notified or involved
+when environment policy requires consent.
