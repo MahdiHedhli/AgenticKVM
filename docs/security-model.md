@@ -9,6 +9,8 @@ approval, scope, provider contracts, audit, and tests.
 - Agent text is untrusted intent.
 - MCP, CLI, API, and workflow inputs are untrusted until converted into
   capability requests.
+- The mock-only MCP SDK adapter is untrusted interface input translated into
+  `MCPToolRequest`; it is not an authority boundary.
 - Policy is the authority boundary.
 - Providers are execution adapters, not trust anchors.
 - Provider and target registries are validation gates, not permission grants.
@@ -69,6 +71,10 @@ be explicit and cannot be combined with live mode.
 Transport security policy defaults to TLS verification enabled, no redirects,
 GET-only Redfish first slice, observe-only PiKVM first slice, bounded response
 size, and no retry for unsafe or mutating capabilities.
+
+The MCP SDK adapter scaffold does not open a server, listen on a port, import a
+live SDK, resolve credentials, or contact live providers. It uses mock config
+by default and fixture config only when explicitly supplied.
 
 ## Emergency Stop
 

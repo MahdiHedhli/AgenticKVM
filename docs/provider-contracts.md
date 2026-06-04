@@ -69,6 +69,10 @@ Provider conformance tests now cover metadata, disabled behavior, unsupported
 capabilities, observe-only restrictions, fake transport use, redaction, and
 interface-level provider bypass prevention.
 
+CLI, MCP router, and the mock-only MCP SDK adapter are interface layers. They
+must not call providers directly and must route through registries and
+`ControlPlane`.
+
 ## Readiness Gates
 
 Real provider readiness is specified in

@@ -31,8 +31,9 @@
 - Prove MCP tools cannot call providers directly.
 - Add contract tests for tool-to-control-plane routing.
 - Add CLI/MCP consistency matrix for mock-target actions.
-- Keep live MCP SDK server and client integration deferred until the internal
-  router, schemas, safety tests, and mock provider path are stable.
+- Add dependency-free mock-only MCP SDK adapter scaffold over `MCPRouter`.
+- Keep live MCP SDK server and client integration deferred until dependency,
+  packaging, host integration, and security questions are settled.
 
 ## 4. Real Provider Readiness
 

@@ -5,7 +5,8 @@ MCP-style request and response models, a tool-to-capability registry, and a
 router that resolves configured targets/providers and delegates every request
 to `ControlPlane`.
 
-No live MCP SDK server is implemented yet.
+No live MCP SDK server is implemented yet. A dependency-free mock-only
+`agentickvm.mcp_sdk` adapter scaffold exists and delegates to this same router.
 
 ## Authority Boundary
 
@@ -96,6 +97,8 @@ approval.
   by the scaffold.
 - Provider results use the normalized provider result envelope.
 - CLI/MCP equivalent requests are covered by a status consistency matrix.
+- The MCP SDK adapter is mock-only by default and returns the same structured
+  statuses through `MCPRouter`.
 
 ## Deferred Work
 

@@ -32,6 +32,10 @@ The current MCP scaffold provides internal MCP-style models, a tool registry,
 and a router that uses provider and target registries. It does not start a live
 MCP server yet.
 
+The current MCP SDK adapter scaffold is dependency-free and mock-only by
+default. It translates JSON-like tool calls into `MCPToolRequest` and delegates
+to the existing MCP router.
+
 The current CLI adapter uses the same mock-only registry and control-plane path
 as MCP.
 
@@ -97,6 +101,7 @@ The current implementation includes:
 - disabled real-provider placeholders
 - fixture-backed PiKVM and Redfish observe-only adapters
 - MCP-style models, registry, and router
+- dependency-free mock-only MCP SDK adapter scaffold
 - mock-only CLI adapter
 - CLI/MCP consistency matrix
 - offline tests
