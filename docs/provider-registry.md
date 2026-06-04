@@ -31,3 +31,7 @@ untrusted input and must match the configured target provider.
 Enabled PiKVM or Redfish config without explicit fixture mode still fails
 closed. Fixture mode is for offline tests and demos only; it does not create a
 live provider execution path.
+
+RustDesk, VNC, RDP, MeshCentral, BrowserBridge, and desktop/session broker
+providers are roadmap-only. They are not registered executable provider types
+in the current code and no remote desktop transport exists.

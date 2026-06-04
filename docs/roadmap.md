@@ -50,6 +50,8 @@
   live PiKVM client code.
 - Keep CI mock-only.
 - Require manual smoke docs and human approval before live testing.
+- Maintain provider taxonomy distinguishing out-of-band providers from future
+  in-band remote session and browser/session providers.
 
 ## 5. PiKVM Provider
 
@@ -84,3 +86,20 @@
 - Add provider conformance suite.
 - Add docs for safe deployment.
 - Run security review before public beta.
+
+## 9. Future In-Band Remote Session Providers
+
+- Document RustDesk, VNC, RDP, and MeshCentral as future in-band remote session
+  providers, not out-of-band providers.
+- Start with provider inventory and session metadata observe-only specs.
+- Keep clipboard, file transfer, remote command execution, agent installation,
+  and unattended control disabled by default and gated by policy/approval.
+- Status: roadmap-only; no implementation, network transport, credentials, or
+  remote desktop behavior exists.
+
+## 10. Future Browser/Session Providers
+
+- Document BrowserBridge and desktop/session brokers as future session-level
+  providers.
+- Start with session inventory and safe observe metadata only.
+- Status: roadmap-only.

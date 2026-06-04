@@ -52,3 +52,14 @@ def test_policy_examples_exist_for_visible_modes() -> None:
         assert "unknown_capability: deny" in text
         assert "audit: mandatory" in text
         assert "secrets: redact_by_default" in text
+
+
+def test_provider_taxonomy_distinguishes_oob_from_inband_remote_sessions() -> None:
+    taxonomy = (ROOT / "docs" / "provider-taxonomy.md").read_text()
+
+    assert "Out-Of-Band Providers" in taxonomy
+    assert "In-Band Remote Session Providers" in taxonomy
+    for provider in ("RustDesk", "VNC", "RDP", "MeshCentral"):
+        assert provider in taxonomy
+    assert "must not be described as out-of-band" in taxonomy
+    assert "roadmap-only" in taxonomy

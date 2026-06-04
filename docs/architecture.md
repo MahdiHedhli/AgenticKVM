@@ -39,6 +39,11 @@ PiKVM and Redfish fixture-mode integrations are available only for offline
 observe tests. They still enter through the same registry and control-plane
 path and do not create live provider access.
 
+Future provider families are documented in `docs/provider-taxonomy.md`.
+Out-of-band providers such as PiKVM, Redfish, iLO, iDRAC, and IPMI/BMC systems
+have different availability assumptions from future in-band remote session
+providers such as RustDesk, VNC, RDP, and MeshCentral.
+
 ### Provider Registry
 
 The provider registry stores explicit provider entries. Unknown providers,
@@ -97,6 +102,8 @@ The current implementation includes:
 - offline tests
 
 Real provider implementations and live MCP SDK testing remain deferred.
+RustDesk, VNC, RDP, MeshCentral, BrowserBridge, and desktop/session brokers are
+roadmap-only; no remote desktop live behavior exists.
 
 ## Design Rule
 

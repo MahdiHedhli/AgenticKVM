@@ -14,6 +14,12 @@ approval, scope, provider contracts, audit, and tests.
 - Provider and target registries are validation gates, not permission grants.
 - Audit is mandatory evidence.
 
+Provider categories have different trust and availability assumptions.
+Out-of-band providers can operate below or outside the OS. Future in-band
+remote session providers such as RustDesk, VNC, RDP, and MeshCentral generally
+depend on a running OS, reachable network path, remote access service, and
+credentials or user/session state.
+
 ## Default-Deny Behavior
 
 Unknown capabilities, malformed requests, missing registry entries, missing
@@ -87,3 +93,9 @@ CLI/MCP output. Secret-shaped fields and credential references are redacted.
 Screenshot and screen observations are sensitive. The current scaffold records
 metadata only, rejects repo-default artifact paths, redacts raw byte fields in
 audit, and ignores common local screenshot artifact paths.
+
+Remote desktop streams, screenshots, clipboard contents, file transfer,
+remote command execution, remote access agent changes, and unattended control
+are high-risk in-band provider behaviors. They are roadmap-only and must require
+explicit capability mapping, policy gates, approval behavior, redaction, and
+audit before implementation.
