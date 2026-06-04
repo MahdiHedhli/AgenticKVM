@@ -71,6 +71,10 @@ The host layer does not write artifact files. Artifact path policy tests use
 temporary directories and assert that artifact roots do not default into the
 tracked repository.
 
+Audit export/import tests verify that artifact metadata can be exported for
+investigation while raw screenshot bytes, raw image fields, and screenshot byte
+arrays remain absent from the export bundle.
+
 ## Cleanup
 
 Manual smoke operators are responsible for removing local screenshot artifacts

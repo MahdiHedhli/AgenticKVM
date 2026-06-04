@@ -49,6 +49,13 @@ A future MCP SDK dependency must be reviewed for:
 - packaging risk for optional dependencies
 - integration risk with current Python packaging
 - operational risk if a listener is exposed
+- ability to preserve host correlation ids
+- ability to expose structured result ids if needed for audit correlation
+- ability to avoid swallowing audit errors
+- ability to surface audit-related failures distinctly enough for policy
+  handling
+- ability to avoid logging raw tool arguments, secrets, credential refs,
+  screenshots, or raw provider payloads
 
 ## Candidate Package
 
@@ -103,6 +110,13 @@ A future MCP SDK dependency must be reviewed for:
 - Can the server avoid opening public listeners by default?
 - Can logs and traces avoid secrets, credential refs, screenshots, and raw
   provider payloads?
+- Can the SDK preserve approval-required results without mutating state?
+- Can the SDK preserve host correlation ids across approval and audit flows?
+- Can the SDK avoid swallowing audit errors?
+- Can the SDK support local-only/mock-only test mode for audit checkpoint and
+  export tests?
+- Can the SDK preserve JSON-safe results and reject unsafe result shapes?
+- Can the SDK avoid background network listeners unless explicitly configured?
 
 ## Required Tests Before Adoption
 
@@ -116,6 +130,10 @@ A future MCP SDK dependency must be reviewed for:
 - approval resumption still surfaces provider errors
 - audit JSONL persistence remains hash-chain verifiable
 - audit tampering, middle-event deletion, and event reordering fail verification
+- checkpoint-backed tail-truncation detection passes
+- audit export/import verification passes
+- retention policy validation rejects silent deletion
+- audit failure blocks high-risk execution and approval consumption
 - artifact metadata is emitted without raw screenshot bytes
 - golden host result fixtures still match generated results
 - host result schema validation passes for valid results and rejects unsafe

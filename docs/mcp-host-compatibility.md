@@ -153,6 +153,11 @@ records must fail verification. The current helper detects content tampering,
 middle-event deletion, and event reordering. Tail truncation requires an
 external checkpoint and remains a production audit-store requirement.
 
+The production audit-store scaffold adds local checkpoint and export/import
+verification helpers. Future live MCP servers must preserve checkpoint-backed
+tail-truncation detection, export verification, and retention policy
+requirements before live providers are exposed.
+
 Provider-error fixture coverage proves that timeout, TLS verification,
 authentication-required, authentication-failed, authorization-denied,
 connection, protocol, response-validation, rate-limit, unsafe-operation,
@@ -233,6 +238,9 @@ A future live MCP server must:
 - preserve `approval_required` behavior and never auto-approve
 - preserve one-time and session approval resumption semantics
 - preserve audit JSONL redaction and hash-chain verification in mock mode
+- preserve checkpoint-backed tail-truncation detection
+- preserve audit export/import verification
+- preserve audit failure fail-closed behavior for high-risk actions
 - preserve provider-error redaction and retry metadata
 - preserve artifact metadata-only behavior
 - not bypass `MCPSDKAdapter`, `MCPRouter`, registries, or `ControlPlane`

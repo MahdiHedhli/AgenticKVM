@@ -42,6 +42,10 @@
   resumption cases, audit integrity expansion, artifact metadata lifecycle
   checks, golden host result fixtures, and lightweight host result schema
   validation.
+- Add production audit-store requirements, checkpoint-backed tail-truncation
+  detection, export/import verification, retention policy validation, audit
+  failure fail-closed coverage, and host audit conformance fixtures before live
+  MCP server dependency selection.
 - Keep live MCP SDK server and client integration deferred until dependency,
   packaging, host integration, and security questions are settled.
 

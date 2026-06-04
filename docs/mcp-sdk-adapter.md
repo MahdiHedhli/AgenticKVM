@@ -105,6 +105,11 @@ It rejects unknown statuses, missing required fields, raw bytes, exception
 objects, unsafe provider-error shapes, malformed approval shapes, and
 unredacted secret-shaped keys.
 
+Production audit-store readiness is also a dependency for future live server
+work. A real MCP SDK/server adapter must preserve checkpoint-backed
+tail-truncation detection, audit export/import verification, retention policy
+rules, and fail-closed audit failure behavior.
+
 ## Current Import
 
 ```python

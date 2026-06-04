@@ -95,6 +95,11 @@ default.
 Approved resumption remains a normal control-plane request. The host does not
 call providers directly and does not execute during approval submission.
 
+Approval grants are stored only after the approval-granted audit event is
+successfully emitted. If audit persistence fails, approval submission fails
+closed and the grant is not usable. Approved resumption also fails closed when
+required audit emission fails before provider execution.
+
 ## Future In-Band Provider Risks
 
 For future RustDesk, VNC, RDP, MeshCentral, BrowserBridge, or desktop/session
