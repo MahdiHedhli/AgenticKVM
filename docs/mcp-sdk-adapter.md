@@ -38,6 +38,9 @@ The dependency decision for this lane is: no external MCP SDK dependency.
 The internal scaffold is used until package, Python version, security, and live
 host integration questions are settled.
 
+Dependency review requirements are tracked in
+`docs/mcp-sdk-dependency-review.md`.
+
 ## Result Contract
 
 Return the existing MCP result dictionary:
@@ -64,6 +67,8 @@ It exposes local methods for:
 - `list_tools()`
 - `get_tool_schema(tool_name)`
 - `call_tool(request)`
+- `submit_approval_response(response)`
+- `resume_approved_tool(approval_request_id)`
 - `serialize_result(result)`
 - `serialize_error(error)`
 
@@ -74,6 +79,15 @@ live hostnames, live IP addresses, or credential examples.
 
 The host compatibility layer preserves `approval_required` and never
 auto-approves gated actions.
+
+Approval submission and resumption are mock-only fixture flows. An approval
+response creates an exact grant in the runtime approval store. Resumed
+execution still routes through `MCPSDKAdapter`, `MCPRouter`, registries, and
+`ControlPlane`.
+
+The host layer can be created with an explicit local JSONL audit path for tests.
+Audit records are redacted and hash-chained; tampered records must fail
+verification.
 
 ## Current Import
 

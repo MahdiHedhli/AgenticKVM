@@ -35,6 +35,9 @@
 - Add dependency-free mock-only MCP host compatibility layer over the SDK
   adapter, including JSON-safe tool listing, schema output, tool calls,
   approval-required pass-through, and structured error serialization.
+- Add mock-only MCP host approval lifecycle fixtures for explicit approval
+  response submission, one-time/session approval resumption, JSONL audit
+  persistence, hash-chain verification, and safe result serialization.
 - Keep live MCP SDK server and client integration deferred until dependency,
   packaging, host integration, and security questions are settled.
 

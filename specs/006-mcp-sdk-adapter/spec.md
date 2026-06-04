@@ -20,6 +20,8 @@ In scope:
 - dependency-free local host compatibility layer
 - JSON-safe result contract
 - approval-required result behavior
+- mock-only host approval response and resumption behavior
+- host audit persistence behavior
 - no provider bypass rule
 
 Out of scope:
@@ -45,5 +47,10 @@ Out of scope:
 - Host compatibility calls must route through `MCPSDKAdapter`.
 - Host compatibility schemas must be JSON-safe and must not include secrets,
   live targets, live hostnames, or provider bypass details.
+- Host approval responses must bind to session, target, provider, capability,
+  params fingerprint, scope, and expiry.
+- Host approval resumption must still route through `ControlPlane`.
+- Host-compatible audit persistence must use explicit local paths, redact
+  secrets, and preserve hash-chain verification.
 - The current adapter must remain dependency-free until the real SDK decision
   is reviewed.

@@ -92,6 +92,9 @@ invariants such as policy modification, audit disabling, emergency stop
 disabling, target expansion, provider expansion, or raw secret reveal by
 default.
 
+Approved resumption remains a normal control-plane request. The host does not
+call providers directly and does not execute during approval submission.
+
 ## Future In-Band Provider Risks
 
 For future RustDesk, VNC, RDP, MeshCentral, BrowserBridge, or desktop/session

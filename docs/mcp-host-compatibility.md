@@ -32,6 +32,8 @@ The host compatibility layer must not call providers directly.
 - list registered tools
 - get a JSON-safe tool schema
 - call a tool through the mock-only SDK adapter
+- submit an explicit approval response
+- resume a pending approved tool call
 - serialize a structured result
 - serialize a structured error
 
@@ -65,6 +67,15 @@ result = host.call_tool(
 
 This runs entirely in process with the built-in mock configuration. It does not
 start a listener and does not contact any provider over the network.
+
+For audit persistence tests, pass an explicit local JSONL path:
+
+```python
+host = MCPHostCompatibilityLayer.mock_only(audit_path="/tmp/agentickvm-host-audit.jsonl")
+```
+
+Tests use temporary directories. Production audit-store requirements remain
+deferred.
 
 ## Results
 
@@ -107,6 +118,16 @@ Approval responses cannot authorize policy modification, audit disabling,
 emergency stop disabling, raw secret reveal by default, target expansion, or
 provider expansion.
 
+The local methods are:
+
+- `submit_approval_response(response)`
+- `resume_approved_tool(approval_request_id)`
+
+Submitting an approval response only creates a matching approval grant in the
+runtime approval store. It does not execute the action. Resumption calls back
+through the host layer, SDK adapter, MCP router, registries, and
+`ControlPlane`.
+
 ## Audit Persistence
 
 Host-compatible mock flows may use an explicit local JSONL audit path for
@@ -120,6 +141,9 @@ The approval lifecycle must audit:
 - approval consumed
 - provider execution when execution occurs
 - final result
+
+Hash-chain verification is performed with `verify_audit_chain`. Tampered JSONL
+records must fail verification.
 
 ## Schemas
 

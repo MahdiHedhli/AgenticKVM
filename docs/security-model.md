@@ -84,6 +84,11 @@ Host compatibility schemas and results are JSON-safe and secret-redacted.
 `approval_required` is preserved as a first-class result and is never
 auto-approved by the host layer.
 
+The mock-only host approval lifecycle requires explicit approval responses.
+Responses must match the pending request by session, target, provider,
+capability, parameter fingerprint, scope, and expiry. Mismatches, denial, and
+expiry fail closed. Approval resumption still routes through `ControlPlane`.
+
 ## Emergency Stop
 
 Emergency stop must not be disableable by an agent-controlled request. Future
@@ -100,6 +105,11 @@ The local JSONL audit scaffold writes only to an explicitly configured file
 path. Test coverage uses temporary directories only. JSONL records are redacted
 before write and include a simple previous-hash/event-hash chain for
 tamper-evidence.
+
+Host compatibility tests cover JSONL audit persistence for ok, denied,
+approval-required, approval-granted, approval-consumed, provider-executed, and
+provider-error flows. Tampered host audit logs must fail hash-chain
+verification.
 
 Provider errors and provider results normalize into structured envelopes before
 CLI/MCP output. Secret-shaped fields and credential references are redacted.

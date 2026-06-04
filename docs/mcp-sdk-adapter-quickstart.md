@@ -84,6 +84,61 @@ print(result["status"])
 Expected status: `ok`. This is a local compatibility boundary, not a live MCP
 server.
 
+## Mock Approval Resumption
+
+```python
+from agentickvm.mcp_sdk import MCPHostCompatibilityLayer
+
+host = MCPHostCompatibilityLayer.mock_only()
+required = host.call_tool(
+    {
+        "tool_name": "force_restart",
+        "target": "mock-host",
+        "session_id": "approval-demo-session",
+        "requester_id": "host-demo",
+    }
+)
+
+approval = required["approval_request"]
+response = {
+    "request_id": approval["id"],
+    "decision": "granted",
+    "operator_id": "operator-demo",
+    "scope": "one_time",
+    "session_id": approval["session_id"],
+    "target": approval["target"],
+    "provider": approval["provider"],
+    "capability": approval["capability"],
+    "params_fingerprint": approval["params_fingerprint"],
+}
+
+print(host.submit_approval_response(response)["status"])
+print(host.resume_approved_tool(approval["id"])["status"])
+```
+
+Expected statuses: `approval_granted`, then `ok`. The approval response is
+explicit; the host does not auto-approve.
+
+## Mock Audit Persistence
+
+```python
+from agentickvm.mcp_sdk import MCPHostCompatibilityLayer
+
+host = MCPHostCompatibilityLayer.mock_only(
+    audit_path="/tmp/agentickvm-host-demo-audit.jsonl"
+)
+host.call_tool(
+    {
+        "tool_name": "get_power_state",
+        "target": "mock-host",
+        "session_id": "audit-demo-session",
+        "requester_id": "host-demo",
+    }
+)
+```
+
+Tests use temporary audit paths and verify the JSONL hash chain.
+
 ## Run Tests
 
 ```text
@@ -102,3 +157,5 @@ uv run --with pytest --python python3.13 python -m pytest
 - No real MCP SDK server is started.
 - The host compatibility layer does not open a listener and does not
   auto-approve gated actions.
+- Approval resumption is mock-only and still routes through `ControlPlane`.
+- Audit persistence tests use explicit local paths.
