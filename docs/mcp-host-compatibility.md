@@ -80,6 +80,47 @@ Host results preserve the MCP adapter result statuses:
 `approval_required` is a first-class outcome. It must be returned to the caller
 as structured data and must not be treated as implicit approval.
 
+## Approval Lifecycle
+
+When a host call returns `approval_required`, the host compatibility layer must
+preserve approval metadata for an explicit operator or test-fixture response.
+
+The approval response must match the pending action by:
+
+- approval request id
+- session id
+- target id
+- provider id
+- capability id
+- safe parameter fingerprint
+- approval scope
+- expiry time
+
+One-time approvals are consumed by exactly one matching resumed execution.
+Session approvals may be reused only for the exact same session, target,
+provider, capability, and parameter fingerprint.
+
+The host cannot auto-approve. A future live MCP server must surface
+`approval_required` to the caller and wait for an explicit approval response.
+
+Approval responses cannot authorize policy modification, audit disabling,
+emergency stop disabling, raw secret reveal by default, target expansion, or
+provider expansion.
+
+## Audit Persistence
+
+Host-compatible mock flows may use an explicit local JSONL audit path for
+tests. Audit records are hash-chained, redacted, and written only to the
+configured path. Tests use temporary directories only.
+
+The approval lifecycle must audit:
+
+- approval requested
+- approval granted, denied, or expired
+- approval consumed
+- provider execution when execution occurs
+- final result
+
 ## Schemas
 
 Tool schemas are JSON-safe and include:

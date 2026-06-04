@@ -753,3 +753,33 @@
   - real MCP server work requires dependency selection, packaging review,
     host integration review, security review, and confirmation that no live
     provider path is exposed by default
+
+## 2026-06-04T01:54:05Z
+
+- selected maturity level: Maturity 4 host lifecycle hardening with
+  Maturity 2 approval/audit and Maturity 6 safety guardrails
+- selected task: expand mock host/adapter contract fixtures for approval
+  request/response serialization, mock-only approval resumption, local audit
+  persistence, audit hash-chain verification, and result/error serialization
+  before any real MCP SDK/server dependency work
+- why this task is safe: all flows remain local, dependency-free, mock-only,
+  fixture-driven, and routed through `MCPHostCompatibilityLayer`,
+  `MCPSDKAdapter`, `MCPRouter`, registries, and `ControlPlane`; no listener,
+  live provider, credential resolution, network call, hardware operation, or
+  auto-approval path is introduced
+- files expected to change:
+  - `specs/006-mcp-sdk-adapter/contracts/`
+  - `docs/mcp-host-compatibility.md`
+  - `docs/mcp-sdk-adapter.md`
+  - `docs/mcp-sdk-adapter-quickstart.md`
+  - `docs/operator-approval.md`
+  - `docs/security-model.md`
+  - `docs/roadmap.md`
+  - `src/agentickvm/mcp_sdk/`
+  - `tests/fixtures/mcp_host/`
+  - `tests/unit/`
+  - `tests/contract/`
+  - `tests/security/`
+  - `docs/heartbeat-log.md`
+- tests expected to run:
+  - `uv run --with pytest --python python3.13 python -m pytest`

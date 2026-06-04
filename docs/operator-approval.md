@@ -69,6 +69,29 @@ Future live SDK/server adapters must preserve the same behavior: approval is a
 first-class result returned to the caller, not permission to continue
 execution.
 
+## MCP Host Compatibility
+
+The mock-only MCP host compatibility layer models approval response submission
+and approved-action resumption for local tests. It remains dependency-free and
+does not open a live server.
+
+Host-level approval responses must match the original approval request by
+request id, session id, target id, provider id, capability id, parameter
+fingerprint, scope, and expiry. A mismatch fails closed.
+
+One-time approvals are consumed after one matching resumed execution. Session
+approvals may be reused only for the same session, target, provider,
+capability, and parameter fingerprint.
+
+Host approval submission must audit granted, denied, or expired responses.
+Control-plane execution must audit approval consumption and provider execution
+when a resumed action is actually allowed to run.
+
+The host layer cannot auto-approve and cannot use approval to bypass hard
+invariants such as policy modification, audit disabling, emergency stop
+disabling, target expansion, provider expansion, or raw secret reveal by
+default.
+
 ## Future In-Band Provider Risks
 
 For future RustDesk, VNC, RDP, MeshCentral, BrowserBridge, or desktop/session
