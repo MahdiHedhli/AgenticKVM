@@ -89,6 +89,22 @@ The host layer can be created with an explicit local JSONL audit path for tests.
 Audit records are redacted and hash-chained; tampered records must fail
 verification.
 
+The host compatibility suite now includes provider-error lifecycle fixtures,
+approval-resumption/provider-error fixtures, audit lifecycle integrity checks,
+artifact metadata-only checks, golden result fixtures, and lightweight host
+result schema validation. A future real MCP SDK/server adapter must preserve
+these behaviors before it is allowed to expose live provider work.
+
+The result validator is available as:
+
+```python
+from agentickvm.mcp_sdk import validate_host_result
+```
+
+It rejects unknown statuses, missing required fields, raw bytes, exception
+objects, unsafe provider-error shapes, malformed approval shapes, and
+unredacted secret-shaped keys.
+
 ## Current Import
 
 ```python
@@ -113,3 +129,4 @@ result = adapter.call_tool(
 - live provider SDK tests
 - approval transport UI
 - credential resolution
+- production audit-store checkpointing and retention

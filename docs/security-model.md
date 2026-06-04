@@ -109,14 +109,28 @@ tamper-evidence.
 Host compatibility tests cover JSONL audit persistence for ok, denied,
 approval-required, approval-granted, approval-consumed, provider-executed, and
 provider-error flows. Tampered host audit logs must fail hash-chain
-verification.
+verification. Current hash-chain verification detects content tampering,
+middle-event deletion, and event reordering; tail truncation requires external
+checkpointing and remains a production audit-store requirement.
 
 Provider errors and provider results normalize into structured envelopes before
 CLI/MCP output. Secret-shaped fields and credential references are redacted.
+Host provider-error fixtures cover retryable and non-retryable provider errors,
+including timeout, TLS verification, authentication-required,
+authentication-failed, authorization-denied, connection, protocol,
+response-validation, rate-limit, unsafe-operation, mutation-blocked,
+disabled-provider, unsupported-capability, and target/provider mismatch cases.
+Provider errors after approval remain visible as provider errors and do not
+silently reuse consumed one-time approvals.
 
 Screenshot and screen observations are sensitive. The current scaffold records
 metadata only, rejects repo-default artifact paths, redacts raw byte fields in
 audit, and ignores common local screenshot artifact paths.
+
+Host result validation rejects unknown statuses, missing required fields, raw
+bytes, exception objects, malformed approval/provider-error shapes, and
+unredacted sensitive keys. Golden host result fixtures pin stable mock-host
+result shapes for future live MCP server conformance.
 
 Remote desktop streams, screenshots, clipboard contents, file transfer,
 remote command execution, remote access agent changes, and unattended control

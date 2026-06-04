@@ -38,6 +38,10 @@
 - Add mock-only MCP host approval lifecycle fixtures for explicit approval
   response submission, one-time/session approval resumption, JSONL audit
   persistence, hash-chain verification, and safe result serialization.
+- Add mock-only host provider-error lifecycle fixtures, approval/provider-error
+  resumption cases, audit integrity expansion, artifact metadata lifecycle
+  checks, golden host result fixtures, and lightweight host result schema
+  validation.
 - Keep live MCP SDK server and client integration deferred until dependency,
   packaging, host integration, and security questions are settled.
 
@@ -55,6 +59,8 @@
 - Add PiKVM-specific live observe ADR, fake-only transport boundary, fixture
   contracts, config hardening, and screenshot artifact safety checks before any
   live PiKVM client code.
+- Preserve host-level artifact metadata and provider-error conformance before
+  exposing real observe providers through any future MCP server.
 - Keep CI mock-only.
 - Require manual smoke docs and human approval before live testing.
 - Maintain provider taxonomy distinguishing out-of-band providers from future

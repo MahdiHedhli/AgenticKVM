@@ -25,18 +25,84 @@ The current implementation is dependency-free:
 
 A future MCP SDK dependency must be reviewed for:
 
+- candidate package name and exact version
+- maintainer, source repository, and release provenance
+- license compatibility
+- release cadence and security advisory history
+- transitive dependency list
+- supply-chain controls for installation and release
 - Python 3.13 support
 - package stability and release cadence
-- license compatibility
 - dependency tree size and security posture
 - JSON schema/tool-call behavior
 - error serialization behavior
-- stdio/server transport options
+- supported transport modes
+- stdio support
+- socket, HTTP, or streaming server exposure model
+- authentication and authorization model
+- local-only mode
 - testability without live hosts
 - ability to run mock-only by default
 - ability to preserve `approval_required` without auto-approval
 - ability to route through `MCPHostCompatibilityLayer` or an equivalent
   adapter without provider bypass
+- packaging risk for optional dependencies
+- integration risk with current Python packaging
+- operational risk if a listener is exposed
+
+## Candidate Package
+
+- name:
+- version:
+- source:
+- maintainer:
+- license:
+- release cadence:
+- Python versions:
+- transitive dependency count:
+- known security advisories:
+
+## Transport And Exposure Model
+
+- stdio support:
+- socket support:
+- HTTP support:
+- streaming support:
+- default bind address:
+- local-only mode:
+- authentication model:
+- authorization model:
+- logging behavior:
+- error serialization behavior:
+- schema serialization behavior:
+
+## Supply-Chain And Packaging Risk
+
+- package manager strategy:
+- optional dependency strategy:
+- lockfile impact:
+- transitive dependency review:
+- vendored code:
+- native extensions:
+- install-time scripts:
+- update cadence:
+- license risk:
+
+## Security Review Questions
+
+- Can the server run in mock-only mode without credentials?
+- Can CI run all SDK tests without live network access?
+- Can tool calls be forced through `MCPHostCompatibilityLayer` or an equivalent
+  safety adapter?
+- Can `approval_required` be returned without triggering implicit approval?
+- Can provider errors be serialized without leaking raw exception details?
+- Can screenshot and artifact metadata be returned without raw bytes?
+- Can the SDK be configured so real providers are disabled by default?
+- Can credential resolution remain outside the SDK server by default?
+- Can the server run without reading environment secrets?
+- Can the server avoid opening public listeners by default?
+- Can logs and traces avoid secrets, credential refs, screenshots, and raw
+  provider payloads?
 
 ## Required Tests Before Adoption
 
@@ -47,7 +113,13 @@ A future MCP SDK dependency must be reviewed for:
 - approval-required results are preserved
 - approval response submission remains explicit
 - one-time and session approval resumption still match exact scope
+- approval resumption still surfaces provider errors
 - audit JSONL persistence remains hash-chain verifiable
+- audit tampering, middle-event deletion, and event reordering fail verification
+- artifact metadata is emitted without raw screenshot bytes
+- golden host result fixtures still match generated results
+- host result schema validation passes for valid results and rejects unsafe
+  shapes
 - unknown tools and targets fail closed
 - disabled providers fail closed
 - no live provider path is exposed by default

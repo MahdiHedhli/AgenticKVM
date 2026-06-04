@@ -91,6 +91,12 @@ Host results preserve the MCP adapter result statuses:
 `approval_required` is a first-class outcome. It must be returned to the caller
 as structured data and must not be treated as implicit approval.
 
+Host results also have lightweight schema validation through
+`validate_host_result`. A future live MCP server must emit only JSON-safe
+results with known statuses, required fields, structured provider errors,
+structured approval data, and no raw bytes, exception objects, or unredacted
+secret-shaped keys.
+
 ## Approval Lifecycle
 
 When a host call returns `approval_required`, the host compatibility layer must
@@ -143,7 +149,57 @@ The approval lifecycle must audit:
 - final result
 
 Hash-chain verification is performed with `verify_audit_chain`. Tampered JSONL
-records must fail verification.
+records must fail verification. The current helper detects content tampering,
+middle-event deletion, and event reordering. Tail truncation requires an
+external checkpoint and remains a production audit-store requirement.
+
+Provider-error fixture coverage proves that timeout, TLS verification,
+authentication-required, authentication-failed, authorization-denied,
+connection, protocol, response-validation, rate-limit, unsafe-operation,
+mutation-blocked, disabled-provider, unsupported-capability, and target/provider
+mismatch outcomes remain structured, redacted, and auditable.
+
+Approval-resumption fixture coverage proves that provider errors after approval
+remain visible as `provider_error` results. Consumed one-time approvals are not
+silently reused after retryable provider errors, while session approvals remain
+bound to the exact same session, target, provider, capability, and parameter
+fingerprint.
+
+## Artifact Lifecycle
+
+Screenshot and screen artifacts are sensitive. Host fixture coverage requires
+that PiKVM screen observation returns metadata-only artifact information:
+
+- sensitivity label
+- content type
+- byte length
+- storage mode
+- redacted target metadata
+- artifact name that does not include target or provider id
+- `raw_bytes_included: false`
+
+Host results and audit records must not contain raw screenshot bytes, raw image
+fields, or screenshot byte arrays. Tests use synthetic fixtures and temporary
+paths only. The host layer does not write artifact files.
+
+## Golden Fixtures
+
+Golden host result fixtures under `tests/fixtures/mcp_host/golden/` pin stable
+result summaries for:
+
+- ok mock observe
+- ok PiKVM fixture observe
+- denied hard invariant
+- approval required dangerous action
+- approval consumed ok action
+- provider timeout
+- provider authentication required
+- unknown tool validation error
+- unknown target validation error
+
+Dynamic fields such as approval ids and timestamps are normalized. Contract
+fields such as status, tool, capability, target, provider, error code,
+retryability, and artifact metadata presence are exact.
 
 ## Schemas
 
@@ -165,3 +221,25 @@ would allow bypassing policy.
 A future real MCP SDK server adapter must conform to this compatibility layer
 before live provider work is exposed through MCP. That future adapter remains a
 separate decision and must still be mock-only by default.
+
+## Live MCP Server Conformance Checklist
+
+A future live MCP server must:
+
+- pass all host compatibility, approval lifecycle, audit lifecycle,
+  provider-error, artifact lifecycle, golden fixture, and host-result validation
+  tests
+- preserve result shapes and status values
+- preserve `approval_required` behavior and never auto-approve
+- preserve one-time and session approval resumption semantics
+- preserve audit JSONL redaction and hash-chain verification in mock mode
+- preserve provider-error redaction and retry metadata
+- preserve artifact metadata-only behavior
+- not bypass `MCPSDKAdapter`, `MCPRouter`, registries, or `ControlPlane`
+- not instantiate real providers by default
+- not resolve credentials by default
+- not open provider network access in CI
+- support mock-only test mode
+- document its transport mode, such as stdio, socket, or HTTP
+- document its exposure boundary and authentication model
+- receive a security review before adoption

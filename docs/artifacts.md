@@ -47,6 +47,7 @@ Audit may record:
 - redacted target id
 - artifact name
 - artifact root
+- raw-bytes-included flag set to false
 
 Audit must not record:
 
@@ -58,6 +59,17 @@ Audit must not record:
 - cookies
 - bearer values
 - target-sensitive names in artifact names
+
+## Host Compatibility
+
+Host compatibility tests exercise PiKVM fixture screen observation through the
+mock-only MCP host path. The host result and JSONL audit records must expose
+metadata only. They must not include raw screenshot bytes, raw image fields, or
+screenshot byte arrays.
+
+The host layer does not write artifact files. Artifact path policy tests use
+temporary directories and assert that artifact roots do not default into the
+tracked repository.
 
 ## Cleanup
 

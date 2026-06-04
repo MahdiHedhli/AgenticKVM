@@ -105,3 +105,35 @@ can be used with live provider work. The real adapter must prove that it:
 - does not resolve credentials by default
 - does not expose raw secrets
 - does not add live-network tests to CI
+
+## Live Server Conformance Checklist
+
+Before a real MCP SDK/server adapter is accepted, it must pass the mock host
+compatibility suite and preserve these behaviors exactly:
+
+- tool listing remains JSON-safe and contains no live targets or credentials
+- tool schemas remain JSON-safe and contain no live hostnames, IPs, credentials,
+  tokens, cookies, or provider bypass instructions
+- every tool call routes through `MCPSDKAdapter`, `MCPRouter`, provider
+  registry, target registry, capability registry, and `ControlPlane`
+- no host path calls a provider directly
+- unknown tools, unknown targets, disabled providers, disabled targets, and
+  provider/target mismatches fail closed
+- `approval_required` remains a first-class result
+- the host never auto-approves
+- approval responses must match request id, session, target, provider,
+  capability, parameter fingerprint, scope, and expiry
+- one-time and session approval semantics remain unchanged
+- approval resumption still routes through `ControlPlane`
+- provider errors remain structured, redacted, and retry metadata is preserved
+- approval resumption does not hide provider errors
+- audit persistence remains redacted and hash-chain verifiable
+- audit tampering, middle-event deletion, and reordering are detected by the
+  current verification helper
+- artifact results expose metadata only and never raw bytes
+- golden host result fixtures still match generated host output
+- host result schema validation rejects unsafe shapes, raw bytes, exception
+  objects, unknown statuses, and unredacted sensitive keys
+- mock-only mode remains available and is the default in CI
+- live providers, live network access, and credential resolution remain disabled
+  unless explicitly approved by a later readiness gate
