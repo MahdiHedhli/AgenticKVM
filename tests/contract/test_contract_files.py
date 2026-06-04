@@ -63,3 +63,23 @@ def test_provider_taxonomy_distinguishes_oob_from_inband_remote_sessions() -> No
         assert provider in taxonomy
     assert "must not be described as out-of-band" in taxonomy
     assert "roadmap-only" in taxonomy
+
+
+def test_inband_remote_session_provider_spec_is_docs_only_and_gated() -> None:
+    spec_dir = ROOT / "specs" / "007-inband-remote-session-providers"
+
+    for filename in ("spec.md", "plan.md", "research.md", "tasks.md"):
+        assert (spec_dir / filename).exists()
+    boundary = (spec_dir / "contracts" / "inband-provider-boundary.md").read_text()
+
+    for provider in ("RustDesk", "VNC", "RDP", "MeshCentral"):
+        assert provider in (spec_dir / "spec.md").read_text()
+    for forbidden in (
+        "file transfer",
+        "clipboard write",
+        "credential reveal",
+        "remote command execution",
+        "agent installation",
+    ):
+        assert forbidden in boundary
+    assert "CI must use fake transports" in boundary
