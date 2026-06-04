@@ -14,6 +14,45 @@
 - tests expected to run:
   - `uv run --with pytest --python python3.13 python -m pytest`
 
+### Result
+
+- timestamp: 2026-06-04T02:58:10Z
+- commits:
+  - `3a8c973` docs: add production audit-store spec
+  - `55c6f8a` feat: add audit checkpoint model
+  - `3a5d2ed` feat: add audit export verification helpers
+  - `733998a` feat: add audit retention policy model
+  - `3cc9f7f` test: add audit failure behavior coverage
+  - `2e17c75` test: add MCP host audit conformance fixtures
+  - `1dc7b3b` docs: document production audit-store requirements
+- files changed:
+  - production audit-store spec package and contracts
+  - checkpoint model for tail-truncation detection
+  - audit export/import verification helpers
+  - retention/rotation validation model
+  - audit failure behavior tests and approval-grant ordering hardening
+  - MCP host audit conformance fixtures
+  - audit-store, security, MCP host, SDK adapter, approval, artifact, roadmap,
+    and MCP dependency review docs
+- tests run:
+  - `uv run --with pytest --python python3.13 python -m pytest`
+- result: 480 passed
+- risks found:
+  - no production audit backend exists yet
+  - checkpoint signing and external checkpoint storage remain deferred
+  - retention/rotation model validates policy only; it does not rotate or delete
+    logs
+  - live MCP server, MCP SDK dependency, live providers, credential resolution,
+    and live network remain deferred
+- next recommended task: perform the docs-only MCP SDK dependency/security
+  review against the host conformance and audit-store requirements, or add a
+  production audit backend ADR before selecting the live SDK/server dependency
+- blockers:
+  - live MCP server work still requires SDK selection, packaging review,
+    transport/exposure decision, approval transport design, credential-handling
+    decision, production audit-store backend decision, and proof that mock-only
+    CI cannot reach live providers
+
 ## 2026-06-04T02:32:55Z
 
 ### Result
@@ -57,6 +96,37 @@
     security review, transport/exposure decision, approval transport design,
     credential-handling decision, and proof that mock-only CI cannot reach live
     providers
+
+## 2026-06-04T02:45:03Z
+
+- selected maturity level: Maturity 2 audit hardening with Maturity 4 host
+  conformance and Maturity 6 real-provider-readiness guardrails
+- selected task: define and scaffold production audit-store requirements,
+  checkpointing, tail-truncation detection, audit export/import verification,
+  retention/rotation policy, audit failure behavior, and host audit conformance
+  fixtures before selecting any live MCP SDK/server dependency
+- why this task is safe: all work remains repo-local, mock-only, and
+  temp-path based; the lane adds docs, contracts, local checkpoint/export
+  helpers, and tests over existing JSONL audit fixtures; no live MCP server,
+  SDK dependency, live provider, network call, hardware operation, credential
+  resolution, or secret access is introduced
+- files expected to change:
+  - `specs/008-production-audit-store/`
+  - `src/agentickvm/control_plane/`
+  - `tests/unit/`
+  - `tests/contract/`
+  - `tests/security/`
+  - `tests/fixtures/mcp_host/audit/`
+  - `docs/audit-store.md`
+  - `docs/security-model.md`
+  - `docs/mcp-host-compatibility.md`
+  - `docs/operator-approval.md`
+  - `docs/artifacts.md`
+  - `docs/roadmap.md`
+  - `docs/mcp-sdk-dependency-review.md`
+  - `docs/heartbeat-log.md`
+- tests expected to run:
+  - `uv run --with pytest --python python3.13 python -m pytest`
 
 ## 2026-06-04T02:17:41Z
 
