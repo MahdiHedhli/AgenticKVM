@@ -6,6 +6,7 @@ import pytest
 from agentickvm.config import ConfigRuntime, mock_only_config
 from agentickvm.control_plane import (
     ApprovalStore,
+    AuditSink,
     ControlMode,
     DEFAULT_CAPABILITY_REGISTRY,
     InMemoryAuditSink,
@@ -93,7 +94,10 @@ class FixtureErrorProvider(Provider):
         )
 
 
-def _runtime(provider: FixtureErrorProvider | None = None) -> ConfigRuntime:
+def _runtime(
+    provider: FixtureErrorProvider | None = None,
+    audit_sink: AuditSink | None = None,
+) -> ConfigRuntime:
     error_provider = provider or FixtureErrorProvider()
     provider_registry = ProviderRegistry(
         [
@@ -128,7 +132,7 @@ def _runtime(provider: FixtureErrorProvider | None = None) -> ConfigRuntime:
         provider_registry=provider_registry,
         target_registry=target_registry,
         policy=mode_preset(ControlMode.SUPERVISED),
-        audit_sink=InMemoryAuditSink(),
+        audit_sink=audit_sink or InMemoryAuditSink(),
         approval_store=ApprovalStore(),
     )
 
