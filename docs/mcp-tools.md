@@ -7,6 +7,8 @@ to `ControlPlane`.
 
 No live MCP SDK server is implemented yet. A dependency-free mock-only
 `agentickvm.mcp_sdk` adapter scaffold exists and delegates to this same router.
+A dependency-free mock-only host compatibility layer exists for local
+host-style testing. It wraps the SDK adapter and is not a live MCP server.
 
 ## Authority Boundary
 
@@ -36,6 +38,12 @@ The required pattern is:
 
 ```text
 MCP tool -> registries -> capability request -> ControlPlane -> policy/approval/audit -> provider
+```
+
+For host-style calls, the required pattern is:
+
+```text
+host compatibility -> MCPSDKAdapter -> MCPRouter -> registries -> ControlPlane -> policy/approval/audit -> provider
 ```
 
 ## Tool Registry
@@ -99,11 +107,17 @@ approval.
 - CLI/MCP equivalent requests are covered by a status consistency matrix.
 - The MCP SDK adapter is mock-only by default and returns the same structured
   statuses through `MCPRouter`.
+- The MCP host compatibility layer is mock-only, dependency-free, local, and
+  routes through `MCPSDKAdapter`; it does not open a listener or call providers
+  directly.
+- Host tool schemas are JSON-safe and contain no secrets, live hostnames, live
+  IP addresses, or credential examples.
 
 ## Deferred Work
 
 - Live MCP SDK server adapter.
 - MCP client integration tests.
+- Live MCP host integration tests.
 - Live provider MCP tests.
 - Live PiKVM transport and live PiKVM MCP tests.
 - Live operator approval transport.

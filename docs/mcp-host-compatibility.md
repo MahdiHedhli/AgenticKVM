@@ -45,6 +45,27 @@ The layer does not:
 - read environment secrets
 - auto-approve gated actions
 
+## Mock-Only Usage
+
+```python
+from agentickvm.mcp_sdk import MCPHostCompatibilityLayer
+
+host = MCPHostCompatibilityLayer.mock_only()
+tools = host.list_tools()
+schema = host.get_tool_schema("get_power_state")
+result = host.call_tool(
+    {
+        "tool_name": "get_power_state",
+        "target": "mock-host",
+        "session_id": "local-host-session",
+        "requester_id": "local-host",
+    }
+)
+```
+
+This runs entirely in process with the built-in mock configuration. It does not
+start a listener and does not contact any provider over the network.
+
 ## Results
 
 Host results preserve the MCP adapter result statuses:

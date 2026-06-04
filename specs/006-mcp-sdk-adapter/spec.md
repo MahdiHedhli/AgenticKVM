@@ -17,6 +17,7 @@ In scope:
 - SDK adapter boundary
 - mock-only first adapter plan
 - dependency-free internal adapter scaffold
+- dependency-free local host compatibility layer
 - JSON-safe result contract
 - approval-required result behavior
 - no provider bypass rule
@@ -41,5 +42,8 @@ Out of scope:
 - Unknown targets fail closed.
 - Structured `approval_required` results remain first-class.
 - Results must be JSON-safe and secret-redacted.
+- Host compatibility calls must route through `MCPSDKAdapter`.
+- Host compatibility schemas must be JSON-safe and must not include secrets,
+  live targets, live hostnames, or provider bypass details.
 - The current adapter must remain dependency-free until the real SDK decision
   is reviewed.

@@ -11,6 +11,9 @@ approval, scope, provider contracts, audit, and tests.
   capability requests.
 - The mock-only MCP SDK adapter is untrusted interface input translated into
   `MCPToolRequest`; it is not an authority boundary.
+- The mock-only MCP host compatibility layer is untrusted host-style input
+  translated through `MCPSDKAdapter`; it is local only and is not a live server
+  or authority boundary.
 - Policy is the authority boundary.
 - Providers are execution adapters, not trust anchors.
 - Provider and target registries are validation gates, not permission grants.
@@ -72,9 +75,14 @@ Transport security policy defaults to TLS verification enabled, no redirects,
 GET-only Redfish first slice, observe-only PiKVM first slice, bounded response
 size, and no retry for unsafe or mutating capabilities.
 
-The MCP SDK adapter scaffold does not open a server, listen on a port, import a
-live SDK, resolve credentials, or contact live providers. It uses mock config
-by default and fixture config only when explicitly supplied.
+The MCP SDK adapter scaffold and host compatibility layer do not open a server,
+listen on a port, import a live SDK, resolve credentials, or contact live
+providers. They use mock config by default and fixture config only when
+explicitly supplied.
+
+Host compatibility schemas and results are JSON-safe and secret-redacted.
+`approval_required` is preserved as a first-class result and is never
+auto-approved by the host layer.
 
 ## Emergency Stop
 

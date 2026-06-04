@@ -61,6 +61,29 @@ print(result["status"])
 
 Expected status: `ok`. This is synthetic fixture output, not live PiKVM output.
 
+## Mock Host Compatibility Example
+
+```python
+from agentickvm.mcp_sdk import MCPHostCompatibilityLayer
+
+host = MCPHostCompatibilityLayer.mock_only()
+print(host.list_tools())
+print(host.get_tool_schema("get_power_state"))
+
+result = host.call_tool(
+    {
+        "tool_name": "get_power_state",
+        "target": "mock-host",
+        "session_id": "host-demo-session",
+        "requester_id": "host-demo",
+    }
+)
+print(result["status"])
+```
+
+Expected status: `ok`. This is a local compatibility boundary, not a live MCP
+server.
+
 ## Run Tests
 
 ```text
@@ -77,3 +100,5 @@ uv run --with pytest --python python3.13 python -m pytest
 - Credential references are not resolved.
 - Live providers remain deferred.
 - No real MCP SDK server is started.
+- The host compatibility layer does not open a listener and does not
+  auto-approve gated actions.

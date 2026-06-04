@@ -32,6 +32,9 @@
 - Add contract tests for tool-to-control-plane routing.
 - Add CLI/MCP consistency matrix for mock-target actions.
 - Add dependency-free mock-only MCP SDK adapter scaffold over `MCPRouter`.
+- Add dependency-free mock-only MCP host compatibility layer over the SDK
+  adapter, including JSON-safe tool listing, schema output, tool calls,
+  approval-required pass-through, and structured error serialization.
 - Keep live MCP SDK server and client integration deferred until dependency,
   packaging, host integration, and security questions are settled.
 

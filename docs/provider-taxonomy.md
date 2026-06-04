@@ -85,6 +85,16 @@ All provider categories must follow the same AgenticKVM control model:
 No provider category may bypass policy, approval, scope, audit, redaction, or
 hard invariants.
 
+If a provider category is exposed through a future MCP host, it must follow the
+same host compatibility path:
+
+```text
+MCP host compatibility -> MCPSDKAdapter -> MCPRouter -> registries -> ControlPlane
+```
+
+The host layer is not a provider execution path. It must not call RustDesk,
+VNC, RDP, MeshCentral, PiKVM, Redfish, or any other provider directly.
+
 ## In-Band Remote Session Risks
 
 For RustDesk, VNC, RDP, and MeshCentral:
