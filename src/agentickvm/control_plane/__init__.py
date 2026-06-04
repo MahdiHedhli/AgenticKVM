@@ -158,6 +158,11 @@ from agentickvm.control_plane.audit_export import (  # noqa: E402
     export_audit_log,
     verify_audit_export,
 )
+from agentickvm.control_plane.audit_retention import (  # noqa: E402
+    AuditRetentionPolicy,
+    AuditRetentionPolicyError,
+    AuditRotationDecision,
+)
 from agentickvm.control_plane.engine import (  # noqa: E402
     CapabilityRequest,
     ControlPlane,
@@ -182,6 +187,9 @@ __all__ = [
     "AuditCheckpointVerification",
     "AuditExportError",
     "AuditExportVerification",
+    "AuditRetentionPolicy",
+    "AuditRetentionPolicyError",
+    "AuditRotationDecision",
     "AuditSink",
     "CAPABILITY_FAMILIES",
     "CONTROL_MODES",
