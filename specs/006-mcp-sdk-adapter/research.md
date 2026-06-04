@@ -8,7 +8,8 @@ adapters, instantiate providers directly, or evaluate policy.
 
 ## Dependency Decision
 
-The SDK dependency is not selected yet. Before adding it, verify:
+The SDK dependency is not selected yet. The current implementation uses a
+dependency-free internal scaffold. Before adding a real SDK package, verify:
 
 - Python 3.13 support
 - package stability
@@ -33,3 +34,12 @@ requires a wrapper. This preserves:
 
 First adapter tests should be local, mock-only, and run without credentials or
 network. Live provider tests remain deferred.
+
+## Current Implementation Notes
+
+- `src/agentickvm/mcp_sdk/adapter.py` wraps `MCPRouter`.
+- `src/agentickvm/mcp_sdk/models.py` defines JSON-like tool call input.
+- The adapter uses mock-only config by default.
+- Explicit fixture configs may be used for offline PiKVM/Redfish tests.
+- No listener, SDK server, network call, credential resolution, or provider
+  bypass exists.

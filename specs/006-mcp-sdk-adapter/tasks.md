@@ -1,8 +1,11 @@
 # Tasks: MCP SDK Adapter
 
 - [x] Write SDK adapter research spec.
-- [ ] Decide MCP SDK dependency.
-- [ ] Add mock-only adapter scaffold.
-- [ ] Add SDK request/response contract tests.
-- [ ] Add manual SDK test plan.
-- [ ] Add live provider prohibition tests.
+- [x] Decide MCP SDK dependency.
+- [x] Add mock-only adapter scaffold.
+- [x] Add SDK request/response contract tests.
+- [x] Add manual SDK test plan.
+- [x] Add live provider prohibition tests.
+- [ ] Select real MCP SDK dependency, if needed, after packaging and security
+  review.
+- [ ] Add live MCP host integration tests without live providers.

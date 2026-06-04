@@ -4,7 +4,7 @@
 
 - Evaluate MCP SDK dependency.
 - Confirm supported Python version and packaging impact.
-- Keep the decision docs-only until dependency risk is understood.
+- Decision for current lane: dependency-free internal scaffold first.
 
 ## Phase 2: Mock-Only Adapter
 
@@ -12,6 +12,7 @@
 - Route through `MCPRouter`.
 - Return `MCPToolResult.to_dict()`.
 - Use built-in mock config by default.
+- Allow explicit fixture configs for offline tests only.
 
 ## Phase 3: Contract Tests
 
@@ -19,6 +20,8 @@
 - Mock observe succeeds.
 - Dangerous action returns approval-required or denied.
 - Provider calls occur only through `ControlPlane`.
+- Adapter does not import or call providers directly.
+- Adapter does not start a live server or read credentials.
 
 ## Deferred
 

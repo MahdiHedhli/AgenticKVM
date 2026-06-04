@@ -2,7 +2,8 @@
 
 ## Status
 
-Research and design draft. No live MCP SDK server is implemented in this spec.
+Mock-only internal adapter scaffold implemented. No live MCP SDK server is
+implemented in this spec.
 
 ## Goal
 
@@ -15,6 +16,7 @@ In scope:
 
 - SDK adapter boundary
 - mock-only first adapter plan
+- dependency-free internal adapter scaffold
 - JSON-safe result contract
 - approval-required result behavior
 - no provider bypass rule
@@ -39,3 +41,5 @@ Out of scope:
 - Unknown targets fail closed.
 - Structured `approval_required` results remain first-class.
 - Results must be JSON-safe and secret-redacted.
+- The current adapter must remain dependency-free until the real SDK decision
+  is reviewed.
