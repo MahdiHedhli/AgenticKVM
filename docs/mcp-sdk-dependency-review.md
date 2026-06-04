@@ -10,6 +10,24 @@ Before AgenticKVM adopts a real MCP SDK or implements a live MCP server, the
 dependency and host integration model must be reviewed against the mock-only
 host compatibility contract.
 
+This document is a review framework, not a dependency decision. Candidate facts
+must be sourced from primary project, package registry, specification, or
+security documentation. If facts cannot be verified, mark them `TODO` and do
+not select the dependency.
+
+## Evidence Sources Consulted
+
+- Official MCP SDK list: https://modelcontextprotocol.io/docs/sdk
+- Official Python SDK repository:
+  https://github.com/modelcontextprotocol/python-sdk
+- PyPI package page for `mcp`: https://pypi.org/project/mcp/
+- MCP transport specification:
+  https://modelcontextprotocol.io/specification/2025-03-26/basic/transports
+- MCP Python SDK testing docs:
+  https://py.sdk.modelcontextprotocol.io/testing/
+- MCP security best practices:
+  https://modelcontextprotocol.io/docs/tutorials/security/security_best_practices
+
 ## Current Boundary
 
 The current implementation is dependency-free:
@@ -56,6 +74,47 @@ A future MCP SDK dependency must be reviewed for:
   handling
 - ability to avoid logging raw tool arguments, secrets, credential refs,
   screenshots, or raw provider payloads
+
+## AgenticKVM Scoring Rubric
+
+Each candidate must be scored before trial:
+
+- `pass`: satisfies the requirement with primary-source evidence or local
+  mock-only validation
+- `conditional`: appears viable but requires an adapter constraint, optional
+  extra, local-only mode, or additional tests
+- `fail`: conflicts with the constitution, control-plane flow, audit
+  requirements, provider registry, or CI safety
+- `unknown`: evidence is missing; candidate cannot be selected
+
+Any `fail` on authority routing, audit, approval, provider bypass, secret
+handling, or CI isolation rejects the candidate. Any `unknown` in those areas
+holds the candidate.
+
+## AgenticKVM Non-Negotiables
+
+- MCP SDK/server is not an authority boundary.
+- Tool calls must enter the existing host compatibility path or an equivalent
+  adapter that preserves the same contract.
+- The SDK/server must not call providers directly.
+- The SDK/server must not bypass `MCPRouter`, registries, or `ControlPlane`.
+- The SDK/server must not auto-approve.
+- The SDK/server must not instantiate real providers by default.
+- The SDK/server must not resolve credentials by default.
+- The SDK/server must not expose network listeners by default.
+- The SDK/server must support mock-only tests.
+- The SDK/server must preserve approval, audit, provider-error, artifact, and
+  result schema behavior.
+
+## Current Project Constraints
+
+- `pyproject.toml` has no runtime dependencies beyond the build backend.
+- `agentickvm` currently supports Python `>=3.11`.
+- Tests run through `uv run --with pytest --python python3.13 python -m pytest`.
+- The current MCP SDK adapter and host compatibility layer are dependency-free.
+- `uv.lock` exists, but this lane must not add or update dependencies.
+- Live MCP server, live providers, credential resolution, and live network
+  behavior remain unimplemented.
 
 ## Candidate Package
 
@@ -143,6 +202,29 @@ A future MCP SDK dependency must be reviewed for:
 - no live provider path is exposed by default
 - no credentials are required in CI
 
+## Live Server Trial Requirements
+
+Before a dependency trial branch may be opened:
+
+- dependency review framework completed
+- candidate matrix completed
+- live MCP server boundary ADR accepted or updated
+- live server acceptance gate reviewed
+- production audit-store requirements reviewed
+- packaging and supply-chain review completed
+- mock-only adapter plan written
+- rollback plan written
+
+Before dependency adoption:
+
+- dependency is pinned or version strategy is documented
+- all host conformance fixtures pass through the SDK-backed adapter
+- audit checkpoint/export tests pass through the SDK-backed adapter
+- dependency logs are reviewed for raw arguments, secrets, screenshots, and
+  provider payloads
+- CI remains mock-only and cannot reach live providers
+- live server manual smoke docs are updated
+
 ## Open Review Items
 
 - exact SDK package name and version
@@ -157,3 +239,8 @@ A future MCP SDK dependency must be reviewed for:
 Do not add a live MCP SDK/server dependency until the mock-only compatibility
 contract, approval lifecycle, audit persistence, and provider bypass tests are
 preserved by the real adapter.
+
+Current docs-only outcome: the official `mcp` Python SDK is a candidate for a
+future trial because it is the official Python SDK, but it is not selected or
+adopted. Adoption remains blocked on the live-server acceptance gate,
+packaging/supply-chain review, and a mock-only adapter proof.
