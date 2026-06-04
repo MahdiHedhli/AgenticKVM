@@ -21,8 +21,14 @@ from agentickvm.mcp_sdk.host_models import (
     HostToolSchema,
 )
 from agentickvm.mcp_sdk.models import MCPSDKToolCall
+from agentickvm.mcp_sdk.result_validation import (
+    HOST_COMPATIBILITY_STATUSES,
+    HostResultValidationError,
+    validate_host_result,
+)
 
 __all__ = [
+    "HOST_COMPATIBILITY_STATUSES",
     "HOST_RESULT_STATUSES",
     "HostApprovalDecision",
     "HostApprovalRequest",
@@ -39,5 +45,7 @@ __all__ = [
     "HostToolDescriptor",
     "HostToolResult",
     "HostToolSchema",
+    "HostResultValidationError",
     "approval_fingerprint",
+    "validate_host_result",
 ]
