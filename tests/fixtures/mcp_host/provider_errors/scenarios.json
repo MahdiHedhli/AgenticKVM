@@ -1,0 +1,98 @@
+[
+  {
+    "name": "provider timeout",
+    "error_name": "provider_timeout",
+    "expected_error_code": "provider_timeout",
+    "expected_status": "provider_error",
+    "expected_retryable": true,
+    "expected_approval_could_resolve": false
+  },
+  {
+    "name": "provider TLS verification failure",
+    "error_name": "provider_tls_verification",
+    "expected_error_code": "provider_tls_verification",
+    "expected_status": "provider_error",
+    "expected_retryable": false,
+    "expected_approval_could_resolve": false
+  },
+  {
+    "name": "provider authentication required",
+    "error_name": "provider_authentication_required",
+    "expected_error_code": "provider_authentication_required",
+    "expected_status": "provider_error",
+    "expected_retryable": false,
+    "expected_approval_could_resolve": true
+  },
+  {
+    "name": "provider authentication failed",
+    "error_name": "provider_authentication_failed",
+    "expected_error_code": "provider_authentication_failed",
+    "expected_status": "provider_error",
+    "expected_retryable": false,
+    "expected_approval_could_resolve": true
+  },
+  {
+    "name": "provider authorization denied",
+    "error_name": "provider_authorization",
+    "expected_error_code": "provider_authorization",
+    "expected_status": "provider_error",
+    "expected_retryable": false,
+    "expected_approval_could_resolve": true
+  },
+  {
+    "name": "provider connection error",
+    "error_name": "provider_connection",
+    "expected_error_code": "provider_connection",
+    "expected_status": "provider_error",
+    "expected_retryable": true,
+    "expected_approval_could_resolve": false
+  },
+  {
+    "name": "provider protocol error",
+    "error_name": "provider_protocol",
+    "expected_error_code": "provider_protocol",
+    "expected_status": "provider_error",
+    "expected_retryable": false,
+    "expected_approval_could_resolve": false
+  },
+  {
+    "name": "provider response validation error",
+    "error_name": "provider_response_validation",
+    "expected_error_code": "provider_response_validation",
+    "expected_status": "provider_error",
+    "expected_retryable": false,
+    "expected_approval_could_resolve": false
+  },
+  {
+    "name": "provider rate limited",
+    "error_name": "provider_rate_limited",
+    "expected_error_code": "provider_rate_limited",
+    "expected_status": "provider_error",
+    "expected_retryable": true,
+    "expected_approval_could_resolve": false
+  },
+  {
+    "name": "provider unsafe operation",
+    "error_name": "provider_unsafe_operation",
+    "expected_error_code": "provider_unsafe_operation",
+    "expected_status": "provider_error",
+    "expected_retryable": false,
+    "expected_approval_could_resolve": false
+  },
+  {
+    "name": "provider mutation blocked",
+    "error_name": "provider_mutation_blocked",
+    "expected_error_code": "provider_mutation_blocked",
+    "expected_status": "provider_error",
+    "expected_retryable": false,
+    "expected_approval_could_resolve": false
+  },
+  {
+    "name": "unsupported capability",
+    "error_name": "unsupported_capability",
+    "expected_error_code": "unsupported_capability",
+    "expected_status": "provider_error",
+    "expected_retryable": false,
+    "expected_approval_could_resolve": false
+  }
+]
