@@ -1,6 +1,15 @@
 """Dependency-free mock-only MCP SDK adapter scaffold."""
 
 from agentickvm.mcp_sdk.adapter import MCPSDKAdapter
+from agentickvm.mcp_sdk.approval_models import (
+    HostApprovalDecision,
+    HostApprovalRequest,
+    HostApprovalResponse,
+    HostApprovalResult,
+    HostApprovalResultStatus,
+    HostApprovalScope,
+    approval_fingerprint,
+)
 from agentickvm.mcp_sdk.host import MCPHostCompatibilityLayer
 from agentickvm.mcp_sdk.host_models import (
     HOST_RESULT_STATUSES,
@@ -15,6 +24,12 @@ from agentickvm.mcp_sdk.models import MCPSDKToolCall
 
 __all__ = [
     "HOST_RESULT_STATUSES",
+    "HostApprovalDecision",
+    "HostApprovalRequest",
+    "HostApprovalResponse",
+    "HostApprovalResult",
+    "HostApprovalResultStatus",
+    "HostApprovalScope",
     "MCPHostCompatibilityLayer",
     "MCPSDKAdapter",
     "MCPSDKToolCall",
@@ -24,4 +39,5 @@ __all__ = [
     "HostToolDescriptor",
     "HostToolResult",
     "HostToolSchema",
+    "approval_fingerprint",
 ]
