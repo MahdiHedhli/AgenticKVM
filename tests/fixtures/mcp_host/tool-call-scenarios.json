@@ -1,0 +1,92 @@
+[
+  {
+    "name": "observe mock target ok",
+    "host": "mock",
+    "request": {
+      "tool_name": "get_power_state",
+      "target": "mock-host",
+      "session_id": "fixture-session",
+      "requester_id": "fixture-host"
+    },
+    "expected_status": "ok"
+  },
+  {
+    "name": "observe PiKVM fixture target ok",
+    "host": "pikvm_fixture",
+    "request": {
+      "tool_name": "observe_screen",
+      "target": "pikvm-fixture-target",
+      "provider": "pikvm-fixture",
+      "session_id": "fixture-session",
+      "requester_id": "fixture-host"
+    },
+    "expected_status": "ok"
+  },
+  {
+    "name": "dangerous mock action approval required",
+    "host": "mock",
+    "request": {
+      "tool_name": "force_restart",
+      "target": "mock-host",
+      "session_id": "fixture-session",
+      "requester_id": "fixture-host"
+    },
+    "expected_status": "approval_required"
+  },
+  {
+    "name": "unknown tool validation error",
+    "host": "mock",
+    "request": {
+      "tool_name": "unknown_tool",
+      "target": "mock-host",
+      "session_id": "fixture-session",
+      "requester_id": "fixture-host"
+    },
+    "expected_status": "validation_error"
+  },
+  {
+    "name": "unknown target validation error",
+    "host": "mock",
+    "request": {
+      "tool_name": "get_power_state",
+      "target": "missing-target",
+      "session_id": "fixture-session",
+      "requester_id": "fixture-host"
+    },
+    "expected_status": "validation_error"
+  },
+  {
+    "name": "raw secret reveal denied",
+    "host": "mock",
+    "request": {
+      "tool_name": "reveal_secret",
+      "target": "mock-host",
+      "session_id": "fixture-session",
+      "requester_id": "fixture-host"
+    },
+    "expected_status": "denied"
+  },
+  {
+    "name": "policy modification denied",
+    "host": "mock",
+    "request": {
+      "tool_name": "modify_policy",
+      "target": "mock-host",
+      "session_id": "fixture-session",
+      "requester_id": "fixture-host"
+    },
+    "expected_status": "denied"
+  },
+  {
+    "name": "PiKVM unsupported observe capability provider error",
+    "host": "pikvm_fixture",
+    "request": {
+      "tool_name": "get_sensors",
+      "target": "pikvm-fixture-target",
+      "provider": "pikvm-fixture",
+      "session_id": "fixture-session",
+      "requester_id": "fixture-host"
+    },
+    "expected_status": "provider_error"
+  }
+]

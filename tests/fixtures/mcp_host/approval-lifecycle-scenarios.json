@@ -1,0 +1,69 @@
+[
+  {
+    "name": "approval grant consumes and resumes action",
+    "request": {
+      "tool_name": "force_restart",
+      "target": "mock-host",
+      "session_id": "fixture-approval-session",
+      "requester_id": "fixture-host",
+      "params": {
+        "reason": "fixture one time"
+      }
+    },
+    "decision": "granted",
+    "scope": "one_time",
+    "expected_submit_status": "approval_granted",
+    "expected_resume_status": "ok",
+    "expected_second_resume_status": "approval_required"
+  },
+  {
+    "name": "approval denied blocks action",
+    "request": {
+      "tool_name": "force_restart",
+      "target": "mock-host",
+      "session_id": "fixture-approval-session",
+      "requester_id": "fixture-host",
+      "params": {
+        "reason": "fixture denial"
+      }
+    },
+    "decision": "denied",
+    "scope": "one_time",
+    "expected_submit_status": "approval_denied",
+    "expected_resume_status": "validation_error"
+  },
+  {
+    "name": "approval target mismatch blocks action",
+    "request": {
+      "tool_name": "force_restart",
+      "target": "mock-host",
+      "session_id": "fixture-approval-session",
+      "requester_id": "fixture-host",
+      "params": {
+        "reason": "fixture mismatch"
+      }
+    },
+    "decision": "granted",
+    "scope": "one_time",
+    "override_target": "other-target",
+    "expected_submit_status": "validation_error",
+    "expected_resume_status": "validation_error"
+  },
+  {
+    "name": "session approval can resume repeatedly",
+    "request": {
+      "tool_name": "force_restart",
+      "target": "mock-host",
+      "session_id": "fixture-approval-session",
+      "requester_id": "fixture-host",
+      "params": {
+        "reason": "fixture session"
+      }
+    },
+    "decision": "granted",
+    "scope": "session",
+    "expected_submit_status": "approval_granted",
+    "expected_resume_status": "ok",
+    "expected_second_resume_status": "ok"
+  }
+]
