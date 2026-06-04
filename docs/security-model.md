@@ -143,6 +143,11 @@ execution does not proceed when required audit emission fails, approval grants
 are stored only after approval-granted audit emission succeeds, and resumption
 does not bypass audit failure.
 
+Any future live MCP SDK/server adapter must preserve these audit-store gates.
+It must not swallow audit errors, downgrade audit failures into generic success
+or provider errors, log raw tool arguments as a substitute for audit, or expose
+live providers before mock-only checkpoint/export/failure conformance passes.
+
 Remote desktop streams, screenshots, clipboard contents, file transfer,
 remote command execution, remote access agent changes, and unattended control
 are high-risk in-band provider behaviors. They are roadmap-only and must require

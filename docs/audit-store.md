@@ -112,6 +112,25 @@ Host audit conformance fixtures cover:
 Future live MCP servers must pass these fixtures before exposing live provider
 work.
 
+## MCP SDK Dependency Gate
+
+A future live MCP SDK/server dependency is acceptable only if an SDK-backed
+adapter preserves the current audit behavior:
+
+- audit writes remain explicit and redacted
+- audit failure remains structured and fail-closed for high-risk actions
+- approval lifecycle events are emitted before approval grants are stored or
+  consumed
+- provider execution and provider errors remain auditable
+- artifact metadata is audit-safe and contains no raw bytes
+- checkpoint-backed tail-truncation detection still verifies
+- export/import verification still detects tampering and malformed bundles
+- CI tests remain mock-only and use temporary audit paths
+
+The SDK must not log raw tool arguments, secrets, credential refs,
+screenshots, raw artifact bytes, or raw provider payloads as a substitute for
+AgenticKVM audit.
+
 ## Future Production Options
 
 Options to evaluate later:

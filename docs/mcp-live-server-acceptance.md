@@ -92,6 +92,28 @@ The live server must preserve:
 No raw screenshots, no raw secrets, no raw credential values, and no raw
 provider payloads may be written to audit logs by default.
 
+The live server adapter must not report success when required audit writes
+fail. High-risk actions and approval consumption must fail closed if audit
+emission, checkpoint-compatible persistence, or audit-error reporting is not
+available. A future production warning-only mode for selected read-only actions
+must be explicit policy, not SDK behavior.
+
+## Required Mock Conformance Before Live Provider Exposure
+
+Before any real provider is reachable through a live MCP server, the
+SDK-backed adapter must pass mock-only tests for:
+
+- ok result audit lifecycle
+- denied result audit lifecycle
+- approval-required lifecycle
+- approval grant, denial, expiry, and consumption
+- provider error audit lifecycle
+- artifact metadata audit lifecycle
+- checkpoint-backed tail-truncation detection
+- audit export/import verification
+- audit failure fail-closed behavior
+- no audit writes outside explicit test paths
+
 ## Stop Conditions
 
 Stop live server work if:

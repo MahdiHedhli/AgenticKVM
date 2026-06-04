@@ -227,6 +227,29 @@ Before dependency adoption:
 - CI remains mock-only and cannot reach live providers
 - live server manual smoke docs are updated
 
+## Audit-Store Acceptance Questions
+
+The dependency review must explicitly answer:
+
+- Can the SDK-backed adapter propagate audit correlation ids from host request
+  to final result?
+- Can the SDK-backed adapter preserve `audit_error` or a structured equivalent
+  without converting it into a generic provider or validation error?
+- Can audit failure block high-risk provider execution before a provider
+  adapter runs?
+- Can approval-required, approval-granted, approval-denied, approval-expired,
+  approval-consumed, provider-executed, provider-error, and artifact-metadata
+  events be emitted without the SDK swallowing failures?
+- Can audit checkpoint and export verification run in mock-only tests through
+  the SDK-backed adapter?
+- Can SDK logging be configured so raw tool arguments, raw secrets, credential
+  refs, screenshots, raw artifact bytes, and raw provider payloads are never
+  logged by default?
+- Can host result ids and audit event ids remain stable enough for
+  investigation workflows?
+- Can CI prove the SDK-backed adapter cannot write audit logs outside explicit
+  temp paths during tests?
+
 ## Open Review Items
 
 - exact SDK package name and version
@@ -234,13 +257,14 @@ Before dependency adoption:
 - whether the first live adapter is stdio-only
 - how host integration tests run without live providers
 - whether approval UI/transport is separate from MCP server transport
-- production audit-store requirements
+- production audit-store backend and checkpoint-signing requirements
 
 ## Decision Rule
 
 Do not add a live MCP SDK/server dependency until the mock-only compatibility
-contract, approval lifecycle, audit persistence, and provider bypass tests are
-preserved by the real adapter.
+contract, approval lifecycle, audit persistence, audit failure behavior,
+checkpoint/export verification, and provider bypass tests are preserved by the
+real adapter.
 
 Current docs-only outcome: the official `mcp` Python SDK is a candidate for a
 future trial because it is the official Python SDK, but it is not selected or
