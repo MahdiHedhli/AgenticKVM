@@ -692,3 +692,31 @@
   - `docs/heartbeat-log.md`
 - tests expected to run:
   - `uv run --with pytest --python python3.13 python -m pytest`
+
+## 2026-06-04T00:56:13Z
+
+- selected maturity level: Maturity 4 host compatibility hardening with
+  Maturity 6 safety guardrails
+- selected task: add a dependency-free, mock-only MCP host compatibility
+  contract, models, adapter, schema handling, contract/security coverage, and
+  documentation updates
+- why this task is safe: the host compatibility layer is local and
+  in-memory only; it does not open listeners, import a live MCP SDK, enable
+  real providers, resolve credentials, read environment secrets, or make
+  network calls; all tool calls must route through the existing
+  `MCPSDKAdapter`, `MCPRouter`, registries, and `ControlPlane`
+- files expected to change:
+  - `specs/006-mcp-sdk-adapter/contracts/`
+  - `docs/mcp-host-compatibility.md`
+  - `docs/mcp-sdk-adapter.md`
+  - `docs/mcp-tools.md`
+  - `docs/security-model.md`
+  - `docs/provider-taxonomy.md`
+  - `docs/roadmap.md`
+  - `src/agentickvm/mcp_sdk/`
+  - `tests/unit/`
+  - `tests/contract/`
+  - `tests/security/`
+  - `docs/heartbeat-log.md`
+- tests expected to run:
+  - `uv run --with pytest --python python3.13 python -m pytest`
