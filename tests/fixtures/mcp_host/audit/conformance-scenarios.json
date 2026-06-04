@@ -1,0 +1,72 @@
+[
+  {
+    "name": "ok action audit lifecycle",
+    "flow": "ok",
+    "expected_status": "ok",
+    "expected_events": [
+      "request_received",
+      "capability_resolved",
+      "policy_decision",
+      "provider_execution_started",
+      "provider_execution_completed",
+      "result_returned"
+    ]
+  },
+  {
+    "name": "denied action audit lifecycle",
+    "flow": "denied",
+    "expected_status": "denied",
+    "expected_events": [
+      "request_received",
+      "capability_resolved",
+      "policy_decision",
+      "result_returned"
+    ]
+  },
+  {
+    "name": "approval required audit lifecycle",
+    "flow": "approval_required",
+    "expected_status": "approval_required",
+    "expected_events": [
+      "request_received",
+      "capability_resolved",
+      "policy_decision",
+      "approval_requested",
+      "result_returned"
+    ]
+  },
+  {
+    "name": "approval consumed audit lifecycle",
+    "flow": "approval_consumed",
+    "expected_status": "ok",
+    "expected_events": [
+      "approval_granted",
+      "approval_consumed",
+      "provider_execution_started",
+      "provider_execution_completed",
+      "result_returned"
+    ]
+  },
+  {
+    "name": "provider error audit lifecycle",
+    "flow": "provider_error",
+    "expected_status": "provider_error",
+    "expected_events": [
+      "request_received",
+      "capability_resolved",
+      "policy_decision",
+      "provider_execution_started",
+      "provider_execution_failed",
+      "result_returned"
+    ]
+  },
+  {
+    "name": "artifact metadata audit lifecycle",
+    "flow": "artifact",
+    "expected_status": "ok",
+    "expected_events": [
+      "provider_execution_completed",
+      "result_returned"
+    ]
+  }
+]
