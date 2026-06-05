@@ -1092,3 +1092,36 @@
 - blockers:
   - repository Pages source/workflow decision
   - public repository URL confirmation for footer links
+## 2026-06-05T15:04:39Z
+
+- selected maturity level: release engineering and open-source project
+  scaffold hardening
+- selected task: add release-quality gates on
+  `feature/release-quality-gates`, including safe CI, static GitHub Pages
+  deployment, package metadata checks, docs/spec validation, safety regression
+  checks, developer workflow docs, release readiness docs, branch review
+  package, and repository hygiene
+- why this task is safe: work starts from `feature/github-pages-site`, not the
+  SDK trial branch; it does not add `mcp==1.27.2`, live MCP server behavior,
+  live providers, credentials, provider network calls, hardware access,
+  tracking, analytics, workflow secrets, or live provider CI jobs
+- files expected to change:
+  - `.github/workflows/`
+  - `scripts/`
+  - `tests/contract/`
+  - `tests/security/`
+  - `docs/release-quality-gates.md`
+  - `docs/packaging.md`
+  - `docs/development.md`
+  - `docs/testing.md`
+  - `docs/release-readiness.md`
+  - `docs/release-checklist.md`
+  - `docs/release-quality-branch-review.md`
+  - `docs/github-pages.md`
+  - `README.md`
+  - `CONTRIBUTING.md`
+  - `docs/roadmap.md`
+  - `docs/heartbeat-log.md`
+- baseline tests run:
+  - `uv run --offline --with pytest --python python3.13 python -m pytest`
+- baseline result: 497 passed
