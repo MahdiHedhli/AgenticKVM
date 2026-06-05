@@ -108,6 +108,49 @@ Safe setup options after review:
    - no provider tests
    - no live infrastructure access
 
+## Repository Settings Setup
+
+After this branch is reviewed and merged, an operator can enable GitHub Pages
+without adding secrets:
+
+1. Open the repository settings in GitHub.
+2. Go to Pages.
+3. Choose a reviewed source option:
+   - deploy from a branch/folder if repository policy allows it
+   - or add a reviewed GitHub Actions workflow in a follow-up branch
+4. Confirm that the source serves only static files from `site/`.
+5. Confirm no production credentials, provider configs, or live infrastructure
+   tests are part of the Pages path.
+
+## Future Workflow Requirements
+
+If a Pages workflow is added later, it must:
+
+- run only on push to `main` and `workflow_dispatch`
+- publish only the static `site/` directory
+- use no secrets
+- install no dependencies unless a future reviewed static generator is adopted
+- run no provider tests
+- make no live hardware or provider network calls
+- use minimal permissions:
+  - `contents: read`
+  - `pages: write`
+  - `id-token: write`
+- avoid analytics, tracking, and remote asset dependencies
+
+## Review Checklist
+
+- site copy does not claim production readiness
+- site copy does not claim live PiKVM, Redfish, RDP, VNC, RustDesk, or
+  MeshCentral support
+- site copy distinguishes out-of-band providers from in-band remote-session
+  providers
+- safety guardrails are visible on the first screen
+- Getting started commands are mock-only and repo-local
+- no SDK trial dependency is added to `main`
+- no secrets, tokens, endpoints, or credentials appear in site files
+- no publishing workflow is added without review
+
 ## Open Questions
 
 - What public GitHub repository URL should the footer use once published?
