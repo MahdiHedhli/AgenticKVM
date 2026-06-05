@@ -95,8 +95,23 @@ def test_github_pages_site_does_not_add_trial_sdk_dependency_to_mainline() -> No
     )
 
 
-def test_github_pages_workflow_is_not_added_without_review() -> None:
+def test_github_pages_workflows_are_reviewed_and_safe() -> None:
     workflows = sorted((ROOT / ".github" / "workflows").glob("*.yml"))
     workflows += sorted((ROOT / ".github" / "workflows").glob("*.yaml"))
 
-    assert workflows == []
+    assert {path.name for path in workflows} <= {"ci.yml", "pages.yml"}
+    for workflow in workflows:
+        text = workflow.read_text(encoding="utf-8").lower()
+        assert "secrets." not in text
+        assert "mcp==1.27.2" not in text
+        for forbidden in (
+            "pikvm",
+            "redfish",
+            "rustdesk",
+            "meshcentral",
+            "idrac",
+            "ipmi",
+            "supermicro",
+            "proxmox",
+        ):
+            assert forbidden not in text

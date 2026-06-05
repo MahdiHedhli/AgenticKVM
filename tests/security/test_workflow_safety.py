@@ -1,0 +1,44 @@
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[2]
+WORKFLOWS = ROOT / ".github" / "workflows"
+
+
+def _workflow_text(name: str) -> str:
+    return (WORKFLOWS / name).read_text(encoding="utf-8")
+
+
+def test_ci_workflow_is_mock_only_and_secret_free() -> None:
+    workflow = _workflow_text("ci.yml")
+    lowered = workflow.lower()
+
+    assert "permissions:\n  contents: read" in workflow
+    assert "python -m pytest" in workflow
+    assert "secrets." not in lowered
+    assert "mcp==1.27.2" not in lowered
+    assert "run_stdio" not in lowered
+    assert "live" not in lowered
+    for forbidden in (
+        "pikvm",
+        "redfish",
+        "rustdesk",
+        "vnc",
+        "rdp",
+        "meshcentral",
+        "idrac",
+        "ilo",
+        "ipmi",
+        "supermicro",
+        "proxmox",
+    ):
+        assert forbidden not in lowered
+
+
+def test_ci_workflow_does_not_define_extra_permissions() -> None:
+    workflow = _workflow_text("ci.yml")
+
+    assert "pages: write" not in workflow
+    assert "id-token: write" not in workflow
+    assert "actions: write" not in workflow
+    assert "contents: write" not in workflow
