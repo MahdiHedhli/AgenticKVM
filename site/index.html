@@ -40,6 +40,24 @@
             <a class="button" href="#roadmap">View the roadmap</a>
             <a class="button" href="#safety">Explore the safety model</a>
           </div>
+          <dl class="status-strip" aria-label="Current project status">
+            <div>
+              <dt>Mainline</dt>
+              <dd>Mock-first</dd>
+            </div>
+            <div>
+              <dt>Live providers</dt>
+              <dd>Gated</dd>
+            </div>
+            <div>
+              <dt>Live MCP server</dt>
+              <dd>Deferred</dd>
+            </div>
+            <div>
+              <dt>CI</dt>
+              <dd>Offline fixtures</dd>
+            </div>
+          </dl>
         </div>
         <aside class="hero-panel" aria-label="Core safety properties">
           <h2>Safety guardrails built in.</h2>
@@ -196,9 +214,10 @@
           </p>
           <p>
             The mainline project does not adopt a live MCP server. A Python MCP
-            SDK trial exists separately and remains gated by human review. Any
-            future live MCP server must preserve provider registry, target
-            registry, policy, approval, audit, and redaction behavior.
+            SDK trial exists separately and remains gated by human review; it is
+            not a mainline dependency. Any future live MCP server must preserve
+            provider registry, target registry, policy, approval, audit, and
+            redaction behavior.
           </p>
         </div>
       </section>
