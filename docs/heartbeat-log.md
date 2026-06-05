@@ -1033,3 +1033,28 @@
   - `docs/heartbeat-log.md`
 - tests expected to run:
   - `uv run --with pytest --python python3.13 python -m pytest`
+## 2026-06-05T14:25:44Z
+
+- selected maturity level: public documentation and marketing foundation
+- selected task: create a simple GitHub Pages-ready static site on
+  `feature/github-pages-site` from `main`, with product positioning, safety
+  guardrails, provider taxonomy, MCP/agent integration, getting started, and
+  roadmap content
+- why this task is safe: work is on a mainline feature branch, not the SDK
+  trial branch; it adds static documentation/marketing files only; no
+  `mcp==1.27.2` dependency, live MCP server, live provider, hardware access,
+  credentials, provider network calls, deployment secrets, analytics, tracking,
+  or policy changes are introduced
+- files expected to change:
+  - `docs/github-pages.md`
+  - `site/index.html`
+  - `site/styles.css`
+  - `site/README.md`
+  - optional static site support files
+  - `tests/`
+  - `README.md`
+  - `docs/roadmap.md`
+  - `docs/heartbeat-log.md`
+- baseline tests run:
+  - `uv run --offline --with pytest --python python3.13 python -m pytest`
+- baseline result: 490 passed
