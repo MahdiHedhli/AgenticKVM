@@ -12,11 +12,28 @@ not an authoritative source for architecture or implementation.
 
 ## Status
 
-AgenticKVM is in bootstrap. The current repository establishes the constitution,
-product vision, control-plane specification, contracts, security model, migration
-plan, mock provider scaffold, and initial safety tests.
+AgenticKVM is a mock-first, safety-first project scaffold. The current
+repository establishes the constitution, control-plane specifications, policy
+core, approval/audit baseline, mock provider, MCP scaffold, host compatibility
+layers, provider readiness contracts, static site, and release quality gates.
 
 Real hardware providers are intentionally not implemented yet.
+
+The Python MCP SDK dependency trial remains isolated on a separate trial branch
+and is not part of mainline metadata.
+
+## Quick Links
+
+- [Security model](docs/security-model.md)
+- [Control plane](docs/control-plane.md)
+- [Provider contracts](docs/provider-contracts.md)
+- [Provider taxonomy](docs/provider-taxonomy.md)
+- [Roadmap](docs/roadmap.md)
+- [Development guide](docs/development.md)
+- [Testing guide](docs/testing.md)
+- [Packaging notes](docs/packaging.md)
+- [Release readiness](docs/release-readiness.md)
+- [GitHub Pages setup](docs/github-pages.md)
 
 ## Core Architecture Rule
 
@@ -73,11 +90,13 @@ When code and specs disagree, update the specification first or stop.
 - `specs/002-control-plane/`: control-plane behavior, contracts, data model,
   research notes, and quickstart
 - `docs/`: architecture, security model, provider contracts, migration plan,
-  roadmap, heartbeat, and threat model
+  roadmap, heartbeat, release readiness, and threat model
 - `site/`: static GitHub Pages-ready marketing/docs site
 - `examples/policies/`: starter mode policies
 - `src/agentickvm/`: minimal Python package scaffold
 - `tests/`: unit, contract, and security tests
+- `scripts/`: local package and docs validation helpers
+- `.github/workflows/`: mock-only CI and static GitHub Pages workflows
 
 ## Website
 
@@ -92,10 +111,20 @@ GitHub Pages setup notes are in `docs/github-pages.md`.
 
 ## Development
 
-Install test dependencies in your preferred Python environment, then run:
+Use the [development guide](docs/development.md) and
+[testing guide](docs/testing.md) for contributor workflow details.
+
+Preferred local test command:
 
 ```bash
-PYTHONPATH=src python3 -m pytest
+uv run --offline --with pytest --python python3.13 python -m pytest
+```
+
+Release-quality validation helpers:
+
+```bash
+python scripts/check-package.py
+python scripts/validate-docs.py
 ```
 
 The test suite must use mocks and schemas only. Real hardware is never used in
