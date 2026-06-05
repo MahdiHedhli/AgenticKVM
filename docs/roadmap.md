@@ -109,6 +109,9 @@
 - Add a GitHub Pages-ready static site for product positioning, safety
   guardrails, provider taxonomy, MCP/agent integration, getting started, and
   roadmap review.
+- Add mock-only CI, static GitHub Pages workflow, package metadata checks,
+  docs/spec validation, release safety regression tests, contributor workflow
+  docs, release readiness docs, and branch review package.
 - Run security review before public beta.
 
 ## 9. Future In-Band Remote Session Providers
@@ -132,7 +135,21 @@
 
 - Static site scaffolded under `site/`.
 - GitHub Pages setup documented in `docs/github-pages.md`.
-- Deployment workflow intentionally deferred pending human review of repository
-  Pages settings.
+- Static GitHub Pages workflow added to publish only `site/` after merge and
+  repository Pages settings review.
 - Site safety checks assert no trial SDK dependency, no tracking, no live
   provider claims, no overclaim phrases, and no workflow secrets.
+
+## 12. Release Quality Gates
+
+- Mock-only CI workflow added for package checks, docs/spec validation, and
+  pytest.
+- Static GitHub Pages workflow added with no secrets and no dependency install.
+- Package metadata and import validation added through `scripts/check-package.py`.
+- Docs/spec/site validation added through `scripts/validate-docs.py`.
+- Release safety regression suite added for provider, target, policy, config,
+  workflow, and public-claim invariants.
+- Development, testing, packaging, release readiness, release checklist, and
+  branch review docs added.
+- Status: branch-ready for human review; live providers, live MCP server, SDK
+  trial dependency, and production audit backend remain deferred.

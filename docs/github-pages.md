@@ -97,9 +97,7 @@ infrastructure.
 
 Setup options after review:
 
-1. Configure GitHub Pages in repository settings to serve from a static branch
-   or folder if that matches repository policy.
-2. Keep the reviewed workflow that uploads `site/` using official GitHub Pages
+1. Keep the reviewed workflow that uploads `site/` using official GitHub Pages
    actions with:
    - `contents: read`
    - `pages: write`
@@ -107,6 +105,8 @@ Setup options after review:
    - no secrets
    - no provider tests
    - no live infrastructure access
+2. Configure GitHub Pages in repository settings to deploy from GitHub Actions
+   after the branch is reviewed and merged.
 
 ## Repository Settings Setup
 
@@ -115,9 +115,7 @@ without adding secrets:
 
 1. Open the repository settings in GitHub.
 2. Go to Pages.
-3. Choose a reviewed source option:
-   - deploy from a branch/folder if repository policy allows it
-   - or add a reviewed GitHub Actions workflow in a follow-up branch
+3. Choose GitHub Actions as the Pages source.
 4. Confirm that the source serves only static files from `site/`.
 5. Confirm no production credentials, provider configs, or live infrastructure
    tests are part of the Pages path.

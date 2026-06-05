@@ -21,6 +21,8 @@ readiness docs without adding live providers or the SDK trial dependency.
 - `26766b9 docs: add development and testing guide`
 - `9916bc1 docs: add release readiness checklist`
 - `6df4f1a docs: polish README release links`
+- `7e3101c docs: add release quality branch review package`
+- final closeout commit records roadmap and heartbeat progress
 
 ## Files Changed
 
