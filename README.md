@@ -74,9 +74,21 @@ When code and specs disagree, update the specification first or stop.
   research notes, and quickstart
 - `docs/`: architecture, security model, provider contracts, migration plan,
   roadmap, heartbeat, and threat model
+- `site/`: static GitHub Pages-ready marketing/docs site
 - `examples/policies/`: starter mode policies
 - `src/agentickvm/`: minimal Python package scaffold
 - `tests/`: unit, contract, and security tests
+
+## Website
+
+This branch includes a static GitHub Pages-ready site under `site/`.
+
+The site is plain HTML/CSS with no JavaScript, tracking, remote fonts, live
+provider behavior, credentials, or MCP SDK dependency. It presents
+AgenticKVM's safety-first architecture and roadmap while keeping live providers
+and live MCP server work explicitly gated.
+
+GitHub Pages setup notes are in `docs/github-pages.md`.
 
 ## Development
 

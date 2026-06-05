@@ -106,6 +106,9 @@
 - Add threat-model test cases.
 - Add provider conformance suite.
 - Add docs for safe deployment.
+- Add a GitHub Pages-ready static site for product positioning, safety
+  guardrails, provider taxonomy, MCP/agent integration, getting started, and
+  roadmap review.
 - Run security review before public beta.
 
 ## 9. Future In-Band Remote Session Providers
@@ -124,3 +127,12 @@
   providers.
 - Start with session inventory and safe observe metadata only.
 - Status: roadmap-only.
+
+## 11. Public Website
+
+- Static site scaffolded under `site/`.
+- GitHub Pages setup documented in `docs/github-pages.md`.
+- Deployment workflow intentionally deferred pending human review of repository
+  Pages settings.
+- Site safety checks assert no trial SDK dependency, no tracking, no live
+  provider claims, no overclaim phrases, and no workflow secrets.
