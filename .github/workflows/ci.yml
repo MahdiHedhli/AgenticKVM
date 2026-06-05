@@ -32,3 +32,9 @@ jobs:
 
       - name: Run mock-only test suite
         run: python -m pytest
+
+      - name: Validate package metadata
+        run: python scripts/check-package.py
+
+      - name: Validate docs and specs
+        run: python scripts/validate-docs.py

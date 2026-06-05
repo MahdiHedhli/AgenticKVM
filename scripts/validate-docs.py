@@ -1,0 +1,157 @@
+#!/usr/bin/env python3
+"""Validate docs, specs, site files, and public safety claims."""
+
+from __future__ import annotations
+
+import re
+import sys
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+
+REQUIRED_FILES = (
+    ".specify/memory/constitution.md",
+    "README.md",
+    "docs/architecture.md",
+    "docs/control-plane.md",
+    "docs/security-model.md",
+    "docs/provider-contracts.md",
+    "docs/provider-taxonomy.md",
+    "docs/github-pages.md",
+    "docs/roadmap.md",
+    "site/index.html",
+    "site/styles.css",
+    "site/README.md",
+    "specs/002-control-plane/spec.md",
+    "specs/002-control-plane/contracts/capability-registry.schema.json",
+    "specs/002-control-plane/contracts/policy.schema.json",
+    "specs/002-control-plane/contracts/provider-contract.md",
+    "specs/003-real-provider-readiness/spec.md",
+    "specs/006-mcp-sdk-adapter/spec.md",
+    "specs/008-production-audit-store/spec.md",
+)
+
+SAFETY_EXPECTATIONS = {
+    "docs/security-model.md": (
+        "fail closed",
+        "must not use real hardware",
+        "Secrets",
+        "Provider and target registries",
+        "approval_required",
+        "Audit",
+    ),
+    "docs/control-plane.md": (
+        "Provider registry",
+        "Target registry",
+        "policy",
+        "approval",
+        "audit",
+        "fail closed",
+    ),
+    "docs/provider-contracts.md": (
+        "Mock First",
+        "Provider Must Not Decide",
+        "Readiness Gates",
+        "disabled placeholders",
+    ),
+}
+
+PUBLIC_CLAIM_FILES = (
+    "README.md",
+    "site/index.html",
+)
+
+FORBIDDEN_PUBLIC_CLAIMS = (
+    "production ready",
+    "fully supports live pikvm",
+    "fully supports live redfish",
+    "supports rdp today",
+    "supports vnc today",
+    "supports rustdesk today",
+    "supports meshcentral today",
+    "autonomous production recovery",
+    "zero risk",
+    "mcp==1.27.2",
+)
+
+MARKDOWN_LINK_RE = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
+
+
+class ValidationFailure(RuntimeError):
+    """Raised when documentation validation fails."""
+
+
+def main() -> int:
+    try:
+        _validate_required_files()
+        _validate_readme_links()
+        _validate_safety_language()
+        _validate_public_claims()
+        _validate_local_markdown_links()
+    except Exception as exc:
+        print(f"docs validation failed: {exc}", file=sys.stderr)
+        return 1
+    print("docs validation passed")
+    return 0
+
+
+def _validate_required_files() -> None:
+    missing = [path for path in REQUIRED_FILES if not (ROOT / path).exists()]
+    if missing:
+        raise ValidationFailure(f"missing required files: {', '.join(missing)}")
+
+
+def _validate_readme_links() -> None:
+    text = (ROOT / "README.md").read_text(encoding="utf-8")
+    for expected in (
+        ".specify/memory/constitution.md",
+        "specs/002-control-plane/",
+        "docs/",
+        "site/",
+        "tests/",
+    ):
+        if expected not in text:
+            raise ValidationFailure(f"README missing repository map entry {expected}")
+
+
+def _validate_safety_language() -> None:
+    for relative, snippets in SAFETY_EXPECTATIONS.items():
+        text = (ROOT / relative).read_text(encoding="utf-8")
+        lowered = text.lower()
+        for snippet in snippets:
+            if snippet.lower() not in lowered:
+                raise ValidationFailure(f"{relative} missing safety language {snippet!r}")
+
+
+def _validate_public_claims() -> None:
+    for relative in PUBLIC_CLAIM_FILES:
+        text = (ROOT / relative).read_text(encoding="utf-8").lower()
+        for phrase in FORBIDDEN_PUBLIC_CLAIMS:
+            if phrase in text:
+                raise ValidationFailure(f"{relative} contains forbidden claim {phrase!r}")
+
+
+def _validate_local_markdown_links() -> None:
+    markdown_files = [ROOT / "README.md", *sorted((ROOT / "docs").glob("*.md"))]
+    for markdown in markdown_files:
+        for target in MARKDOWN_LINK_RE.findall(markdown.read_text(encoding="utf-8")):
+            if _skip_link(target):
+                continue
+            target_path = (markdown.parent / target.split("#", 1)[0]).resolve()
+            if not target_path.exists():
+                raise ValidationFailure(
+                    f"{markdown.relative_to(ROOT)} has broken local link {target!r}"
+                )
+
+
+def _skip_link(target: str) -> bool:
+    if target.startswith(("#", "http://", "https://", "mailto:")):
+        return True
+    if not target.split("#", 1)[0]:
+        return True
+    return False
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
