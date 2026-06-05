@@ -88,18 +88,18 @@ Use clear language from the constitution:
 
 ## Deployment Plan
 
-This branch adds static files under `site/` and documents GitHub Pages setup.
-It does not add a GitHub Actions workflow yet.
+This branch adds static files under `site/` and a minimal GitHub Pages workflow
+that publishes only that directory.
 
-Reason: the repository currently has no `.github/workflows/` convention. A
-future workflow should be added only after human review confirms the repository
-should publish GitHub Pages from `main`.
+The workflow uses official GitHub Pages actions, requires no secrets, installs
+no dependencies, runs no provider tests, and does not access live
+infrastructure.
 
-Safe setup options after review:
+Setup options after review:
 
 1. Configure GitHub Pages in repository settings to serve from a static branch
    or folder if that matches repository policy.
-2. Add a minimal workflow that uploads `site/` using official GitHub Pages
+2. Keep the reviewed workflow that uploads `site/` using official GitHub Pages
    actions with:
    - `contents: read`
    - `pages: write`
@@ -122,9 +122,9 @@ without adding secrets:
 5. Confirm no production credentials, provider configs, or live infrastructure
    tests are part of the Pages path.
 
-## Future Workflow Requirements
+## Workflow Requirements
 
-If a Pages workflow is added later, it must:
+The Pages workflow must:
 
 - run only on push to `main` and `workflow_dispatch`
 - publish only the static `site/` directory
@@ -149,7 +149,7 @@ If a Pages workflow is added later, it must:
 - Getting started commands are mock-only and repo-local
 - no SDK trial dependency is added to `main`
 - no secrets, tokens, endpoints, or credentials appear in site files
-- no publishing workflow is added without review
+- publishing workflow uses official Pages actions and minimal permissions
 
 ## Open Questions
 

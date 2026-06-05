@@ -42,3 +42,41 @@ def test_ci_workflow_does_not_define_extra_permissions() -> None:
     assert "id-token: write" not in workflow
     assert "actions: write" not in workflow
     assert "contents: write" not in workflow
+
+
+def test_pages_workflow_publishes_static_site_only() -> None:
+    workflow = _workflow_text("pages.yml")
+    lowered = workflow.lower()
+
+    assert "contents: read" in workflow
+    assert "pages: write" in workflow
+    assert "id-token: write" in workflow
+    assert "actions/upload-pages-artifact" in workflow
+    assert "actions/deploy-pages" in workflow
+    assert "path: site" in workflow
+    assert "python -m pytest" not in workflow
+    assert "pip install" not in lowered
+    assert "uv run" not in lowered
+    assert "secrets." not in lowered
+    assert "mcp==1.27.2" not in lowered
+
+
+def test_pages_workflow_does_not_reference_live_provider_commands() -> None:
+    workflow = _workflow_text("pages.yml").lower()
+
+    for forbidden in (
+        "pikvm",
+        "redfish",
+        "rustdesk",
+        "vnc",
+        "rdp",
+        "meshcentral",
+        "idrac",
+        "ilo",
+        "ipmi",
+        "supermicro",
+        "proxmox",
+        "smoke",
+        "provider",
+    ):
+        assert forbidden not in workflow
