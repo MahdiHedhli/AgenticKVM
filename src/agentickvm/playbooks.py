@@ -13,7 +13,9 @@ from types import MappingProxyType
 from typing import Any, Iterable, Mapping
 
 from agentickvm.config import ConfigRuntime
+from agentickvm.control_plane import redact_mapping
 from agentickvm.mcp import MCPResultStatus, MCPRouter, MCPToolRequest
+from agentickvm.mcp.registry import DEFAULT_MCP_TOOL_REGISTRY, MCPToolRegistry
 
 
 class PlaybookStatus(StrEnum):
@@ -45,12 +47,14 @@ class PlaybookStep:
     def to_dict(self) -> dict[str, Any]:
         """Return a JSON-safe step dictionary."""
 
+        safe_params, redactions = redact_mapping(dict(self.params))
         return _json_safe(
             {
                 "name": self.name,
                 "tool_name": self.tool_name,
                 "description": self.description,
-                "params": dict(self.params),
+                "params": dict(safe_params),
+                "redactions": [f"params.{path}" for path in redactions],
                 "approval_checkpoint": self.approval_checkpoint,
             }
         )
@@ -72,6 +76,10 @@ class PlaybookDefinition:
             raise ValueError("playbook name is required")
         if not self.steps:
             raise ValueError("playbook requires at least one step")
+        if not self.risk_tier:
+            raise ValueError("playbook risk_tier is required")
+        if not self.rollback_notes:
+            raise ValueError("playbook rollback_notes are required")
 
     def to_dict(self) -> dict[str, Any]:
         """Return a JSON-safe playbook definition."""
@@ -92,11 +100,19 @@ class PlaybookDefinition:
 class PlaybookRegistry:
     """Explicit playbook registry."""
 
-    def __init__(self, playbooks: Iterable[PlaybookDefinition]) -> None:
+    def __init__(
+        self,
+        playbooks: Iterable[PlaybookDefinition],
+        *,
+        tool_registry: MCPToolRegistry = DEFAULT_MCP_TOOL_REGISTRY,
+    ) -> None:
         resolved = tuple(playbooks)
         self._playbooks = {playbook.name: playbook for playbook in resolved}
         if len(self._playbooks) != len(resolved):
             raise ValueError("duplicate playbook name")
+        self.tool_registry = tool_registry
+        for playbook in resolved:
+            self._validate_playbook(playbook)
 
     def list(self) -> tuple[PlaybookDefinition, ...]:
         """Return registered playbooks sorted by name."""
@@ -115,6 +131,20 @@ class PlaybookRegistry:
         if playbook is None:
             raise ValueError(f"Unknown playbook: {name}")
         return playbook
+
+    def _validate_playbook(self, playbook: PlaybookDefinition) -> None:
+        required_capabilities = set(playbook.required_capabilities)
+        for step in playbook.steps:
+            tool = self.tool_registry.get(step.tool_name)
+            if tool is None:
+                raise ValueError(
+                    f"playbook {playbook.name} references unknown tool {step.tool_name}"
+                )
+            if tool.capability_id not in required_capabilities:
+                raise ValueError(
+                    f"playbook {playbook.name} missing required capability "
+                    f"{tool.capability_id}"
+                )
 
 
 DEFAULT_PLAYBOOK_REGISTRY = PlaybookRegistry(

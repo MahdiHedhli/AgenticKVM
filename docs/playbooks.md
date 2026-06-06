@@ -55,6 +55,13 @@ The runner:
 - records normal audit events through the configured audit sink
 - stops when a step returns `approval_required`, `denied`,
   `validation_error`, `provider_error`, or `policy_error`
+- validates that every step references a known MCP tool
+- validates that step capabilities are declared in playbook metadata
+- redacts secret-like step params in output
+
+Playbooks do not resume approvals by themselves. If a step returns
+`approval_required`, the playbook stops and an operator must use the approval
+transport or a future explicit playbook approval flow.
 
 ## Disallowed For This Slice
 
