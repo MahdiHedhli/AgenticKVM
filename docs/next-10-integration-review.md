@@ -87,11 +87,11 @@ Automated tests remain mock-only, fixture-only, temp-path-only, and safe.
 | 2. Python MCP SDK trial review | Complete; continue trial, hold mainline adoption |
 | 3. Mock-only MCP stdio mainline | Deferred; no SDK dependency or code port on this branch |
 | 4. Operator approval transport | Complete; local explicit-path queue and CLI commands added |
-| 5. PiKVM observe-only | Disabled-by-default docs/spec/tests only unless safely bounded |
-| 6. Redfish observe-only | Disabled-by-default docs/spec/tests only unless safely bounded |
+| 5. PiKVM observe-only | Gated; live code deferred, implementation gate documented |
+| 6. Redfish observe-only | Gated; live code deferred, implementation gate documented |
 | 7. Local operator console | Complete; local JSON CLI status console added |
 | 8. Production audit backend v1 | Complete; explicit-path SQLite audit backend v1 added |
-| 9. PiKVM input-control phase | Fake-only/gated scaffold only; no live input |
+| 9. PiKVM input-control phase | Gated; no code added because current PiKVM spec is observe-only |
 | 10. Recovery playbooks | Complete; mock-safe playbook framework added |
 
 ## Next Gate
@@ -130,6 +130,34 @@ Safety properties:
 - no auto-approval
 - no credential resolution
 - tests use temp directories only
+
+## Moves 5, 6, And 9: Live Provider And Input Gates
+
+Status: deferred by gate.
+
+No live PiKVM transport, live Redfish transport, or PiKVM input-control code was
+added in this branch.
+
+Reason:
+
+- the current PiKVM source-of-truth spec remains observe-only
+- Redfish live implementation still needs a provider-specific live observe gate
+- live HTTP transport code would require a separate credential, config, manual
+  smoke, and operator review decision
+- PiKVM input control would conflict with the current observe-only contract if
+  added without a new approved phase
+
+Added:
+
+- `docs/live-provider-and-input-gates.md`
+
+The gate document records:
+
+- allowed future PiKVM observe-only capabilities
+- Redfish GET-only requirements
+- disabled-by-default live transport requirements
+- fake-only PiKVM input-control phase requirements
+- explicit ban on unattended live input
 
 ## Move 7: Local Operator Console
 
