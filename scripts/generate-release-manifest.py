@@ -92,6 +92,9 @@ def _manifest() -> dict[str, Any]:
             "public_beta_readiness": (
                 ROOT / "docs" / "public-beta-readiness.md"
             ).exists(),
+            "public_beta_merge_review": (
+                ROOT / "docs" / "public-beta-merge-review.md"
+            ).exists(),
         },
         "site": {
             "site_dir": (ROOT / "site").exists(),

@@ -99,6 +99,24 @@ Automated tests remain mock-only, fixture-only, temp-path-only, and safe.
 Proceed to local console, audit, or playbook work that remains dependency-free
 and mock-only. SDK adoption requires a separate human-reviewed branch.
 
+## Audit Beta Readiness Addendum
+
+Branch: `feature/audit-beta-readiness`
+
+Additional safe hardening on top of this integration branch:
+
+- SQLite audit backend hardening review and contract
+- audit checkpoint, inspect, and checkpoint-aware export CLI coverage
+- approval queue audit integration hardening
+- recovery playbook safety hardening
+- live-provider preflight gate model and CLI
+- public beta risk register
+- public beta readiness checklist
+- release/CI gates for beta docs and generated local artifact exclusions
+
+The addendum still does not implement live provider network calls, live MCP
+server behavior, live PiKVM input, or the SDK trial dependency.
+
 ## Move 4: Local Operator Approval Transport
 
 Status: complete.

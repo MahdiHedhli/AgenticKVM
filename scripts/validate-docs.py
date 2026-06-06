@@ -35,6 +35,7 @@ REQUIRED_FILES = (
     "docs/live-provider-preflight.md",
     "docs/public-beta-risk-register.md",
     "docs/public-beta-readiness.md",
+    "docs/public-beta-merge-review.md",
     "docs/roadmap.md",
     "site/index.html",
     "site/styles.css",

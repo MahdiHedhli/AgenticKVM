@@ -31,6 +31,7 @@ def test_release_manifest_generator_writes_json_to_explicit_temp_path(tmp_path: 
     assert manifest["docs"]["live_provider_preflight"] is True
     assert manifest["docs"]["public_beta_risk_register"] is True
     assert manifest["docs"]["public_beta_readiness"] is True
+    assert manifest["docs"]["public_beta_merge_review"] is True
     assert manifest["site"]["pages_workflow_static_site_only"] is True
     assert manifest["workflows"]["uses_secrets"] is False
     assert manifest["safety"]["live_providers_enabled"] is False

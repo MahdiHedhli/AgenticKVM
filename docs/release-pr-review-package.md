@@ -189,3 +189,31 @@ Additional review focus:
 - verify no SDK trial dependency appears in `pyproject.toml`
 - verify no live provider or live input code was added
 - verify all checks report mock-only behavior
+
+## Audit Beta Readiness Addendum
+
+Branch: `feature/audit-beta-readiness`
+
+Additional safe changes:
+
+- SQLite audit backend hardening review, checkpoint helpers, event inspection,
+  checkpoint-aware export, and malformed/tamper tests
+- audit CLI polish for checkpoint and inspect workflows
+- approval queue audit integration hardening for denial, expiry, consumption,
+  redaction, fingerprint mismatch, and malformed stores
+- recovery playbook registry validation, required risk/rollback metadata,
+  redacted step output, and approval/policy stop behavior
+- live-provider preflight gates with CI/test-mode blocking and observe-only
+  capability enforcement
+- public beta readiness and risk-register docs
+- release gates for beta docs, preflight docs, and generated local artifact
+  exclusions
+
+Additional review focus:
+
+- verify no live provider network calls were added
+- verify no SDK trial dependency entered this branch
+- verify preflight does not instantiate providers or resolve credentials
+- verify generated audit DB/export/checkpoint/approval/artifact files are not
+  tracked
+- verify public beta docs remain conservative about live-provider readiness
