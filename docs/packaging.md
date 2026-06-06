@@ -20,9 +20,10 @@ Run:
 
 ```bash
 python scripts/check-package.py
+python scripts/build-package.py
 ```
 
-The script verifies:
+`scripts/check-package.py` verifies:
 
 - required project metadata
 - `src` package discovery
@@ -32,10 +33,37 @@ The script verifies:
 - absence of the trial MCP SDK dependency
 - no accidental `python -m agentickvm` behavior
 
+`scripts/build-package.py` verifies package artifact readiness without adding
+new dependencies:
+
+- project name and version
+- CLI script metadata
+- no trial-only `mcp==1.27.2` dependency
+- package metadata does not claim live provider support
+- live providers are reported disabled
+- artifact build status is JSON-safe
+
+If the optional `build` module is available, the script builds a wheel and
+source distribution in a temporary directory, validates artifact names and
+contents, and verifies importability from the wheel.
+
+If the optional `build` module is unavailable, the script reports:
+
+```json
+{
+  "status": "deferred",
+  "reason": "python build module is not installed"
+}
+```
+
+That deferred status is allowed for the current release-quality branch because
+adding build tooling is a separate dependency decision.
+
 ## Build Artifact Status
 
 This branch does not add wheel or source distribution build tooling. The local
-quality gate is metadata/import verification.
+quality gate now includes metadata/import verification plus artifact-readiness
+verification that builds only when existing tooling is available.
 
 Future build verification may add a reviewed build command such as:
 
@@ -45,6 +73,12 @@ python -m build
 
 Only add that command after deciding whether to add or vendor build tooling,
 and after confirming it does not introduce unnecessary dependency churn.
+
+To require artifact builds once tooling is approved, run:
+
+```bash
+python scripts/build-package.py --require-build
+```
 
 ## Inclusion Notes
 

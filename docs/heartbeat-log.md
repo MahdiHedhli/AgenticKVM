@@ -1184,3 +1184,40 @@
 - next recommended task: human-review `feature/release-quality-gates`, then
   decide whether to merge and enable GitHub Pages deployment from GitHub
   Actions settings
+
+## 2026-06-06T00:09:02Z
+
+- selected maturity level: package and release hardening for public release
+  candidate review
+- selected task: create `feature/package-release-hardening` from
+  `feature/release-quality-gates` and add package artifact verification, CLI
+  smoke matrix, lint/type sanity gates, coverage policy, release manifest
+  generation, CI hardening, site preview checks, release artifact checklist,
+  PR review package, and final release-readiness docs
+- why this task is safe: work stays on a mainline feature branch; it does not
+  add the trial-only MCP SDK dependency, live MCP server behavior, live
+  providers, credentials, provider network calls, hardware access, workflow
+  secrets, analytics, tracking, or live-provider CI jobs
+- files expected to change:
+  - `.github/workflows/ci.yml`
+  - `scripts/`
+  - `tests/contract/`
+  - `tests/security/`
+  - `docs/packaging.md`
+  - `docs/cli-smoke.md`
+  - `docs/linting.md`
+  - `docs/type-checking.md`
+  - `docs/coverage-policy.md`
+  - `docs/site-preview.md`
+  - `docs/release-artifacts.md`
+  - `docs/release-pr-review-package.md`
+  - `docs/release-readiness.md`
+  - `docs/release-checklist.md`
+  - `README.md`
+  - `docs/roadmap.md`
+  - `docs/heartbeat-log.md`
+- baseline checks run:
+  - `python3 scripts/check-package.py`
+  - `python3 scripts/validate-docs.py`
+  - `uv run --offline --with pytest --python python3.13 python -m pytest`
+- baseline result: package check passed; docs validation passed; 521 passed
