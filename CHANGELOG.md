@@ -26,6 +26,9 @@ version bump.
   work.
 - Public beta risk register, readiness checklist, merge review package,
   cutover plan, and release notes.
+- Final public beta branch review, safety verification, human merge command
+  plan, GitHub Pages enablement runbook, tagging plan, and maintainer handoff
+  docs.
 
 ### Security
 
@@ -42,6 +45,8 @@ version bump.
 - Wheel/sdist build is deferred unless optional build tooling is available.
 - Full lint/type/coverage enforcement remains documented but deferred.
 - GitHub Pages repository settings require human enablement after merge.
+- The public beta tag and GitHub pre-release are not created by this branch and
+  require explicit maintainer approval.
 - External production audit backend and SIEM integration are not implemented.
 - No production hardware use is supported by this beta candidate.
 

@@ -20,6 +20,10 @@ This beta is intended for code review, mock/fixture testing, documentation
 review, and provider-readiness planning. It is not a production hardware
 automation release.
 
+GitHub Pages site files and workflow are included, but repository Pages settings
+still require maintainer enablement after merge. The release tag and GitHub
+pre-release must also be created manually after final review.
+
 ## What Works Today
 
 - Constitution-backed control-plane rules.
@@ -38,6 +42,8 @@ automation release.
 - Safe recovery playbooks that run through `MCPRouter` and `ControlPlane`.
 - Dependency-free MCP SDK adapter and host compatibility scaffolds.
 - Static GitHub Pages site and release-quality workflows.
+- Final public beta cutover, merge, tagging, Pages enablement, and maintainer
+  review docs.
 - Release validation scripts for package metadata, CLI smoke, lint sanity, type
   sanity, docs/specs, site safety, and release manifest generation.
 - Live-provider preflight gates that block CI/test mode and require explicit
@@ -96,7 +102,8 @@ The trial dependency `mcp==1.27.2` is not adopted in this beta candidate.
 - `scripts/build-package.py` reports `deferred` when the optional `build`
   module is unavailable.
 - Full lint/type/coverage tooling remains documented but deferred.
-- GitHub Pages settings must be enabled by a maintainer after merge.
+- GitHub Pages settings must be enabled by a maintainer after merge before the
+  site is public.
 - SQLite audit backend v1 is local and explicit-path only.
 - External production audit backend and SIEM integration are deferred.
 - No live provider smoke has been run.
