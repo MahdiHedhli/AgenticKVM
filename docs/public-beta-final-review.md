@@ -95,6 +95,37 @@ No local merge conflicts were encountered because this review did not merge to
 is configured locally. A maintainer should confirm remote branch state before
 opening or merging a PR.
 
+## Final Safety Verification
+
+The final review checked these release safety conditions locally:
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| SDK trial dependency absent from package metadata | Pass | `pyproject.toml` has no `mcp` dependency; package checks report `sdk_trial_dependency_present: false`. |
+| SDK trial branch remains separate | Pass | `trial/mock-only-mcp-python-sdk` exists locally at `2a421e1` and is not merged into this branch. |
+| Live providers disabled by default | Pass | Package checks report `live_providers_enabled: false`; CLI smoke uses mock and fixture targets only. |
+| Live MCP server disabled | Pass | Release notes and known limitations mark live MCP server adoption as deferred; no live MCP SDK dependency is present. |
+| No workflow secrets required | Pass | `.github/workflows/ci.yml` and `.github/workflows/pages.yml` contain no `secrets.*` references. |
+| Workflows avoid live provider commands | Pass | Workflow grep found no PiKVM, Redfish, live smoke, or provider smoke commands. |
+| Pages remains static and tracking-free | Pass | `scripts/check-site.py` reports no scripts, no tracking, and no remote fonts. |
+| Generated local artifacts absent | Pass | `scripts/lint-sanity.py` reports `committed_generated_artifacts: 0`. |
+| Issue templates warn against secrets | Pass | `scripts/check-public-beta.py` reports `secret_warning_present: true`. |
+| Site avoids production-ready overclaim | Pass | Site/content safety checks pass and release docs describe the beta as mock-first. |
+
+Some files intentionally mention `mcp==1.27.2` and unsupported live-provider
+phrases as guardrails, docs, or tests. Those references are not package
+dependencies or public support claims.
+
+## Generated Artifact Review
+
+A broad local file-pattern scan found only source-controlled contracts, tests,
+fixtures, and docs, such as schema files and screenshot metadata fixtures. It
+did not identify generated SQLite databases, generated manifests, audit exports,
+approval queue files, screenshots, credentials, real hostnames, or real IP
+addresses committed as release artifacts.
+
+Generated release manifests for this review were written to `/tmp`.
+
 ## Review Conclusion
 
 The branch stack is locally clean and validation is passing. The candidate is
