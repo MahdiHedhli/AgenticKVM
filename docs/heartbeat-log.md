@@ -1343,3 +1343,56 @@
   - operator console, audit backend, input-control, and playbook scaffolds only
     if they preserve `ControlPlane`, approval, audit, registry, and mock-only CI
     boundaries
+
+## 2026-06-06T05:54:37Z
+
+- selected maturity level: next-10 integration branch advanced with safe
+  mainline-compatible scaffolds
+- branch: `feature/agentickvm-next-10-integration`
+- completed:
+  - release-quality and GitHub Pages branch integration confirmed through the
+    package-release hardening base
+  - Python MCP SDK trial reviewed without merging the trial branch
+  - MCP stdio mainline adoption deferred; no `mcp` dependency added
+  - local operator approval transport added with explicit approval queue path,
+    one-time/session scope, denial, expiry, redaction, and optional audit path
+  - local operator console added through `agentickvm status` and
+    `agentickvm console`
+  - SQLite audit backend v1 added with explicit-path opt-in, hash-chain
+    verification, list, export, and tamper-detection tests
+  - live PiKVM observe, live Redfish observe, and PiKVM input-control phases
+    gated in docs; no live provider or input-control code added
+  - safe recovery playbook framework added with dry-run and mock execution
+    through `MCPRouter` and `ControlPlane`
+- tests and scripts run:
+  - `python3 scripts/check-package.py`
+  - `python3 scripts/build-package.py`
+  - `python3 scripts/smoke-cli.py`
+  - `python3 scripts/lint-sanity.py`
+  - `python3 scripts/type-sanity.py`
+  - `python3 scripts/validate-docs.py`
+  - `python3 scripts/check-site.py`
+  - `python3 scripts/generate-release-manifest.py --output <temp path>`
+  - `uv run --offline --with pytest --python python3.13 python -m pytest`
+- result: all scripts passed; package artifact check reported documented
+  deferred build status; pytest result 555 passed
+- safety notes:
+  - real hardware touched: no
+  - live provider network calls made: no
+  - secrets touched: no
+  - live providers enabled by default: no
+  - live input implemented: no
+  - live MCP server enabled: no
+  - SDK trial dependency added: no
+  - policy gates weakened: no
+  - ControlPlane bypass added: no
+- deferred:
+  - mainline MCP SDK dependency adoption
+  - mock-only MCP stdio server mainline adoption
+  - disabled live PiKVM observe implementation
+  - disabled GET-only Redfish implementation
+  - fake-only PiKVM input-control phase
+  - lab-only live smoke plans
+- next recommended task: human review of
+  `feature/agentickvm-next-10-integration`, then choose either a focused
+  live-provider implementation plan or a focused MCP SDK adoption plan.

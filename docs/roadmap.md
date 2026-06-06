@@ -100,6 +100,12 @@
 - Implement explainable prompts.
 - Support approval reuse inside exact session scope.
 - Add audit and expiration tests.
+- Add explicit local approval queue transport with CLI list/show/approve/deny/
+  expire commands, one-time consumption, session-scoped reuse, redaction, and
+  optional local audit persistence.
+- Add local read-only operator console/status output for providers, targets,
+  policy mode, pending approvals, audit verification, and live-provider default
+  status.
 
 ## 8. Hardening And Public Beta
 
@@ -159,5 +165,27 @@
   workflow, and public-claim invariants.
 - Development, testing, packaging, coverage policy, release readiness, release
   checklist, release artifacts, branch review, and PR review docs added.
-- Status: branch-ready for human review; live providers, live MCP server, SDK
-  trial dependency, and production audit backend remain deferred.
+- Status: branch-ready for human review; live providers, live MCP server, and
+  SDK trial dependency remain deferred.
+
+## 13. Next-10 Integration Branch
+
+- Release-quality and GitHub Pages branches are integrated through the
+  package-release hardening base.
+- Python MCP SDK trial reviewed; decision is continue trial and hold mainline
+  adoption until human review.
+- Mock-only MCP stdio mainline adoption remains deferred; no `mcp` dependency
+  added.
+- Local operator approval transport added.
+- Live PiKVM observe, live Redfish observe, and PiKVM input-control phases are
+  explicitly gated in `docs/live-provider-and-input-gates.md`; no live provider
+  or input-control code was added.
+- Local operator console added through `agentickvm status` and
+  `agentickvm console`.
+- SQLite audit backend v1 added with explicit-path runtime opt-in,
+  verification, listing, export, and tamper-detection tests.
+- Safe recovery playbook framework added with dry-run and mock/fake execution
+  through `MCPRouter` and `ControlPlane`.
+- Status: integration branch ready for human review; live providers, live MCP
+  server, SDK trial dependency, real input control, and live recovery playbooks
+  remain deferred.

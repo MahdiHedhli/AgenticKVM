@@ -159,3 +159,33 @@ python scripts/generate-release-manifest.py --output /tmp/agentickvm-release-man
 3. Generate a release manifest into an ignored artifact path or temp path.
 4. Review release artifact checklist.
 5. Decide whether to add public workflow badges after a repository URL exists.
+
+## Next-10 Integration Addendum
+
+Branch: `feature/agentickvm-next-10-integration`
+
+Additional safe changes on the integration branch:
+
+- release-quality and GitHub Pages integration confirmed through the
+  package-release hardening base
+- Python MCP SDK trial reviewed without merging `trial/mock-only-mcp-python-sdk`
+- MCP stdio mainline adoption deferred; no `mcp==1.27.2` dependency added
+- local operator approval transport added with explicit queue path and optional
+  audit path
+- local operator console added through `agentickvm status` and
+  `agentickvm console`
+- SQLite audit backend v1 added with explicit-path opt-in, verification,
+  listing, export, and tamper-detection tests
+- live PiKVM observe, live Redfish observe, and PiKVM input-control phases
+  documented as gated/deferred
+- safe recovery playbook framework added with dry-run and mock/fake execution
+  through `MCPRouter` and `ControlPlane`
+
+Additional review focus:
+
+- verify CLI approval queue paths remain explicit
+- verify SQLite audit paths remain explicit
+- verify playbooks do not call providers directly
+- verify no SDK trial dependency appears in `pyproject.toml`
+- verify no live provider or live input code was added
+- verify all checks report mock-only behavior

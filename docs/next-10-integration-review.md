@@ -241,3 +241,32 @@ Safety properties:
 - no live providers by default
 - no credential resolution
 - no mutating real-provider behavior
+
+## Final Verification
+
+Final checks on this branch:
+
+- `python3 scripts/check-package.py`
+- `python3 scripts/build-package.py`
+- `python3 scripts/smoke-cli.py`
+- `python3 scripts/lint-sanity.py`
+- `python3 scripts/type-sanity.py`
+- `python3 scripts/validate-docs.py`
+- `python3 scripts/check-site.py`
+- `python3 scripts/generate-release-manifest.py --output <temp path>`
+- `uv run --offline --with pytest --python python3.13 python -m pytest`
+
+Result: all scripts passed. Package artifact verification reported its
+documented deferred status because the optional `build` module is not installed.
+Pytest result: 555 passed.
+
+## Remaining Human Decisions
+
+- whether to merge this integration branch
+- whether to continue or hold the Python MCP SDK trial
+- whether to plan a focused mock-only MCP stdio mainline adoption branch
+- whether to plan disabled-by-default live PiKVM observe implementation
+- whether to plan disabled-by-default GET-only Redfish implementation
+- whether to plan a separate fake-only PiKVM input-control phase
+- whether SQLite audit v1 needs additional production hardening before public
+  beta
