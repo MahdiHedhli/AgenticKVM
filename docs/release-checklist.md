@@ -9,6 +9,8 @@ Use this checklist before merging a release-quality branch or cutting a release.
 - [ ] Branch does not merge SDK trial work.
 - [ ] Branch has no unrelated dirty changes.
 - [ ] Branch review package is complete.
+- [ ] Public beta risk register is reviewed.
+- [ ] Public beta readiness checklist is reviewed.
 
 ## Tests
 
@@ -42,6 +44,11 @@ Use this checklist before merging a release-quality branch or cutting a release.
 - [ ] Live PiKVM and Redfish configs are rejected by default.
 - [ ] CLI, MCP, SDK adapter, and host paths preserve `ControlPlane`.
 - [ ] Approval and audit behavior is not weakened.
+- [ ] SQLite audit backend uses explicit paths only.
+- [ ] Live-provider preflight blocks CI/test mode.
+- [ ] Playbooks route through the MCP router and `ControlPlane`.
+- [ ] Generated audit DBs, audit exports, checkpoints, approval queues,
+      screenshots, and artifacts are not committed.
 
 ## Workflows
 
@@ -63,6 +70,7 @@ Use this checklist before merging a release-quality branch or cutting a release.
       documented.
 - [ ] Release manifest can be generated to an explicit safe path.
 - [ ] Release artifact checklist is reviewed.
+- [ ] Public beta merge review package is reviewed if this is a beta branch.
 
 ## Docs And Site
 
@@ -70,6 +78,8 @@ Use this checklist before merging a release-quality branch or cutting a release.
 - [ ] Security model is current.
 - [ ] Provider contracts are current.
 - [ ] Roadmap status is current.
+- [ ] Public beta readiness and risk-register docs are current.
+- [ ] Live-provider preflight docs are current.
 - [ ] GitHub Pages docs are current.
 - [ ] Static site has no analytics or tracking.
 - [ ] Static site does not claim live PiKVM or Redfish support.

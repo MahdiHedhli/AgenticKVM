@@ -15,7 +15,11 @@ The current mainline scope is:
 - MCP scaffold and host compatibility layers
 - provider, target, config, CLI, and docs readiness
 - PiKVM observe-only readiness design
-- production audit-store readiness scaffold
+- local operator approval transport
+- local operator console
+- SQLite audit backend v1
+- safe recovery playbook framework
+- live-provider preflight gates
 - static GitHub Pages site
 - mock-only CI and release quality gates
 
@@ -26,7 +30,7 @@ The following remain deferred:
 - live Redfish transport
 - live MCP server adoption
 - live remote desktop providers
-- production audit backend
+- external production audit backend or SIEM integration
 
 ## Release Principles
 
@@ -121,6 +125,20 @@ Before release:
 - release manifest generation writes only to an explicit safe path
 - release artifacts do not include secrets or generated local audit/artifact
   outputs
+- generated SQLite DBs, audit exports, checkpoints, approval queues, screenshots,
+  and artifact files are not committed
+
+## Public Beta Checks
+
+Before public beta review:
+
+- public beta readiness checklist is current
+- public beta risk register is current
+- SQLite audit hardening review is current
+- live-provider preflight docs and tests are current
+- approval queue and playbook safety docs are current
+- live providers remain gated/deferred
+- SDK trial dependency remains outside this branch
 
 ## GitHub Pages Checks
 
