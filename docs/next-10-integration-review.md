@@ -117,6 +117,23 @@ Additional safe hardening on top of this integration branch:
 The addendum still does not implement live provider network calls, live MCP
 server behavior, live PiKVM input, or the SDK trial dependency.
 
+## Public Beta Cutover Addendum
+
+Branch: `feature/public-beta-cutover`
+
+Additional safe packaging/release work on top of audit beta readiness:
+
+- cutover plan and branch-stack merge guidance
+- public beta release notes, changelog entry, known limitations, and security
+  statement
+- GitHub Pages enablement checklist
+- site public beta status polish
+- maintainer runbook and issue/PR templates
+- release manifest public beta fields and public beta readiness script
+
+This addendum still does not merge to main, create a tag, publish a release,
+enable live providers, add the SDK trial dependency, or run live smoke.
+
 ## Move 4: Local Operator Approval Transport
 
 Status: complete.

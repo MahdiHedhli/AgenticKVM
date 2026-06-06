@@ -217,3 +217,28 @@ Additional review focus:
 - verify generated audit DB/export/checkpoint/approval/artifact files are not
   tracked
 - verify public beta docs remain conservative about live-provider readiness
+
+## Public Beta Cutover Addendum
+
+Branch: `feature/public-beta-cutover`
+
+Additional safe changes:
+
+- public beta cutover plan
+- changelog entry and draft release notes for proposed
+  `v0.1.0-public-beta.1`
+- public beta known limitations and security statement
+- GitHub Pages enablement checklist
+- public beta site copy and links
+- maintainer runbook
+- issue and PR templates with no-secrets warnings
+- release manifest public beta fields
+- public beta readiness script and CI hook
+
+Additional review focus:
+
+- verify issue templates do not request secrets or unredacted operational
+  details
+- verify release notes describe deferred live providers and SDK trial separation
+- verify generated manifests are written only to temp or ignored artifact paths
+- verify no tag or release has been published from this branch
