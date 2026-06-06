@@ -1466,3 +1466,41 @@
 - final validation: pending after this closeout commit
 - next recommended task: run final release script matrix and pytest, then send
   the branch for human merge review if all checks pass.
+
+## 2026-06-06T11:09:33Z
+
+- selected maturity level: public beta cutover and first pre-release readiness
+  package
+- branch: `feature/public-beta-cutover`
+- selected task: prepare public beta cutover docs, release notes, changelog,
+  Pages enablement checklist, site polish, maintainer runbook, templates,
+  manifest/readiness checks, and final merge review without merging to main,
+  adding SDK trial dependency, enabling live MCP server, or touching live
+  providers
+- why this task is safe: baseline validation passed on
+  `feature/public-beta-cutover`; planned work is documentation, static-site,
+  metadata, templates, and offline validation only; no live provider network
+  calls, credentials, hardware access, live smoke, or live MCP behavior are in
+  scope
+- baseline checks run:
+  - `python3 scripts/check-package.py`
+  - `python3 scripts/build-package.py`
+  - `python3 scripts/smoke-cli.py`
+  - `python3 scripts/lint-sanity.py`
+  - `python3 scripts/type-sanity.py`
+  - `python3 scripts/validate-docs.py`
+  - `python3 scripts/check-site.py`
+  - `python3 scripts/generate-release-manifest.py --output <temp path>`
+  - `uv run --offline --with pytest --python python3.13 python -m pytest`
+- baseline result: all scripts passed; package artifact check reported
+  documented deferred build status; pytest result 572 passed
+- expected safe outputs:
+  - public beta cutover plan
+  - public beta release notes and changelog entry
+  - known limitations and security statement
+  - GitHub Pages enablement checklist
+  - site public beta copy polish
+  - maintainer runbook
+  - issue and PR templates that warn against secrets
+  - release manifest and public beta readiness checks
+  - final merge review package and roadmap update
