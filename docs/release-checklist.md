@@ -13,7 +13,13 @@ Use this checklist before merging a release-quality branch or cutting a release.
 ## Tests
 
 - [ ] `python scripts/check-package.py` passes.
+- [ ] `python scripts/build-package.py` passes with `built` or documented
+      `deferred` status.
+- [ ] `python scripts/smoke-cli.py` passes.
+- [ ] `python scripts/lint-sanity.py` passes.
+- [ ] `python scripts/type-sanity.py` passes.
 - [ ] `python scripts/validate-docs.py` passes.
+- [ ] `python scripts/check-site.py` passes.
 - [ ] `uv run --offline --with pytest --python python3.13 python -m pytest`
       passes, or fallback is documented.
 - [ ] CI passes.
@@ -55,6 +61,8 @@ Use this checklist before merging a release-quality branch or cutting a release.
 - [ ] No trial-only dependency was added.
 - [ ] Package build verification is complete or future build command is
       documented.
+- [ ] Release manifest can be generated to an explicit safe path.
+- [ ] Release artifact checklist is reviewed.
 
 ## Docs And Site
 

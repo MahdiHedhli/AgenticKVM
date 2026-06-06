@@ -49,7 +49,12 @@ Run:
 
 ```bash
 python scripts/check-package.py
+python scripts/build-package.py
+python scripts/smoke-cli.py
+python scripts/lint-sanity.py
+python scripts/type-sanity.py
 python scripts/validate-docs.py
+python scripts/check-site.py
 uv run --offline --with pytest --python python3.13 python -m pytest
 ```
 
@@ -61,7 +66,12 @@ safe fallback command and why it was used.
 The CI workflow should pass with:
 
 - package metadata validation
+- package artifact validation or documented deferred status
+- CLI smoke matrix
+- lint sanity
+- type sanity
 - docs/spec validation
+- static site validation
 - pytest
 
 CI must not require secrets, provider credentials, live hardware, live provider
@@ -108,6 +118,7 @@ Before release:
 - package name and version are intentional
 - package metadata does not include the SDK trial dependency
 - package build command is either verified or explicitly deferred
+- release manifest generation writes only to an explicit safe path
 - release artifacts do not include secrets or generated local audit/artifact
   outputs
 

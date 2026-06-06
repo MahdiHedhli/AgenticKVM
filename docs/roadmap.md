@@ -146,10 +146,18 @@
   pytest.
 - Static GitHub Pages workflow added with no secrets and no dependency install.
 - Package metadata and import validation added through `scripts/check-package.py`.
+- Package artifact readiness validation added through `scripts/build-package.py`;
+  wheel/sdist build remains deferred unless optional build tooling is present.
+- CLI smoke matrix added through `scripts/smoke-cli.py`.
+- Lint and type sanity gates added through `scripts/lint-sanity.py` and
+  `scripts/type-sanity.py`.
+- Static site preview validation added through `scripts/check-site.py`.
+- Release manifest generation added through
+  `scripts/generate-release-manifest.py`.
 - Docs/spec/site validation added through `scripts/validate-docs.py`.
 - Release safety regression suite added for provider, target, policy, config,
   workflow, and public-claim invariants.
-- Development, testing, packaging, release readiness, release checklist, and
-  branch review docs added.
+- Development, testing, packaging, coverage policy, release readiness, release
+  checklist, release artifacts, branch review, and PR review docs added.
 - Status: branch-ready for human review; live providers, live MCP server, SDK
   trial dependency, and production audit backend remain deferred.

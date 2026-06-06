@@ -23,6 +23,9 @@ preview checks, and release artifact review docs.
 - `9e796c6 test: add site preview checks`
 - `5724d65 ci: add site preview gate`
 - `3555873 docs: add release artifact checklist`
+- `edf8acb docs: add release PR review package`
+- final closeout commit records release readiness, checklist, roadmap, and
+  heartbeat progress
 
 ## Files Changed By Category
 

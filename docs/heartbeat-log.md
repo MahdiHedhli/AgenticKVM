@@ -1221,3 +1221,83 @@
   - `python3 scripts/validate-docs.py`
   - `uv run --offline --with pytest --python python3.13 python -m pytest`
 - baseline result: package check passed; docs validation passed; 521 passed
+
+### Result
+
+- timestamp: 2026-06-06T00:22:36Z
+- commits:
+  - `5042461` build: add package artifact verification
+  - `7d900cb` test: add CLI smoke matrix
+  - `34b99c6` test: add lint sanity gate
+  - `76b8594` test: add type sanity gate
+  - `0e50aa4` docs: add coverage policy
+  - `16dd8ed` build: add release manifest generator
+  - `07d1496` ci: harden release quality workflow
+  - `9e796c6` test: add site preview checks
+  - `5724d65` ci: add site preview gate
+  - `3555873` docs: add release artifact checklist
+  - `edf8acb` docs: add release PR review package
+  - `cdc5469` docs: polish README release links
+- files changed:
+  - `.github/workflows/ci.yml`
+  - `scripts/build-package.py`
+  - `scripts/smoke-cli.py`
+  - `scripts/lint-sanity.py`
+  - `scripts/type-sanity.py`
+  - `scripts/generate-release-manifest.py`
+  - `scripts/check-site.py`
+  - `scripts/validate-docs.py`
+  - `tests/contract/test_package_artifacts.py`
+  - `tests/contract/test_cli_smoke_matrix.py`
+  - `tests/contract/test_lint_sanity.py`
+  - `tests/contract/test_type_sanity.py`
+  - `tests/contract/test_release_manifest.py`
+  - `tests/security/test_site_preview_safety.py`
+  - `tests/security/test_workflow_safety.py`
+  - `docs/packaging.md`
+  - `docs/cli-smoke.md`
+  - `docs/linting.md`
+  - `docs/type-checking.md`
+  - `docs/coverage-policy.md`
+  - `docs/site-preview.md`
+  - `docs/release-artifacts.md`
+  - `docs/release-pr-review-package.md`
+  - `docs/release-readiness.md`
+  - `docs/release-checklist.md`
+  - `docs/release-quality-gates.md`
+  - `docs/roadmap.md`
+  - `docs/heartbeat-log.md`
+  - `README.md`
+- tests and scripts run:
+  - `python3 scripts/check-package.py`
+  - `python3 scripts/build-package.py`
+  - `python3 scripts/smoke-cli.py`
+  - `python3 scripts/lint-sanity.py`
+  - `python3 scripts/type-sanity.py`
+  - `python3 scripts/validate-docs.py`
+  - `python3 scripts/check-site.py`
+  - `python3 scripts/generate-release-manifest.py --output <temp path>`
+  - `uv run --offline --with pytest --python python3.13 python -m pytest`
+- result: 537 passed
+- risks closed:
+  - package artifact readiness gate added with safe deferred behavior when
+    optional build tooling is unavailable
+  - CLI smoke matrix added for mock and fixture-only flows
+  - lint and type sanity gates added without new dependencies
+  - coverage policy documented without premature percentage claims
+  - release manifest generator added with explicit-path output safety
+  - CI now runs package, artifact, CLI, lint, type, docs, site, and pytest
+    gates
+  - static site preview checks added
+  - release artifact checklist and PR review package added
+- risks remaining:
+  - optional wheel/sdist build tooling still needs human dependency decision
+  - full lint/type tooling remains deferred
+  - coverage percentage enforcement remains deferred
+  - public repository URL and badges remain undecided
+  - GitHub Pages repository settings require human confirmation after merge
+  - live MCP server, live providers, SDK trial adoption, and production audit
+    backend remain deferred
+- next recommended task: human-review `feature/package-release-hardening`,
+  then decide whether to merge into the release-quality branch or mainline
+  review path

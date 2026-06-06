@@ -56,9 +56,14 @@ live provider, hardware, or credential calls.
 
 The workflow should run:
 
-- `python -m pytest`
 - `python scripts/check-package.py`
+- `python scripts/build-package.py`
+- `python scripts/smoke-cli.py`
+- `python scripts/lint-sanity.py`
+- `python scripts/type-sanity.py`
 - `python scripts/validate-docs.py`
+- `python scripts/check-site.py`
+- `python -m pytest`
 
 CI must not:
 
