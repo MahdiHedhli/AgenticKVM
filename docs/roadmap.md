@@ -213,3 +213,24 @@
 - Status: public beta candidate branch ready for final local validation and
   human merge review; live providers, live MCP server, SDK trial dependency,
   real input control, and production external audit backend remain deferred.
+
+## 15. Public Beta Cutover Branch
+
+- Public beta cutover plan added with branch stack, merge order, validation
+  commands, GitHub Pages enablement, pre-release tag proposal, release notes
+  workflow, rollback plan, and human decisions.
+- Draft release notes and changelog entry added for proposed
+  `v0.1.0-public-beta.1`; package metadata remains `0.0.0` until maintainer
+  approval.
+- Known limitations and public beta security statement added.
+- GitHub Pages enablement checklist added.
+- Static site polished to show public beta candidate status, what works today,
+  what remains intentionally disabled, and links to release notes, limitations,
+  security, and roadmap docs.
+- Maintainer runbook and GitHub issue/PR templates added.
+- Release manifest strengthened with public beta metadata and generated-artifact
+  exclusion fields.
+- Public beta readiness script added and wired into CI.
+- Status: ready for final local validation and human merge review; no tag,
+  release, main merge, live provider, live MCP server, or SDK trial adoption has
+  occurred.

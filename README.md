@@ -39,8 +39,13 @@ and is not part of mainline metadata.
 - [Release readiness](docs/release-readiness.md)
 - [Release artifacts](docs/release-artifacts.md)
 - [Public beta readiness](docs/public-beta-readiness.md)
+- [Public beta cutover plan](docs/public-beta-cutover-plan.md)
+- [Public beta release notes](docs/releases/public-beta-0.1.0.md)
+- [Public beta known limitations](docs/public-beta-known-limitations.md)
+- [Public beta security statement](docs/public-beta-security-statement.md)
 - [Public beta risk register](docs/public-beta-risk-register.md)
 - [Live provider preflight](docs/live-provider-preflight.md)
+- [Maintainer runbook](docs/maintainer-runbook.md)
 - [GitHub Pages setup](docs/github-pages.md)
 
 ## Core Architecture Rule
@@ -139,6 +144,7 @@ python scripts/type-sanity.py
 python scripts/validate-docs.py
 python scripts/check-site.py
 python scripts/generate-release-manifest.py --output /tmp/agentickvm-release-manifest.json
+python scripts/check-public-beta.py
 ```
 
 The test suite must use mocks and schemas only. Real hardware is never used in

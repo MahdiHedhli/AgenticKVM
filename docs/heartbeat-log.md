@@ -1504,3 +1504,36 @@
   - issue and PR templates that warn against secrets
   - release manifest and public beta readiness checks
   - final merge review package and roadmap update
+
+## 2026-06-06T11:42:00Z
+
+- selected maturity level: public beta cutover branch ready for final local
+  validation and human merge review
+- branch: `feature/public-beta-cutover`
+- completed:
+  - public beta cutover plan
+  - draft public beta release notes and changelog entry for proposed
+    `v0.1.0-public-beta.1`
+  - public beta known limitations and security statement
+  - GitHub Pages enablement checklist
+  - public beta site status polish with release notes, limitations, security,
+    and roadmap links
+  - maintainer public beta runbook
+  - GitHub issue and PR templates with no-secrets warnings
+  - release manifest public beta metadata and generated-artifact exclusion
+    fields
+  - public beta readiness script and CI hook
+  - finalized public beta merge review package
+  - README and roadmap public beta cutover links/status
+- safety notes:
+  - real hardware touched: no
+  - live provider network calls made: no
+  - secrets touched: no
+  - live providers enabled by default: no
+  - live MCP server enabled: no
+  - SDK trial dependency added: no
+  - generated audit DB/export/checkpoint/approval/artifact files committed: no
+  - tag pushed or release published: no
+- final validation: pending after this closeout commit
+- next recommended task: run final release script matrix and pytest, then send
+  `feature/public-beta-cutover` for human merge review if all checks pass.
