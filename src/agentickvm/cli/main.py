@@ -13,9 +13,13 @@ from agentickvm.control_plane import (
     ApprovalGrantScope,
     LocalApprovalQueue,
     LocalJSONLAuditSink,
+    SQLiteAuditSink,
+    export_sqlite_audit,
     fingerprint_parameters,
+    list_sqlite_audit_events,
     mode_preset,
     verify_audit_chain,
+    verify_sqlite_audit_chain,
 )
 from agentickvm.mcp import MCPResultStatus, MCPRouter, MCPToolRequest
 
@@ -26,12 +30,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = _parser()
     args = parser.parse_args(argv)
     try:
-        approval_queue = _approval_queue_from_args(args)
+        audit_sink = _audit_sink_from_args(args)
+        approval_queue = _approval_queue_from_args(args, audit_sink=audit_sink)
         if args.command == "approvals":
             return _approvals(args, approval_queue)
+        if args.command == "audit":
+            return _audit(args)
         runtime = build_runtime(
             load_config(args.config),
-            audit_sink=LocalJSONLAuditSink(args.audit_path) if args.audit_path else None,
+            audit_sink=audit_sink,
             approval_store=approval_queue.to_approval_store() if approval_queue else None,
         )
         if args.command == "list-providers":
@@ -41,7 +48,14 @@ def main(argv: Sequence[str] | None = None) -> int:
             _print_json(_targets_payload(runtime))
             return 0
         if args.command in {"status", "console"}:
-            _print_json(_status_payload(runtime, approval_queue, args.audit_path))
+            _print_json(
+                _status_payload(
+                    runtime,
+                    approval_queue,
+                    args.audit_path,
+                    args.audit_sqlite_path,
+                )
+            )
             return 0
         if args.command == "call":
             return _call(args, runtime, approval_queue)
@@ -131,6 +145,10 @@ def _parser() -> argparse.ArgumentParser:
         "--audit-path",
         help="Explicit local audit JSONL path.",
     )
+    parser.add_argument(
+        "--audit-sqlite-path",
+        help="Explicit local SQLite audit path.",
+    )
     subparsers = parser.add_subparsers(dest="command")
 
     subparsers.add_parser("list-providers")
@@ -175,6 +193,18 @@ def _parser() -> argparse.ArgumentParser:
     expire.add_argument("approval_id")
     expire.add_argument("--operator-id", required=True)
     expire.add_argument("--reason")
+
+    audit = subparsers.add_parser("audit")
+    audit_actions = audit.add_subparsers(dest="audit_command")
+    verify = audit_actions.add_parser("verify")
+    verify.add_argument("--jsonl-path")
+    verify.add_argument("--sqlite-path")
+    list_events = audit_actions.add_parser("list")
+    list_events.add_argument("--sqlite-path", required=True)
+    list_events.add_argument("--limit", type=int, default=20)
+    export = audit_actions.add_parser("export")
+    export.add_argument("--sqlite-path", required=True)
+    export.add_argument("--output", required=True)
     return parser
 
 
@@ -225,6 +255,43 @@ def _approvals(
     raise ValueError("unknown approvals command")
 
 
+def _audit(args: argparse.Namespace) -> int:
+    if args.audit_command == "verify":
+        if bool(args.jsonl_path) == bool(args.sqlite_path):
+            raise ValueError("audit verify requires exactly one audit path")
+        if args.jsonl_path:
+            payload = {
+                "status": "ok" if verify_audit_chain(args.jsonl_path) else "audit_error",
+                "backend": "jsonl",
+                "path": args.jsonl_path,
+            }
+        else:
+            verification = verify_sqlite_audit_chain(args.sqlite_path)
+            payload = {
+                "status": "ok" if verification.ok else "audit_error",
+                "backend": "sqlite",
+                "path": args.sqlite_path,
+                "verification": verification.to_dict(),
+            }
+        _print_json(payload)
+        return 0 if payload["status"] == "ok" else 2
+    if args.audit_command == "list":
+        _print_json(
+            {
+                "status": "ok",
+                "backend": "sqlite",
+                "path": args.sqlite_path,
+                "events": list(list_sqlite_audit_events(args.sqlite_path, limit=args.limit)),
+            }
+        )
+        return 0
+    if args.audit_command == "export":
+        payload = export_sqlite_audit(args.sqlite_path, output_path=args.output)
+        _print_json({"status": "ok", "export": payload})
+        return 0
+    raise ValueError("unknown audit command")
+
+
 def _providers_payload(runtime: Any) -> dict[str, Any]:
     return {"providers": [dict(item) for item in runtime.provider_registry.list_summaries()]}
 
@@ -237,6 +304,7 @@ def _status_payload(
     runtime: Any,
     approval_queue: LocalApprovalQueue | None,
     audit_path: str | None,
+    audit_sqlite_path: str | None,
 ) -> dict[str, Any]:
     providers = [dict(item) for item in runtime.provider_registry.list_summaries()]
     targets = [dict(item) for item in runtime.target_registry.list_summaries()]
@@ -251,11 +319,7 @@ def _status_payload(
         "providers": providers,
         "targets": targets,
         "pending_approvals": [],
-        "audit": {
-            "path": audit_path,
-            "configured": audit_path is not None,
-            "hash_chain_valid": verify_audit_chain(audit_path) if audit_path else None,
-        },
+        "audit": _audit_status(audit_path, audit_sqlite_path),
         "safety": {
             "live_providers_enabled_by_default": False,
             "real_provider_enabled": real_provider_enabled,
@@ -290,10 +354,49 @@ def _params_from_cli(values: Sequence[str]) -> dict[str, str]:
     return params
 
 
-def _approval_queue_from_args(args: argparse.Namespace) -> LocalApprovalQueue | None:
+def _approval_queue_from_args(
+    args: argparse.Namespace,
+    *,
+    audit_sink: Any | None = None,
+) -> LocalApprovalQueue | None:
     if not args.approval_path:
         return None
-    return LocalApprovalQueue(args.approval_path, audit_path=args.audit_path)
+    return LocalApprovalQueue(args.approval_path, audit_sink=audit_sink)
+
+
+def _audit_sink_from_args(args: argparse.Namespace) -> Any | None:
+    if args.audit_path and args.audit_sqlite_path:
+        raise ValueError("choose either --audit-path or --audit-sqlite-path")
+    if args.audit_path:
+        return LocalJSONLAuditSink(args.audit_path)
+    if args.audit_sqlite_path:
+        return SQLiteAuditSink(args.audit_sqlite_path)
+    return None
+
+
+def _audit_status(audit_path: str | None, audit_sqlite_path: str | None) -> dict[str, Any]:
+    if audit_path:
+        return {
+            "backend": "jsonl",
+            "path": audit_path,
+            "configured": True,
+            "hash_chain_valid": verify_audit_chain(audit_path),
+        }
+    if audit_sqlite_path:
+        verification = verify_sqlite_audit_chain(audit_sqlite_path)
+        return {
+            "backend": "sqlite",
+            "path": audit_sqlite_path,
+            "configured": True,
+            "hash_chain_valid": verification.ok,
+            "verification": verification.to_dict(),
+        }
+    return {
+        "backend": None,
+        "path": None,
+        "configured": False,
+        "hash_chain_valid": None,
+    }
 
 
 def _fixture_provider_summary(provider: dict[str, Any]) -> bool:

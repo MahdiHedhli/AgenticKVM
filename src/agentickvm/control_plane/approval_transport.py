@@ -343,14 +343,17 @@ class LocalApprovalQueue:
         path: str | Path,
         *,
         audit_path: str | Path | None = None,
+        audit_sink: AuditSink | None = None,
         now_factory: Any | None = None,
     ) -> None:
+        if audit_path is not None and audit_sink is not None:
+            raise ValueError("provide either audit_path or audit_sink, not both")
         self.path = Path(path)
         if self.path.exists() and self.path.is_dir():
             raise ValueError("approval path must be a file")
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self.now_factory = now_factory or (lambda: datetime.now(UTC))
-        self.audit_sink: AuditSink | None = (
+        self.audit_sink: AuditSink | None = audit_sink or (
             LocalJSONLAuditSink(audit_path) if audit_path is not None else None
         )
 

@@ -168,6 +168,14 @@ from agentickvm.control_plane.audit_retention import (  # noqa: E402
     AuditRetentionPolicyError,
     AuditRotationDecision,
 )
+from agentickvm.control_plane.audit_sqlite import (  # noqa: E402
+    SQLiteAuditError,
+    SQLiteAuditSink,
+    SQLiteAuditVerification,
+    export_sqlite_audit,
+    list_sqlite_audit_events,
+    verify_sqlite_audit_chain,
+)
 from agentickvm.control_plane.engine import (  # noqa: E402
     CapabilityRequest,
     ControlPlane,
@@ -227,6 +235,9 @@ __all__ = [
     "PolicyRule",
     "RiskLevel",
     "SessionScope",
+    "SQLiteAuditError",
+    "SQLiteAuditSink",
+    "SQLiteAuditVerification",
     "TargetScope",
     "TargetDefinition",
     "TargetRegistry",
@@ -235,12 +246,15 @@ __all__ = [
     "build_audit_event",
     "create_audit_checkpoint",
     "export_audit_log",
+    "export_sqlite_audit",
     "default_decision_for_unknown_capability",
     "fingerprint_parameters",
+    "list_sqlite_audit_events",
     "load_policy_file",
     "mode_preset",
     "redact_mapping",
     "verify_audit_checkpoint",
     "verify_audit_export",
     "verify_audit_chain",
+    "verify_sqlite_audit_chain",
 ]

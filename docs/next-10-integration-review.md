@@ -90,7 +90,7 @@ Automated tests remain mock-only, fixture-only, temp-path-only, and safe.
 | 5. PiKVM observe-only | Disabled-by-default docs/spec/tests only unless safely bounded |
 | 6. Redfish observe-only | Disabled-by-default docs/spec/tests only unless safely bounded |
 | 7. Local operator console | Complete; local JSON CLI status console added |
-| 8. Production audit backend v1 | Candidate for local SQLite/file-backed implementation |
+| 8. Production audit backend v1 | Complete; explicit-path SQLite audit backend v1 added |
 | 9. PiKVM input-control phase | Fake-only/gated scaffold only; no live input |
 | 10. Recovery playbooks | Candidate for mock/fake dry-run framework |
 
@@ -153,3 +153,31 @@ Safety properties:
 - no environment secret reads
 - no network listener
 - no auto-approval
+
+## Move 8: Production Audit Backend V1
+
+Status: complete.
+
+Implemented:
+
+- `SQLiteAuditSink`
+- SQLite hash-chain verification
+- recent event listing
+- explicit-path JSON export
+- CLI commands:
+  - `agentickvm audit verify --sqlite-path <path>`
+  - `agentickvm audit list --sqlite-path <path>`
+  - `agentickvm audit export --sqlite-path <path> --output <path>`
+- runtime opt-in through `--audit-sqlite-path`
+- tests for persistence, verification, tamper detection, export safety, CLI
+  audit commands, and console reporting
+
+Safety properties:
+
+- standard library only
+- explicit paths only
+- tests use temp directories only
+- no network
+- no credentials
+- no provider execution path changes
+- JSONL audit remains supported
