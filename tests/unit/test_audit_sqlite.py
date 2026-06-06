@@ -3,10 +3,16 @@ from __future__ import annotations
 import json
 import sqlite3
 
+import pytest
+
 from agentickvm.cli import main as cli_main
 from agentickvm.control_plane import (
+    SQLiteAuditError,
+    create_sqlite_audit_checkpoint,
     export_sqlite_audit,
+    inspect_sqlite_audit_event,
     list_sqlite_audit_events,
+    verify_sqlite_audit_checkpoint,
     verify_sqlite_audit_chain,
 )
 
@@ -42,8 +48,15 @@ def test_sqlite_audit_sink_persists_and_verifies_cli_flow(tmp_path, capsys) -> N
     assert events
     assert events[-1]["event"]["event_type"] == "result_returned"
 
+    reopened = verify_sqlite_audit_chain(audit_path)
+    assert reopened.ok is True
+    assert reopened.event_count == verification.event_count
 
-def test_sqlite_audit_export_is_explicit_path_json_safe(tmp_path, capsys) -> None:
+
+def test_sqlite_audit_export_and_checkpoint_are_explicit_path_json_safe(
+    tmp_path,
+    capsys,
+) -> None:
     audit_path = tmp_path / "audit.sqlite"
     export_path = tmp_path / "audit-export.json"
     _run_cli(
@@ -58,15 +71,30 @@ def test_sqlite_audit_export_is_explicit_path_json_safe(tmp_path, capsys) -> Non
         ],
         capsys,
     )
+    checkpoint = create_sqlite_audit_checkpoint(
+        audit_path,
+        audit_log_id="sqlite-test",
+        metadata={"operator": "tester", "api_key": "should-redact"},
+        checkpoint_id="sqlite-checkpoint-1",
+    )
 
-    payload = export_sqlite_audit(audit_path, output_path=export_path)
+    checkpoint_verification = verify_sqlite_audit_checkpoint(audit_path, checkpoint)
+    payload = export_sqlite_audit(
+        audit_path,
+        output_path=export_path,
+        checkpoint=checkpoint,
+    )
 
     assert export_path.exists()
     assert payload["format"] == "agentickvm.sqlite-audit-export.v1"
     assert payload["verification"]["ok"] is True
+    assert checkpoint_verification.ok is True
+    assert payload["checkpoint_verified"] is True
+    assert payload["checkpoint"]["metadata"]["api_key"] == "[REDACTED]"
     lowered = export_path.read_text(encoding="utf-8").lower()
     assert "password" not in lowered
-    assert "api_key" not in lowered
+    assert "should-redact" not in lowered
+    assert "[redacted]" in lowered
     assert "screenshot_bytes" not in lowered
 
 
@@ -103,6 +131,66 @@ def test_sqlite_audit_tamper_is_detected(tmp_path, capsys) -> None:
 
     assert verification.ok is False
     assert verification.reason == "event hash mismatch"
+
+
+def test_sqlite_audit_deletion_and_malformed_db_fail_closed(tmp_path, capsys) -> None:
+    audit_path = tmp_path / "audit.sqlite"
+    _run_cli(
+        [
+            "--audit-sqlite-path",
+            str(audit_path),
+            "call",
+            "--target",
+            "mock-host",
+            "--tool",
+            "get_power_state",
+        ],
+        capsys,
+    )
+    checkpoint = create_sqlite_audit_checkpoint(audit_path, audit_log_id="delete-test")
+    connection = sqlite3.connect(audit_path)
+    try:
+        connection.execute(
+            "DELETE FROM audit_events WHERE event_index = (SELECT max(event_index) FROM audit_events)"
+        )
+        connection.commit()
+    finally:
+        connection.close()
+
+    verification = verify_sqlite_audit_checkpoint(audit_path, checkpoint)
+    assert verification.ok is False
+    assert verification.reason == "audit log tail truncated"
+
+    malformed = tmp_path / "malformed.sqlite"
+    malformed.write_text("not sqlite", encoding="utf-8")
+    malformed_result = verify_sqlite_audit_chain(malformed)
+    assert malformed_result.ok is False
+
+
+def test_sqlite_audit_inspect_event_and_bad_identifier(tmp_path, capsys) -> None:
+    audit_path = tmp_path / "audit.sqlite"
+    _run_cli(
+        [
+            "--audit-sqlite-path",
+            str(audit_path),
+            "call",
+            "--target",
+            "mock-host",
+            "--tool",
+            "get_power_state",
+        ],
+        capsys,
+    )
+    events = list_sqlite_audit_events(audit_path)
+
+    inspected = inspect_sqlite_audit_event(
+        audit_path,
+        event_index=events[0]["event_index"],
+    )
+
+    assert inspected["event_hash"] == events[0]["event_hash"]
+    with pytest.raises(SQLiteAuditError, match="exactly one"):
+        inspect_sqlite_audit_event(audit_path)
 
 
 def test_cli_audit_verify_list_and_export_sqlite(tmp_path, capsys) -> None:

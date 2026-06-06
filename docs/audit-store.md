@@ -62,6 +62,9 @@ The SQLite backend does not enable live providers, open network connections,
 resolve credentials, or change policy behavior. Tests use temp directories
 only.
 
+Hardening details and known limitations are tracked in
+[SQLite Audit Backend Hardening](sqlite-audit-hardening.md).
+
 ## Tail-Truncation Risk
 
 A hash chain alone cannot detect an attacker removing records from the end of
@@ -86,6 +89,9 @@ is malformed, or the checkpoint hash does not match its content.
 
 Appending events after a checkpoint is allowed. Truncating events at or before
 the checkpoint is not allowed.
+
+SQLite audit checkpoints use the same model through
+`create_sqlite_audit_checkpoint` and `verify_sqlite_audit_checkpoint`.
 
 ## Export And Import Verification
 

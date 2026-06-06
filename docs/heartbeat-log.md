@@ -1396,3 +1396,37 @@
 - next recommended task: human review of
   `feature/agentickvm-next-10-integration`, then choose either a focused
   live-provider implementation plan or a focused MCP SDK adoption plan.
+
+## 2026-06-06T06:49:29Z
+
+- selected maturity level: audit beta readiness and public beta merge
+  hardening
+- selected task: create `feature/audit-beta-readiness` from
+  `feature/agentickvm-next-10-integration`, harden SQLite audit behavior,
+  approval/audit integration, playbook safety, live-provider preflight gates,
+  and public beta review docs without adding live providers or SDK trial
+  dependency
+- why this task is safe: baseline release gates passed on the new branch;
+  planned work is explicit-path, temp-path-tested, mock-only, docs/spec/test
+  heavy, and keeps live provider execution, live smoke, credentials, hardware,
+  and network listeners out of scope
+- baseline checks run:
+  - `python3 scripts/check-package.py`
+  - `python3 scripts/build-package.py`
+  - `python3 scripts/smoke-cli.py`
+  - `python3 scripts/lint-sanity.py`
+  - `python3 scripts/type-sanity.py`
+  - `python3 scripts/validate-docs.py`
+  - `python3 scripts/check-site.py`
+  - `python3 scripts/generate-release-manifest.py --output <temp path>`
+  - `uv run --offline --with pytest --python python3.13 python -m pytest`
+- baseline result: all scripts passed; package artifact check reported
+  documented deferred build status; pytest result 555 passed
+- expected safe outputs:
+  - SQLite audit backend hardening review and tests
+  - audit CLI query/export/checkpoint polish
+  - approval queue plus audit integration hardening
+  - playbook safety conformance tests
+  - live-provider preflight gate framework
+  - public beta risk register and readiness package
+  - release/CI checks for generated audit, approval, and artifact files
