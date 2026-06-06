@@ -1301,3 +1301,45 @@
 - next recommended task: human-review `feature/package-release-hardening`,
   then decide whether to merge into the release-quality branch or mainline
   review path
+
+## 2026-06-06T05:36:26Z
+
+- selected maturity level: next-10 strategic integration planning and safe
+  scaffold implementation
+- selected task: create `feature/agentickvm-next-10-integration` from
+  `feature/package-release-hardening`, confirm release-quality and GitHub
+  Pages work is integrated, review the Python MCP SDK trial without merging it,
+  and advance safe local/mock/disabled-by-default scaffolds for approval,
+  provider readiness, audit, operator console, input-control, and recovery
+  playbooks where bounded
+- why this task is safe: baseline release gates passed on
+  `feature/package-release-hardening`; this branch does not add the trial-only
+  MCP SDK dependency, live MCP server default, live provider default,
+  credentials, provider network calls, hardware access, workflow secrets,
+  analytics, tracking, or live-provider CI jobs
+- branch integration baseline:
+  - `feature/github-pages-site` is included in `feature/package-release-hardening`
+  - `feature/release-quality-gates` is included in
+    `feature/package-release-hardening`
+  - integration branch created from clean `feature/package-release-hardening`
+- baseline checks run:
+  - `python3 scripts/check-package.py`
+  - `python3 scripts/build-package.py`
+  - `python3 scripts/smoke-cli.py`
+  - `python3 scripts/lint-sanity.py`
+  - `python3 scripts/type-sanity.py`
+  - `python3 scripts/validate-docs.py`
+  - `python3 scripts/check-site.py`
+  - `python3 scripts/generate-release-manifest.py --output <temp path>`
+  - `uv run --offline --with pytest --python python3.13 python -m pytest`
+- baseline result: all scripts passed; package artifact check reported
+  documented deferred build status; pytest result 537 passed
+- expected safe outputs:
+  - next-10 integration review
+  - SDK trial review decision
+  - MCP stdio mainline adoption hold/defer docs unless human review accepts SDK
+  - local approval transport scaffold if bounded
+  - disabled/fake-only provider readiness docs/tests where safe
+  - operator console, audit backend, input-control, and playbook scaffolds only
+    if they preserve `ControlPlane`, approval, audit, registry, and mock-only CI
+    boundaries
