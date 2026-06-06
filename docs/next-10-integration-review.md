@@ -92,7 +92,7 @@ Automated tests remain mock-only, fixture-only, temp-path-only, and safe.
 | 7. Local operator console | Complete; local JSON CLI status console added |
 | 8. Production audit backend v1 | Complete; explicit-path SQLite audit backend v1 added |
 | 9. PiKVM input-control phase | Fake-only/gated scaffold only; no live input |
-| 10. Recovery playbooks | Candidate for mock/fake dry-run framework |
+| 10. Recovery playbooks | Complete; mock-safe playbook framework added |
 
 ## Next Gate
 
@@ -181,3 +181,35 @@ Safety properties:
 - no credentials
 - no provider execution path changes
 - JSONL audit remains supported
+
+## Move 10: Safe Recovery Playbooks
+
+Status: complete.
+
+Implemented:
+
+- playbook model
+- playbook registry
+- playbook runner
+- dry-run support
+- CLI commands:
+  - `agentickvm playbooks list`
+  - `agentickvm playbooks dry-run <name> --target <target>`
+  - `agentickvm playbooks run <name> --target <target>`
+- initial playbooks:
+  - `observe-target-health`
+  - `capture-screen-evidence`
+  - `inspect-boot-status`
+  - `collect-pre-recovery-evidence`
+  - `wait-for-login-prompt`
+- tests for dry-run, mock execution, unknown target fail-closed behavior,
+  audit path use, and provider-bypass prevention
+
+Safety properties:
+
+- executes through `MCPRouter` and `ControlPlane`
+- stops on non-`ok` step results
+- no direct provider calls
+- no live providers by default
+- no credential resolution
+- no mutating real-provider behavior

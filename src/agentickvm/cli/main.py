@@ -22,6 +22,7 @@ from agentickvm.control_plane import (
     verify_sqlite_audit_chain,
 )
 from agentickvm.mcp import MCPResultStatus, MCPRouter, MCPToolRequest
+from agentickvm.playbooks import PlaybookRunner
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -57,6 +58,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                 )
             )
             return 0
+        if args.command == "playbooks":
+            return _playbooks(args, runtime)
         if args.command == "call":
             return _call(args, runtime, approval_queue)
     except Exception as exc:  # noqa: BLE001 - CLI must return structured failures.
@@ -205,6 +208,18 @@ def _parser() -> argparse.ArgumentParser:
     export = audit_actions.add_parser("export")
     export.add_argument("--sqlite-path", required=True)
     export.add_argument("--output", required=True)
+
+    playbooks = subparsers.add_parser("playbooks")
+    playbook_actions = playbooks.add_subparsers(dest="playbook_command")
+    playbook_actions.add_parser("list")
+    dry_run = playbook_actions.add_parser("dry-run")
+    dry_run.add_argument("name")
+    dry_run.add_argument("--target", required=True)
+    run = playbook_actions.add_parser("run")
+    run.add_argument("name")
+    run.add_argument("--target", required=True)
+    run.add_argument("--session-id", default="playbook-session")
+    run.add_argument("--requester-id", default="playbook-runner")
     return parser
 
 
@@ -290,6 +305,26 @@ def _audit(args: argparse.Namespace) -> int:
         _print_json({"status": "ok", "export": payload})
         return 0
     raise ValueError("unknown audit command")
+
+
+def _playbooks(args: argparse.Namespace, runtime: Any) -> int:
+    runner = PlaybookRunner(runtime)
+    if args.playbook_command == "list":
+        _print_json(runner.list_playbooks())
+        return 0
+    if args.playbook_command == "dry-run":
+        _print_json(runner.dry_run(args.name, target=args.target))
+        return 0
+    if args.playbook_command == "run":
+        payload = runner.run(
+            args.name,
+            target=args.target,
+            session_id=args.session_id,
+            requester_id=args.requester_id,
+        )
+        _print_json(payload)
+        return 0 if payload["status"] == "ok" else 2
+    raise ValueError("unknown playbooks command")
 
 
 def _providers_payload(runtime: Any) -> dict[str, Any]:
