@@ -30,6 +30,11 @@ def test_github_pages_site_contains_required_safety_messaging() -> None:
         "Live providers are deferred",
         "Future roadmap only",
         "not a mainline dependency",
+        "Public beta candidate",
+        "What works today",
+        "What is intentionally disabled",
+        "../docs/public-beta-known-limitations.md",
+        "../docs/public-beta-security-statement.md",
     ):
         assert required in text
 

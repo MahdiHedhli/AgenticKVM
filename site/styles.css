@@ -187,6 +187,17 @@ h3 {
   font-weight: 800;
 }
 
+.beta-note {
+  max-width: 760px;
+  margin: 22px 0 0;
+  padding: 12px 14px;
+  border: 1px solid rgba(243, 201, 105, 0.5);
+  border-radius: 8px;
+  background: rgba(243, 201, 105, 0.08);
+  color: var(--warning);
+  font-weight: 700;
+}
+
 .button {
   display: inline-flex;
   min-height: 44px;
@@ -259,6 +270,46 @@ h3 {
   gap: 28px;
   color: var(--muted);
   font-size: 1.05rem;
+}
+
+.mini-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  max-width: 1180px;
+}
+
+.mini-grid article {
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.mini-grid ul {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--muted);
+}
+
+.doc-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-width: 1180px;
+  margin-top: 22px;
+}
+
+.doc-links a {
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--accent-strong);
+  text-decoration: none;
+}
+
+.doc-links a:hover {
+  border-color: var(--accent);
 }
 
 .flow {
@@ -404,6 +455,7 @@ code {
   .hero,
   .split,
   .command-grid,
+  .mini-grid,
   .timeline {
     grid-template-columns: 1fr;
   }

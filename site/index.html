@@ -40,18 +40,22 @@
             <a class="button" href="#roadmap">View the roadmap</a>
             <a class="button" href="#safety">Explore the safety model</a>
           </div>
+          <p class="beta-note">
+            Public beta candidate. Mock-first, live-provider gated, and not for
+            unattended production hardware use.
+          </p>
           <dl class="status-strip" aria-label="Current project status">
             <div>
-              <dt>Mainline</dt>
-              <dd>Mock-first</dd>
+              <dt>Public beta</dt>
+              <dd>Candidate</dd>
             </div>
             <div>
               <dt>Live providers</dt>
-              <dd>Gated</dd>
+              <dd>Deferred</dd>
             </div>
             <div>
-              <dt>Live MCP server</dt>
-              <dd>Deferred</dd>
+              <dt>Provider mode</dt>
+              <dd>Mock-first</dd>
             </div>
             <div>
               <dt>CI</dt>
@@ -70,6 +74,43 @@
             <li>MCP-ready integration</li>
           </ul>
         </aside>
+      </section>
+
+      <section class="section" id="beta">
+        <div class="section-heading">
+          <p class="eyebrow">Public beta candidate</p>
+          <h2>What works today, and what is intentionally disabled.</h2>
+        </div>
+        <div class="mini-grid">
+          <article>
+            <h3>Works today</h3>
+            <ul>
+              <li>Mock provider and fake/fixture observe paths</li>
+              <li>Policy, approval, audit, provider, and target registries</li>
+              <li>Local approval queue and operator console</li>
+              <li>SQLite audit backend v1 with explicit local paths</li>
+              <li>Safe recovery playbooks through the control plane</li>
+              <li>Release-quality scripts and mock-only CI</li>
+            </ul>
+          </article>
+          <article>
+            <h3>What is intentionally disabled</h3>
+            <ul>
+              <li>Live PiKVM and Redfish execution</li>
+              <li>PiKVM keyboard, mouse, paste, and hotkey input</li>
+              <li>Live MCP server adoption</li>
+              <li>Python MCP SDK dependency on mainline</li>
+              <li>RustDesk, VNC, RDP, MeshCentral, and browser/session providers</li>
+              <li>Production external audit backend and SIEM integration</li>
+            </ul>
+          </article>
+        </div>
+        <div class="doc-links" aria-label="Public beta documents">
+          <a href="../docs/releases/public-beta-0.1.0.md">Release notes</a>
+          <a href="../docs/public-beta-known-limitations.md">Known limitations</a>
+          <a href="../docs/public-beta-security-statement.md">Security statement</a>
+          <a href="../docs/roadmap.md">Roadmap</a>
+        </div>
       </section>
 
       <section class="section" id="why">
@@ -244,6 +285,12 @@ cd AgenticKVM</code></pre>
           endpoints unless a future operator-approved smoke plan explicitly says
           to do so.
         </p>
+        <div class="doc-links" aria-label="Getting started documents">
+          <a href="../README.md">Repository README</a>
+          <a href="../docs/public-beta-readiness.md">Beta readiness</a>
+          <a href="../docs/public-beta-known-limitations.md">Known limitations</a>
+          <a href="../docs/public-beta-security-statement.md">Security statement</a>
+        </div>
       </section>
 
       <section class="section" id="roadmap">
@@ -280,6 +327,7 @@ cd AgenticKVM</code></pre>
       <nav aria-label="Footer navigation">
         <a href="../README.md">Docs</a>
         <a href="../docs/security-model.md">Security</a>
+        <a href="../docs/public-beta-known-limitations.md">Limitations</a>
         <a href="../docs/roadmap.md">Roadmap</a>
         <a href="../LICENSE">License</a>
       </nav>
