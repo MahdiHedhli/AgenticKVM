@@ -6,6 +6,7 @@ import argparse
 import json
 import sys
 from collections.abc import Sequence
+from pathlib import Path
 from typing import Any
 
 from agentickvm.config import build_runtime, load_config
@@ -25,6 +26,12 @@ from agentickvm.control_plane import (
 )
 from agentickvm.mcp import MCPResultStatus, MCPRouter, MCPToolRequest
 from agentickvm.playbooks import PlaybookRunner
+from agentickvm.providers import (
+    LiveProviderPreflightRequest,
+    detected_ci_mode,
+    detected_test_mode,
+    run_live_provider_preflight,
+)
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -33,12 +40,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = _parser()
     args = parser.parse_args(argv)
     try:
+        if args.command == "audit":
+            return _audit(args)
+        if args.command == "providers":
+            return _providers(args)
         audit_sink = _audit_sink_from_args(args)
         approval_queue = _approval_queue_from_args(args, audit_sink=audit_sink)
         if args.command == "approvals":
             return _approvals(args, approval_queue)
-        if args.command == "audit":
-            return _audit(args)
         runtime = build_runtime(
             load_config(args.config),
             audit_sink=audit_sink,
@@ -221,6 +230,21 @@ def _parser() -> argparse.ArgumentParser:
     inspect_group.add_argument("--event-index", type=int)
     inspect_group.add_argument("--event-hash")
 
+    providers = subparsers.add_parser("providers")
+    provider_actions = providers.add_subparsers(dest="providers_command")
+    preflight = provider_actions.add_parser("preflight")
+    preflight.add_argument("--target", required=True)
+    preflight.add_argument("--external-config", required=True)
+    preflight.add_argument("--artifact-path")
+    preflight.add_argument("--credential-ref")
+    preflight.add_argument("--live-provider-enabled", action="store_true")
+    preflight.add_argument("--tls-reviewed", action="store_true")
+    preflight.add_argument("--timeout-reviewed", action="store_true")
+    preflight.add_argument("--manual-smoke-acknowledged", action="store_true")
+    preflight.add_argument("--capability", action="append", default=[])
+    preflight.add_argument("--ci-mode", action="store_true")
+    preflight.add_argument("--test-mode", action="store_true")
+
     playbooks = subparsers.add_parser("playbooks")
     playbook_actions = playbooks.add_subparsers(dest="playbook_command")
     playbook_actions.add_parser("list")
@@ -343,6 +367,79 @@ def _audit(args: argparse.Namespace) -> int:
         _print_json({"status": "ok", "backend": "sqlite", "event": event})
         return 0
     raise ValueError("unknown audit command")
+
+
+def _providers(args: argparse.Namespace) -> int:
+    if args.providers_command == "preflight":
+        result = _provider_preflight(args)
+        _print_json(result.to_dict())
+        return 0 if result.ok else 2
+    raise ValueError("unknown providers command")
+
+
+def _provider_preflight(args: argparse.Namespace):
+    config = load_config(args.config)
+    target = next((item for item in config.targets if item.id == args.target), None)
+    if target is None:
+        request = LiveProviderPreflightRequest(
+            provider_type="unknown",
+            target_id=args.target,
+            live_provider_enabled=args.live_provider_enabled,
+            external_config_path=args.external_config,
+            credential_ref=args.credential_ref,
+            audit_backend_configured=bool(args.audit_path or args.audit_sqlite_path),
+            approval_transport_configured=bool(args.approval_path),
+            artifact_path=args.artifact_path,
+            tls_policy_reviewed=args.tls_reviewed,
+            timeout_policy_reviewed=args.timeout_reviewed,
+            manual_smoke_acknowledged=args.manual_smoke_acknowledged,
+            ci_mode=args.ci_mode or detected_ci_mode(),
+            test_mode=args.test_mode or detected_test_mode(),
+            capabilities=tuple(args.capability),
+            repo_root=str(Path.cwd()),
+        )
+        return run_live_provider_preflight(request)
+
+    provider = next((item for item in config.providers if item.id == target.provider), None)
+    if provider is None:
+        provider_type = "unknown"
+        provider_id = target.provider
+        credential_ref = args.credential_ref
+        committed_enabled = False
+        capabilities = tuple(args.capability)
+    else:
+        provider_type = provider.type
+        provider_id = provider.id
+        credential_ref = args.credential_ref or provider.credential_ref
+        committed_enabled = provider.enabled and bool(provider.metadata.get("live_mode", False))
+        metadata_capabilities = provider.metadata.get("capabilities", ())
+        if isinstance(metadata_capabilities, (list, tuple)):
+            capabilities = tuple(str(item) for item in metadata_capabilities)
+        else:
+            capabilities = ()
+        capabilities = tuple(args.capability) or capabilities
+
+    return run_live_provider_preflight(
+        LiveProviderPreflightRequest(
+            provider_type=provider_type,
+            provider_id=provider_id,
+            target_id=args.target,
+            live_provider_enabled=args.live_provider_enabled,
+            external_config_path=args.external_config,
+            credential_ref=credential_ref,
+            audit_backend_configured=bool(args.audit_path or args.audit_sqlite_path),
+            approval_transport_configured=bool(args.approval_path),
+            artifact_path=args.artifact_path,
+            tls_policy_reviewed=args.tls_reviewed,
+            timeout_policy_reviewed=args.timeout_reviewed,
+            manual_smoke_acknowledged=args.manual_smoke_acknowledged,
+            ci_mode=args.ci_mode or detected_ci_mode(),
+            test_mode=args.test_mode or detected_test_mode(),
+            committed_config_provider_enabled=committed_enabled,
+            capabilities=capabilities,
+            repo_root=str(Path.cwd()),
+        )
+    )
 
 
 def _playbooks(args: argparse.Namespace, runtime: Any) -> int:
