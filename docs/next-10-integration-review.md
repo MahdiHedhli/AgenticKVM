@@ -89,7 +89,7 @@ Automated tests remain mock-only, fixture-only, temp-path-only, and safe.
 | 4. Operator approval transport | Complete; local explicit-path queue and CLI commands added |
 | 5. PiKVM observe-only | Disabled-by-default docs/spec/tests only unless safely bounded |
 | 6. Redfish observe-only | Disabled-by-default docs/spec/tests only unless safely bounded |
-| 7. Local operator console | Candidate for local CLI/status implementation |
+| 7. Local operator console | Complete; local JSON CLI status console added |
 | 8. Production audit backend v1 | Candidate for local SQLite/file-backed implementation |
 | 9. PiKVM input-control phase | Fake-only/gated scaffold only; no live input |
 | 10. Recovery playbooks | Candidate for mock/fake dry-run framework |
@@ -130,3 +130,26 @@ Safety properties:
 - no auto-approval
 - no credential resolution
 - tests use temp directories only
+
+## Move 7: Local Operator Console
+
+Status: complete.
+
+Implemented:
+
+- `agentickvm status`
+- `agentickvm console`
+- provider and target summaries from the configured registries
+- active policy mode summary
+- pending approval summaries when `--approval-path` is supplied
+- audit hash-chain verification when `--audit-path` is supplied
+- explicit safety fields showing no listener and no live-provider default
+
+Safety properties:
+
+- read-only
+- no provider execution
+- no credential resolution
+- no environment secret reads
+- no network listener
+- no auto-approval

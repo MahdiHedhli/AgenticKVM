@@ -15,6 +15,7 @@ from agentickvm.control_plane import (
     LocalJSONLAuditSink,
     fingerprint_parameters,
     mode_preset,
+    verify_audit_chain,
 )
 from agentickvm.mcp import MCPResultStatus, MCPRouter, MCPToolRequest
 
@@ -38,6 +39,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             return 0
         if args.command == "list-targets":
             _print_json(_targets_payload(runtime))
+            return 0
+        if args.command in {"status", "console"}:
+            _print_json(_status_payload(runtime, approval_queue, args.audit_path))
             return 0
         if args.command == "call":
             return _call(args, runtime, approval_queue)
@@ -131,6 +135,8 @@ def _parser() -> argparse.ArgumentParser:
 
     subparsers.add_parser("list-providers")
     subparsers.add_parser("list-targets")
+    subparsers.add_parser("status")
+    subparsers.add_parser("console")
 
     call = subparsers.add_parser("call")
     call.add_argument("--target", required=True)
@@ -227,6 +233,51 @@ def _targets_payload(runtime: Any) -> dict[str, Any]:
     return {"targets": [dict(item) for item in runtime.target_registry.list_summaries()]}
 
 
+def _status_payload(
+    runtime: Any,
+    approval_queue: LocalApprovalQueue | None,
+    audit_path: str | None,
+) -> dict[str, Any]:
+    providers = [dict(item) for item in runtime.provider_registry.list_summaries()]
+    targets = [dict(item) for item in runtime.target_registry.list_summaries()]
+    real_provider_enabled = any(
+        provider["enabled"] and provider["type"] not in {"mock"}
+        for provider in providers
+        if not _fixture_provider_summary(provider)
+    )
+    payload: dict[str, Any] = {
+        "status": "ok",
+        "mode": runtime.policy.mode.value,
+        "providers": providers,
+        "targets": targets,
+        "pending_approvals": [],
+        "audit": {
+            "path": audit_path,
+            "configured": audit_path is not None,
+            "hash_chain_valid": verify_audit_chain(audit_path) if audit_path else None,
+        },
+        "safety": {
+            "live_providers_enabled_by_default": False,
+            "real_provider_enabled": real_provider_enabled,
+            "emergency_stop": "not_active",
+            "network_listener": False,
+        },
+    }
+    if approval_queue is not None:
+        payload["pending_approvals"] = [
+            record.to_summary()
+            for record in approval_queue.list_records()
+            if record.status.value == "pending"
+        ]
+        payload["approval_queue"] = {
+            "path": str(approval_queue.path),
+            "configured": True,
+        }
+    else:
+        payload["approval_queue"] = {"path": None, "configured": False}
+    return payload
+
+
 def _params_from_cli(values: Sequence[str]) -> dict[str, str]:
     params: dict[str, str] = {}
     for value in values:
@@ -243,6 +294,10 @@ def _approval_queue_from_args(args: argparse.Namespace) -> LocalApprovalQueue | 
     if not args.approval_path:
         return None
     return LocalApprovalQueue(args.approval_path, audit_path=args.audit_path)
+
+
+def _fixture_provider_summary(provider: dict[str, Any]) -> bool:
+    return bool(provider.get("executable")) and provider.get("type") in {"pikvm", "redfish"}
 
 
 def _print_json(payload: dict[str, Any]) -> None:
