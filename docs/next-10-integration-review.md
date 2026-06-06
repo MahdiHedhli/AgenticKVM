@@ -84,8 +84,8 @@ Automated tests remain mock-only, fixture-only, temp-path-only, and safe.
 | Move | Status |
 | --- | --- |
 | 1. Release-quality/GitHub Pages merge | Complete; already integrated through base branch |
-| 2. Python MCP SDK trial review | Pending decision doc on this branch |
-| 3. Mock-only MCP stdio mainline | Deferred unless SDK review gates approve adoption |
+| 2. Python MCP SDK trial review | Complete; continue trial, hold mainline adoption |
+| 3. Mock-only MCP stdio mainline | Deferred; no SDK dependency or code port on this branch |
 | 4. Operator approval transport | Candidate for local/temp-path implementation |
 | 5. PiKVM observe-only | Disabled-by-default docs/spec/tests only unless safely bounded |
 | 6. Redfish observe-only | Disabled-by-default docs/spec/tests only unless safely bounded |
@@ -96,6 +96,6 @@ Automated tests remain mock-only, fixture-only, temp-path-only, and safe.
 
 ## Next Gate
 
-Record the Python MCP SDK trial review decision before any mainline MCP stdio
-work. The current trial docs recommend continuing the trial, not adopting it
-automatically.
+Proceed to local approval, console, audit, or playbook work that remains
+dependency-free and mock-only. SDK adoption requires a separate human-reviewed
+branch.
