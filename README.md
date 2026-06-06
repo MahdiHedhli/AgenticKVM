@@ -43,6 +43,7 @@ and is not part of mainline metadata.
 - [Public beta final review](docs/public-beta-final-review.md)
 - [Public beta merge commands](docs/public-beta-merge-commands.md)
 - [Public beta tagging plan](docs/public-beta-tagging-plan.md)
+- [Public beta final handoff](docs/public-beta-final-handoff.md)
 - [Public beta release notes](docs/releases/public-beta-0.1.0.md)
 - [Public beta known limitations](docs/public-beta-known-limitations.md)
 - [Public beta security statement](docs/public-beta-security-statement.md)

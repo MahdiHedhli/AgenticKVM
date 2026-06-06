@@ -231,6 +231,8 @@
 - Release manifest strengthened with public beta metadata and generated-artifact
   exclusion fields.
 - Public beta readiness script added and wired into CI.
+- Final branch review, safety verification, human merge command plan, Pages
+  enablement runbook, pre-release tagging plan, and final handoff docs added.
 - Status: ready for final local validation and human merge review; no tag,
   release, main merge, live provider, live MCP server, or SDK trial adoption has
   occurred.

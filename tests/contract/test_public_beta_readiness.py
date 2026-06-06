@@ -18,7 +18,7 @@ def test_public_beta_readiness_script_passes() -> None:
     payload = json.loads(result.stdout)
 
     assert payload["status"] == "ok"
-    assert payload["required_files"] >= 10
+    assert payload["required_files"] >= 20
     assert payload["metadata"]["sdk_trial_dependency_present"] is False
     assert payload["site"]["known_limitations_linked"] is True
     assert payload["templates"]["secret_warning_present"] is True
