@@ -1,0 +1,72 @@
+name: Bug report
+description: Report a safe, redacted AgenticKVM bug.
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not paste secrets, credentials, tokens, cookies, real hostnames, real
+        IP addresses, screenshots, audit databases, approval queues, or generated
+        artifacts. Redact logs before attaching them.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: dropdown
+    id: live_hardware
+    attributes:
+      label: Did this involve live hardware?
+      options:
+        - "No, mock/fixture only"
+        - "Yes, but details are redacted"
+    validations:
+      required: true
+  - type: dropdown
+    id: provider_config
+    attributes:
+      label: Did this involve provider configuration?
+      options:
+        - "No"
+        - "Yes, redacted config only"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: Use mock or fixture paths when possible.
+    validations:
+      required: true
+  - type: textarea
+    id: commands
+    attributes:
+      label: Test command output
+      description: Paste redacted output from safe local commands.
+      placeholder: |
+        python3 scripts/check-package.py
+        uv run --offline --with pytest --python python3.13 python -m pytest
+    validations:
+      required: false
+  - type: textarea
+    id: safety
+    attributes:
+      label: Safety impact
+      description: Could this weaken policy, approval, audit, redaction, or provider gating?
+    validations:
+      required: true

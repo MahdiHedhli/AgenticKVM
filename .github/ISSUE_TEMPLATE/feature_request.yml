@@ -1,0 +1,55 @@
+name: Feature request
+description: Propose a safe AgenticKVM feature or documentation improvement.
+title: "[Feature]: "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include secrets, credentials, tokens, real hostnames, real IP
+        addresses, screenshots, audit databases, approval queues, or generated
+        artifacts. For live-provider ideas, describe the safety gate, not a real
+        target.
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What problem should this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: Describe the smallest safe slice.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Control plane
+        - Policy/approval/audit
+        - CLI
+        - MCP scaffolding
+        - Provider readiness
+        - Docs/site
+        - Release engineering
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: safety
+    attributes:
+      label: Safety considerations
+      description: How should this preserve policy, approval, audit, redaction, and fail-closed behavior?
+    validations:
+      required: true
+  - type: textarea
+    id: tests
+    attributes:
+      label: Suggested tests
+      description: Prefer mock-only, fixture-only, temp-path-only tests.
+    validations:
+      required: false
