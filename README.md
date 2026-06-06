@@ -32,7 +32,12 @@ and is not part of mainline metadata.
 - [Development guide](docs/development.md)
 - [Testing guide](docs/testing.md)
 - [Packaging notes](docs/packaging.md)
+- [CLI smoke matrix](docs/cli-smoke.md)
+- [Linting](docs/linting.md)
+- [Type checking](docs/type-checking.md)
+- [Coverage policy](docs/coverage-policy.md)
 - [Release readiness](docs/release-readiness.md)
+- [Release artifacts](docs/release-artifacts.md)
 - [GitHub Pages setup](docs/github-pages.md)
 
 ## Core Architecture Rule
@@ -124,11 +129,19 @@ Release-quality validation helpers:
 
 ```bash
 python scripts/check-package.py
+python scripts/build-package.py
+python scripts/smoke-cli.py
+python scripts/lint-sanity.py
+python scripts/type-sanity.py
 python scripts/validate-docs.py
+python scripts/check-site.py
 ```
 
 The test suite must use mocks and schemas only. Real hardware is never used in
 CI.
+
+Workflow badges are intentionally not added until the public repository URL is
+confirmed.
 
 ## License
 
