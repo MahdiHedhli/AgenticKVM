@@ -36,6 +36,11 @@ the repository. Committed examples use placeholders only.
 Common local artifact directories and screenshot filename patterns are ignored
 by `.gitignore`.
 
+Generated release manifests, audit exports, audit checkpoints, SQLite audit
+databases, approval queue files, screenshots, and local artifact outputs must
+not be committed. Use `/tmp` or ignored `artifacts/` paths for local release
+validation.
+
 ## Audit
 
 Audit may record:

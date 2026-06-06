@@ -147,6 +147,8 @@ def _check_generated_local_artifacts() -> dict[str, int]:
             offenders.append(str(relative))
         elif lowered_name in GENERATED_LOCAL_ARTIFACT_NAMES:
             offenders.append(str(relative))
+        elif "manifest" in lowered_name and path.suffix.lower() == ".json":
+            offenders.append(str(relative))
         elif "screenshot" in lowered_name and path.suffix.lower() in {".json", ".txt"}:
             offenders.append(str(relative))
     if offenders:

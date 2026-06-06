@@ -22,6 +22,11 @@ def test_release_manifest_generator_writes_json_to_explicit_temp_path(tmp_path: 
 
     assert command_payload["status"] == "ok"
     assert command_payload["output"] == str(output)
+    assert manifest["release"]["channel"] == "public-beta"
+    assert manifest["release"]["tag_proposal"] == "v0.1.0-public-beta.1"
+    assert manifest["release"]["release_notes"] == "docs/releases/public-beta-0.1.0.md"
+    assert manifest["release"]["known_limitations"] == "docs/public-beta-known-limitations.md"
+    assert manifest["release"]["security_statement"] == "docs/public-beta-security-statement.md"
     assert manifest["project"]["name"] == "agentickvm"
     assert manifest["project"]["version"]
     assert manifest["git"]["branch"]
@@ -32,6 +37,11 @@ def test_release_manifest_generator_writes_json_to_explicit_temp_path(tmp_path: 
     assert manifest["docs"]["public_beta_risk_register"] is True
     assert manifest["docs"]["public_beta_readiness"] is True
     assert manifest["docs"]["public_beta_merge_review"] is True
+    assert manifest["docs"]["public_beta_release_notes"] is True
+    assert manifest["docs"]["public_beta_known_limitations"] is True
+    assert manifest["docs"]["public_beta_security_statement"] is True
+    assert manifest["docs"]["public_beta_cutover_plan"] is True
+    assert manifest["docs"]["maintainer_runbook"] is True
     assert manifest["site"]["pages_workflow_static_site_only"] is True
     assert manifest["workflows"]["uses_secrets"] is False
     assert manifest["safety"]["live_providers_enabled"] is False
@@ -40,6 +50,9 @@ def test_release_manifest_generator_writes_json_to_explicit_temp_path(tmp_path: 
     assert manifest["safety"]["live_provider_network_calls"] is False
     assert manifest["safety"]["live_provider_preflight_ci_block"] is True
     assert manifest["safety"]["generated_local_artifacts_committed"] is False
+    assert manifest["artifact_policy"]["generated_manifests_committed"] is False
+    assert manifest["artifact_policy"]["audit_databases_committed"] is False
+    assert manifest["artifact_policy"]["screenshots_committed"] is False
 
 
 def test_release_manifest_generator_rejects_tracked_repo_paths() -> None:

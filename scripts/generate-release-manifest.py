@@ -62,6 +62,16 @@ def _manifest() -> dict[str, Any]:
     return {
         "schema_version": "0.1",
         "generated_at": datetime.now(UTC).isoformat(),
+        "release": {
+            "channel": "public-beta",
+            "version_proposal": "0.1.0-public-beta.1",
+            "tag_proposal": "v0.1.0-public-beta.1",
+            "release_notes": "docs/releases/public-beta-0.1.0.md",
+            "known_limitations": "docs/public-beta-known-limitations.md",
+            "security_statement": "docs/public-beta-security-statement.md",
+            "cutover_plan": "docs/public-beta-cutover-plan.md",
+            "maintainer_runbook": "docs/maintainer-runbook.md",
+        },
         "project": metadata,
         "git": {
             "branch": _git(["branch", "--show-current"]),
@@ -95,6 +105,19 @@ def _manifest() -> dict[str, Any]:
             "public_beta_merge_review": (
                 ROOT / "docs" / "public-beta-merge-review.md"
             ).exists(),
+            "public_beta_release_notes": (
+                ROOT / "docs" / "releases" / "public-beta-0.1.0.md"
+            ).exists(),
+            "public_beta_known_limitations": (
+                ROOT / "docs" / "public-beta-known-limitations.md"
+            ).exists(),
+            "public_beta_security_statement": (
+                ROOT / "docs" / "public-beta-security-statement.md"
+            ).exists(),
+            "public_beta_cutover_plan": (
+                ROOT / "docs" / "public-beta-cutover-plan.md"
+            ).exists(),
+            "maintainer_runbook": (ROOT / "docs" / "maintainer-runbook.md").exists(),
         },
         "site": {
             "site_dir": (ROOT / "site").exists(),
@@ -115,6 +138,14 @@ def _manifest() -> dict[str, Any]:
             "requires_github_actions_secrets": "secrets." in workflow_text.lower(),
             "live_provider_preflight_ci_block": True,
             "generated_local_artifacts_committed": False,
+        },
+        "artifact_policy": {
+            "generated_manifests_committed": False,
+            "audit_databases_committed": False,
+            "audit_exports_committed": False,
+            "approval_queues_committed": False,
+            "screenshots_committed": False,
+            "credential_material_committed": False,
         },
     }
 

@@ -16,18 +16,29 @@ release-quality branch.
 - [ ] Package metadata does not claim live provider support.
 - [ ] Generated audit/artifact paths are not included in package artifacts.
 - [ ] No secrets or local credentials are included.
+- [ ] No generated SQLite DB, audit export, audit checkpoint, approval queue,
+      screenshot, release manifest, or local artifact output is included.
 
 ## Release Manifest
 
 - [ ] `python scripts/generate-release-manifest.py --output <explicit-temp-or-artifact-path>`
       succeeds.
+- [ ] Manifest is generated to `/tmp` or ignored `artifacts/`, not a tracked
+      repository path.
+- [ ] Manifest includes public beta channel and proposed tag/version fields.
+- [ ] Manifest includes release notes, known limitations, security statement,
+      cutover plan, and maintainer runbook paths.
 - [ ] Manifest includes project name and version.
 - [ ] Manifest includes branch and commit.
 - [ ] Manifest reports live providers enabled: `false`.
 - [ ] Manifest reports SDK trial dependency present: `false`.
 - [ ] Manifest reports credential refs resolved: `false`.
+- [ ] Manifest reports generated artifacts excluded.
 - [ ] Manifest is JSON-safe.
 - [ ] Manifest is written only to an explicit path.
+
+Do not commit generated manifest files unless a future release process
+explicitly changes this policy.
 
 ## Docs And Specs
 
