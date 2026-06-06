@@ -120,6 +120,9 @@ without adding secrets:
 5. Confirm no production credentials, provider configs, or live infrastructure
    tests are part of the Pages path.
 
+Use the detailed enablement checklist in
+[`github-pages-enablement-checklist.md`](github-pages-enablement-checklist.md).
+
 ## Workflow Requirements
 
 The Pages workflow must:
