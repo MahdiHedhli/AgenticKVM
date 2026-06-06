@@ -48,5 +48,8 @@ jobs:
       - name: Validate docs and specs
         run: python scripts/validate-docs.py
 
+      - name: Validate static site
+        run: python scripts/check-site.py
+
       - name: Run mock-only test suite
         run: python -m pytest

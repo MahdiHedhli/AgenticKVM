@@ -21,6 +21,7 @@ def test_ci_workflow_is_mock_only_and_secret_free() -> None:
     assert "python scripts/lint-sanity.py" in workflow
     assert "python scripts/type-sanity.py" in workflow
     assert "python scripts/validate-docs.py" in workflow
+    assert "python scripts/check-site.py" in workflow
     assert "secrets." not in lowered
     assert "mcp==1.27.2" not in lowered
     assert "run_stdio" not in lowered
