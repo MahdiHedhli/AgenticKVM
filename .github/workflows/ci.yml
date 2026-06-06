@@ -54,5 +54,8 @@ jobs:
       - name: Generate release manifest
         run: python scripts/generate-release-manifest.py --output artifacts/release-manifest.json
 
+      - name: Run public beta readiness check
+        run: python scripts/check-public-beta.py
+
       - name: Run mock-only test suite
         run: python -m pytest
