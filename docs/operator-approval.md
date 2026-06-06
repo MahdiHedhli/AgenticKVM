@@ -48,6 +48,20 @@ One-time grants are consumed after one matching execution. Session grants can be
 reused only for the same session, target, provider, capability, and parameter
 fingerprint. Consumed approvals emit an `approval_consumed` audit event.
 
+## Local Approval Transport
+
+The CLI also supports an explicit local approval queue through
+`--approval-path`. See [Local Operator Approval Transport](operator-approval-transport.md).
+
+The local queue records `approval_required` results, lets an operator list,
+show, approve, deny, or expire requests, and converts approved records into the
+existing `ApprovalStore` only when a later CLI call is made with the same
+explicit queue path.
+
+This transport does not execute providers during approval submission and does
+not auto-approve. Resumed actions still route through `MCPRouter`, registries,
+policy, audit, and `ControlPlane`.
+
 ## Approval Cannot Grant
 
 Approval cannot grant capabilities outside policy, change hard invariants,

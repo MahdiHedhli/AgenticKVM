@@ -86,7 +86,7 @@ Automated tests remain mock-only, fixture-only, temp-path-only, and safe.
 | 1. Release-quality/GitHub Pages merge | Complete; already integrated through base branch |
 | 2. Python MCP SDK trial review | Complete; continue trial, hold mainline adoption |
 | 3. Mock-only MCP stdio mainline | Deferred; no SDK dependency or code port on this branch |
-| 4. Operator approval transport | Candidate for local/temp-path implementation |
+| 4. Operator approval transport | Complete; local explicit-path queue and CLI commands added |
 | 5. PiKVM observe-only | Disabled-by-default docs/spec/tests only unless safely bounded |
 | 6. Redfish observe-only | Disabled-by-default docs/spec/tests only unless safely bounded |
 | 7. Local operator console | Candidate for local CLI/status implementation |
@@ -96,6 +96,37 @@ Automated tests remain mock-only, fixture-only, temp-path-only, and safe.
 
 ## Next Gate
 
-Proceed to local approval, console, audit, or playbook work that remains
-dependency-free and mock-only. SDK adoption requires a separate human-reviewed
-branch.
+Proceed to local console, audit, or playbook work that remains dependency-free
+and mock-only. SDK adoption requires a separate human-reviewed branch.
+
+## Move 4: Local Operator Approval Transport
+
+Status: complete.
+
+Implemented:
+
+- path-scoped `LocalApprovalQueue`
+- persisted local approval records with pending, approved, denied, expired, and
+  consumed states
+- one-time and session approval scopes
+- exact binding to session, target, provider, capability, params fingerprint,
+  expiry, and operator id
+- CLI commands:
+  - `agentickvm --approval-path <path> approvals list`
+  - `agentickvm --approval-path <path> approvals show <id>`
+  - `agentickvm --approval-path <path> approvals approve <id>`
+  - `agentickvm --approval-path <path> approvals deny <id>`
+  - `agentickvm --approval-path <path> approvals expire <id>`
+- optional `--audit-path` support using the existing local JSONL audit sink
+- tests for one-time consumption, session reuse, denial, expiry, audit chain
+  verification, and redaction
+
+Safety properties:
+
+- disabled unless an explicit `--approval-path` is supplied
+- approval submission does not execute providers
+- approved resumption still goes through `MCPRouter`, registries, policy,
+  audit, and `ControlPlane`
+- no auto-approval
+- no credential resolution
+- tests use temp directories only

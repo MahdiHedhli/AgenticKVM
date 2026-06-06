@@ -134,6 +134,11 @@ from agentickvm.control_plane.approvals import (  # noqa: E402
     build_approval_request,
     fingerprint_parameters,
 )
+from agentickvm.control_plane.approval_transport import (  # noqa: E402
+    LocalApprovalQueue,
+    LocalApprovalRecord,
+    LocalApprovalStatus,
+)
 from agentickvm.control_plane.audit import (  # noqa: E402
     AuditEvent,
     AuditEventType,
@@ -201,6 +206,9 @@ __all__ = [
     "InMemoryAuditSink",
     "INTERNAL_DECISIONS",
     "LocalJSONLAuditSink",
+    "LocalApprovalQueue",
+    "LocalApprovalRecord",
+    "LocalApprovalStatus",
     "ProviderRef",
     "REQUIRED_FLOW",
     "SessionApprovalGrant",
