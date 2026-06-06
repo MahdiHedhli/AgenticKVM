@@ -24,6 +24,34 @@ artifacts, or live infrastructure.
 5. Confirm the workflow uploads only `site/`.
 6. Confirm the workflow requires no GitHub Actions secrets.
 
+## Step-By-Step Enablement Runbook
+
+Use this runbook only after the public beta branch has been merged to `main` and
+CI has passed.
+
+1. In GitHub, open the AgenticKVM repository.
+2. Open Settings.
+3. Select Pages from the left navigation.
+4. Under Build and deployment, set Source to GitHub Actions.
+5. Save the setting if GitHub requires a save action.
+6. Open Actions.
+7. Select the GitHub Pages workflow.
+8. Run it manually with `workflow_dispatch`, or wait for the next push to
+   `main`.
+9. Confirm the workflow uploads `site/` and completes successfully.
+10. Open the deployed Pages URL shown by the workflow.
+11. Validate the homepage:
+    - public beta candidate status is visible
+    - known limitations are linked
+    - security statement is linked
+    - live providers are described as gated or deferred
+    - no analytics, tracking, remote fonts, or scripts are present
+12. If the public URL is final, update README badges and links in a separate
+    reviewed branch.
+
+Do not add secrets, deploy tokens, analytics, provider config, credentials, or
+live smoke commands to the Pages workflow.
+
 ## Expected Workflow
 
 The Pages workflow should:
@@ -60,6 +88,9 @@ If Pages output is wrong:
 2. Revert the Pages workflow or site changes.
 3. Re-run `python3 scripts/check-site.py`.
 4. Re-enable Pages only after review.
+
+If the site exposes an unsupported claim after deployment, disable Pages first,
+then fix the site copy in a normal pull request.
 
 ## Badges And Public URL
 
