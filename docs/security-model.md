@@ -89,6 +89,11 @@ Responses must match the pending request by session, target, provider,
 capability, parameter fingerprint, scope, and expiry. Mismatches, denial, and
 expiry fail closed. Approval resumption still routes through `ControlPlane`.
 
+Public beta validation remains mock-only and fixture-only. The beta security
+statement in `docs/public-beta-security-statement.md` records that live
+providers, live MCP server behavior, PiKVM input, and production hardware
+recovery are outside public beta scope.
+
 ## Emergency Stop
 
 Emergency stop must not be disableable by an agent-controlled request. Future
