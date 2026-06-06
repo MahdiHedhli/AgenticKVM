@@ -44,6 +44,21 @@ Recent events can be listed with:
 agentickvm audit list --sqlite-path /tmp/agentickvm-audit.sqlite
 ```
 
+Single events can be inspected with:
+
+```bash
+agentickvm audit inspect --sqlite-path /tmp/agentickvm-audit.sqlite --event-index 1
+```
+
+SQLite checkpoints can be written to an explicit JSON path:
+
+```bash
+agentickvm audit checkpoint \
+  --sqlite-path /tmp/agentickvm-audit.sqlite \
+  --audit-log-id local-operator-run \
+  --output /tmp/agentickvm-audit-checkpoint.json
+```
+
 Exports require an explicit output path:
 
 ```bash
@@ -64,6 +79,7 @@ only.
 
 Hardening details and known limitations are tracked in
 [SQLite Audit Backend Hardening](sqlite-audit-hardening.md).
+Command details are in [Audit CLI](audit-cli.md).
 
 ## Tail-Truncation Risk
 

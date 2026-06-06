@@ -14,8 +14,10 @@ from agentickvm.control_plane import (
     LocalApprovalQueue,
     LocalJSONLAuditSink,
     SQLiteAuditSink,
+    create_sqlite_audit_checkpoint,
     export_sqlite_audit,
     fingerprint_parameters,
+    inspect_sqlite_audit_event,
     list_sqlite_audit_events,
     mode_preset,
     verify_audit_chain,
@@ -208,6 +210,16 @@ def _parser() -> argparse.ArgumentParser:
     export = audit_actions.add_parser("export")
     export.add_argument("--sqlite-path", required=True)
     export.add_argument("--output", required=True)
+    export.add_argument("--checkpoint-path")
+    checkpoint = audit_actions.add_parser("checkpoint")
+    checkpoint.add_argument("--sqlite-path", required=True)
+    checkpoint.add_argument("--audit-log-id", required=True)
+    checkpoint.add_argument("--output", required=True)
+    inspect_event = audit_actions.add_parser("inspect")
+    inspect_event.add_argument("--sqlite-path", required=True)
+    inspect_group = inspect_event.add_mutually_exclusive_group(required=True)
+    inspect_group.add_argument("--event-index", type=int)
+    inspect_group.add_argument("--event-hash")
 
     playbooks = subparsers.add_parser("playbooks")
     playbook_actions = playbooks.add_subparsers(dest="playbook_command")
@@ -301,8 +313,34 @@ def _audit(args: argparse.Namespace) -> int:
         )
         return 0
     if args.audit_command == "export":
-        payload = export_sqlite_audit(args.sqlite_path, output_path=args.output)
+        checkpoint = None
+        if args.checkpoint_path:
+            with open(args.checkpoint_path, encoding="utf-8") as handle:
+                checkpoint = json.load(handle)
+        payload = export_sqlite_audit(
+            args.sqlite_path,
+            output_path=args.output,
+            checkpoint=checkpoint,
+        )
         _print_json({"status": "ok", "export": payload})
+        return 0
+    if args.audit_command == "checkpoint":
+        checkpoint = create_sqlite_audit_checkpoint(
+            args.sqlite_path,
+            audit_log_id=args.audit_log_id,
+        )
+        with open(args.output, "w", encoding="utf-8") as handle:
+            json.dump(checkpoint.to_dict(), handle, indent=2, sort_keys=True)
+            handle.write("\n")
+        _print_json({"status": "ok", "checkpoint": checkpoint.to_dict(), "output": args.output})
+        return 0
+    if args.audit_command == "inspect":
+        event = inspect_sqlite_audit_event(
+            args.sqlite_path,
+            event_index=args.event_index,
+            event_hash=args.event_hash,
+        )
+        _print_json({"status": "ok", "backend": "sqlite", "event": event})
         return 0
     raise ValueError("unknown audit command")
 

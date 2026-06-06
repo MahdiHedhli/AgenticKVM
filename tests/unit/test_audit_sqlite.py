@@ -196,6 +196,7 @@ def test_sqlite_audit_inspect_event_and_bad_identifier(tmp_path, capsys) -> None
 def test_cli_audit_verify_list_and_export_sqlite(tmp_path, capsys) -> None:
     audit_path = tmp_path / "audit.sqlite"
     export_path = tmp_path / "audit-export.json"
+    checkpoint_path = tmp_path / "audit-checkpoint.json"
     _run_cli(
         [
             "--audit-sqlite-path",
@@ -217,6 +218,19 @@ def test_cli_audit_verify_list_and_export_sqlite(tmp_path, capsys) -> None:
         ["audit", "list", "--sqlite-path", str(audit_path), "--limit", "5"],
         capsys,
     )
+    checkpoint_exit, checkpoint = _run_cli(
+        [
+            "audit",
+            "checkpoint",
+            "--sqlite-path",
+            str(audit_path),
+            "--audit-log-id",
+            "cli-audit",
+            "--output",
+            str(checkpoint_path),
+        ],
+        capsys,
+    )
     export_exit, exported = _run_cli(
         [
             "audit",
@@ -225,6 +239,19 @@ def test_cli_audit_verify_list_and_export_sqlite(tmp_path, capsys) -> None:
             str(audit_path),
             "--output",
             str(export_path),
+            "--checkpoint-path",
+            str(checkpoint_path),
+        ],
+        capsys,
+    )
+    inspected_exit, inspected = _run_cli(
+        [
+            "audit",
+            "inspect",
+            "--sqlite-path",
+            str(audit_path),
+            "--event-index",
+            str(listed["events"][0]["event_index"]),
         ],
         capsys,
     )
@@ -233,9 +260,15 @@ def test_cli_audit_verify_list_and_export_sqlite(tmp_path, capsys) -> None:
     assert verified["status"] == "ok"
     assert list_exit == 0
     assert listed["events"]
+    assert checkpoint_exit == 0
+    assert checkpoint["status"] == "ok"
+    assert checkpoint_path.exists()
     assert export_exit == 0
     assert exported["status"] == "ok"
+    assert exported["export"]["checkpoint_verified"] is True
     assert export_path.exists()
+    assert inspected_exit == 0
+    assert inspected["event"]["event"]["event_type"]
 
 
 def test_cli_status_reports_sqlite_audit_backend(tmp_path, capsys) -> None:
