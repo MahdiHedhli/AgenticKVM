@@ -30,11 +30,23 @@ jobs:
           python -m pip install pytest
           python -m pip install -e .
 
-      - name: Run mock-only test suite
-        run: python -m pytest
-
       - name: Validate package metadata
         run: python scripts/check-package.py
 
+      - name: Validate package artifacts
+        run: python scripts/build-package.py
+
+      - name: Run CLI smoke matrix
+        run: python scripts/smoke-cli.py
+
+      - name: Run lint sanity
+        run: python scripts/lint-sanity.py
+
+      - name: Run type sanity
+        run: python scripts/type-sanity.py
+
       - name: Validate docs and specs
         run: python scripts/validate-docs.py
+
+      - name: Run mock-only test suite
+        run: python -m pytest
