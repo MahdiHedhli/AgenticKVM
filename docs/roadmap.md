@@ -189,3 +189,27 @@
 - Status: integration branch ready for human review; live providers, live MCP
   server, SDK trial dependency, real input control, and live recovery playbooks
   remain deferred.
+
+## 14. Audit Beta Readiness Branch
+
+- SQLite audit backend v1 hardened with checkpoint, inspect, checkpoint-aware
+  export, reopen verification, malformed store handling, and tamper/deletion
+  tests.
+- Audit CLI workflows expanded for list, verify, export, checkpoint, and inspect
+  operations.
+- Local approval queue hardened with denial, expiry, consumed-event, redaction,
+  fingerprint mismatch, hard-invariant, and malformed-store tests.
+- Recovery playbook safety hardened with required risk/rollback metadata, known
+  tool and capability validation, redacted step output, and policy/approval stop
+  behavior.
+- Live-provider preflight gates added for future PiKVM/Redfish observe-only
+  work. The gates are local, preflight-only, CI/test-mode-blocked, observe-only,
+  and do not instantiate providers, resolve credentials, or contact hardware.
+- Public beta risk register, readiness checklist, and merge review package
+  added.
+- CI/release gates now require beta/preflight/audit docs and reject committed
+  generated local audit DBs, exports, checkpoints, approval queues, screenshots,
+  and artifact files.
+- Status: public beta candidate branch ready for final local validation and
+  human merge review; live providers, live MCP server, SDK trial dependency,
+  real input control, and production external audit backend remain deferred.

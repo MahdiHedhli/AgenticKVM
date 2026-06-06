@@ -38,6 +38,9 @@ and is not part of mainline metadata.
 - [Coverage policy](docs/coverage-policy.md)
 - [Release readiness](docs/release-readiness.md)
 - [Release artifacts](docs/release-artifacts.md)
+- [Public beta readiness](docs/public-beta-readiness.md)
+- [Public beta risk register](docs/public-beta-risk-register.md)
+- [Live provider preflight](docs/live-provider-preflight.md)
 - [GitHub Pages setup](docs/github-pages.md)
 
 ## Core Architecture Rule
@@ -135,6 +138,7 @@ python scripts/lint-sanity.py
 python scripts/type-sanity.py
 python scripts/validate-docs.py
 python scripts/check-site.py
+python scripts/generate-release-manifest.py --output /tmp/agentickvm-release-manifest.json
 ```
 
 The test suite must use mocks and schemas only. Real hardware is never used in

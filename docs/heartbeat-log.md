@@ -1430,3 +1430,39 @@
   - live-provider preflight gate framework
   - public beta risk register and readiness package
   - release/CI checks for generated audit, approval, and artifact files
+
+## 2026-06-06T07:41:00Z
+
+- selected maturity level: audit beta readiness branch ready for final local
+  validation and human public beta review
+- branch: `feature/audit-beta-readiness`
+- completed:
+  - SQLite audit backend hardening review, contract, checkpoint verification,
+    checkpoint-aware export, event inspection, malformed DB handling, and
+    tamper/deletion tests
+  - audit CLI checkpoint and inspect workflows
+  - approval queue audit integration hardening for denial, expiry, consumption,
+    redaction, fingerprint mismatch, hard-invariant rejection, and malformed
+    stores
+  - recovery playbook safety hardening for known tool/capability mapping,
+    required risk/rollback metadata, redacted step output, and approval/policy
+    stop behavior
+  - live-provider preflight gate model and CLI with CI/test-mode blocking,
+    observe-only capability enforcement, explicit audit/approval/credential-ref
+    evidence, artifact path checks, TLS/timeout review, and manual smoke
+    acknowledgement
+  - public beta risk register, readiness checklist, and merge review package
+  - CI/release gates for beta/preflight/audit docs, release manifest beta
+    fields, and generated local artifact exclusions
+- safety notes:
+  - real hardware touched: no
+  - live provider network calls made: no
+  - secrets touched: no
+  - live providers enabled by default: no
+  - SDK trial dependency added: no
+  - generated audit DB/export/checkpoint/approval/artifact files committed: no
+  - approval auto-bypass added: no
+  - playbook ControlPlane bypass added: no
+- final validation: pending after this closeout commit
+- next recommended task: run final release script matrix and pytest, then send
+  the branch for human merge review if all checks pass.
