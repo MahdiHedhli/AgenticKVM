@@ -7,6 +7,7 @@ import pytest
 from agentickvm.cli import main as cli_main
 from agentickvm.control_plane import (
     ApprovalGrantScope,
+    LocalApprovalRecord,
     LocalApprovalQueue,
     LocalApprovalStatus,
     verify_audit_chain,
@@ -128,7 +129,8 @@ def test_local_approval_queue_session_scope_remains_reusable(tmp_path, capsys) -
 
 def test_local_approval_queue_denial_and_expiry_fail_closed(tmp_path, capsys) -> None:
     approval_path = tmp_path / "approvals.json"
-    base = ["--approval-path", str(approval_path)]
+    audit_path = tmp_path / "audit.jsonl"
+    base = ["--approval-path", str(approval_path), "--audit-path", str(audit_path)]
     call = [
         "call",
         "--target",
@@ -173,9 +175,15 @@ def test_local_approval_queue_denial_and_expiry_fail_closed(tmp_path, capsys) ->
     )
     after_expiry = _approval_required([*base, *call], capsys)
     assert after_expiry["approval_queue"]["approval_id"] not in {denied_id, expired_id}
+    events = [
+        json.loads(line)["event"]["event_type"]
+        for line in audit_path.read_text(encoding="utf-8").splitlines()
+    ]
+    assert "approval_denied" in events
+    assert "approval_expired" in events
 
 
-def test_local_approval_queue_redacts_secret_like_text(tmp_path, capsys) -> None:
+def test_local_approval_queue_redacts_secret_like_text_and_params(tmp_path, capsys) -> None:
     approval_path = tmp_path / "approvals.json"
     base = ["--approval-path", str(approval_path)]
     required = _approval_required(
@@ -188,6 +196,8 @@ def test_local_approval_queue_redacts_secret_like_text(tmp_path, capsys) -> None
             "force_restart",
             "--param",
             "reason=redaction",
+            "--param",
+            "password=do-not-store",
         ],
         capsys,
     )
@@ -211,6 +221,7 @@ def test_local_approval_queue_redacts_secret_like_text(tmp_path, capsys) -> None
     assert granted["status"] == "approval_granted"
     contents = approval_path.read_text(encoding="utf-8").lower()
     assert "password secret token" not in contents
+    assert "do-not-store" not in contents
     assert "[redacted]" in contents
 
 
@@ -219,3 +230,86 @@ def test_local_approval_queue_rejects_unknown_and_non_pending_ids(tmp_path) -> N
 
     with pytest.raises(ValueError, match="Unknown approval id"):
         queue.approve("missing", operator_id="operator-1")
+
+
+def test_local_approval_fingerprint_mismatch_fails_closed(tmp_path, capsys) -> None:
+    approval_path = tmp_path / "approvals.json"
+    base = ["--approval-path", str(approval_path)]
+    original_call = [
+        "call",
+        "--target",
+        "mock-host",
+        "--tool",
+        "force_restart",
+        "--param",
+        "reason=first",
+    ]
+    changed_call = [
+        "call",
+        "--target",
+        "mock-host",
+        "--tool",
+        "force_restart",
+        "--param",
+        "reason=changed",
+    ]
+    required = _approval_required([*base, *original_call], capsys)
+    approval_id = required["approval_queue"]["approval_id"]
+    _run_cli(
+        [
+            *base,
+            "approvals",
+            "approve",
+            approval_id,
+            "--operator-id",
+            "operator-1",
+        ],
+        capsys,
+    )
+
+    changed = _approval_required([*base, *changed_call], capsys)
+
+    assert changed["approval_queue"]["approval_id"] != approval_id
+    assert LocalApprovalQueue(approval_path).get(approval_id).status == LocalApprovalStatus.APPROVED
+
+
+def test_local_approval_cannot_grant_hard_invariant_action(tmp_path) -> None:
+    queue_path = tmp_path / "approvals.json"
+    queue = LocalApprovalQueue(queue_path)
+    record = LocalApprovalRecord.from_dict(
+        {
+            "id": "hard-invariant",
+            "status": "pending",
+            "created_at": "2026-06-06T00:00:00+00:00",
+            "expires_at": "2026-06-07T01:00:00+00:00",
+            "session_id": "session-1",
+            "target_id": "mock-host",
+            "provider_id": "mock",
+            "capability_id": "session.disable_audit",
+            "params_fingerprint": "abc123",
+            "policy_decision": "ask_each_time",
+            "operator_message": "fabricated hard invariant",
+            "material_risks": ["dangerous action"],
+            "request": {},
+            "redactions": [],
+        }
+    )
+    queue._save_records({"hard-invariant": record})
+
+    with pytest.raises(ValueError, match="cannot be approval-resumed"):
+        queue.approve("hard-invariant", operator_id="operator-1")
+
+    assert queue.get("hard-invariant").status == LocalApprovalStatus.PENDING
+
+
+def test_malformed_approval_store_fails_closed(tmp_path, capsys) -> None:
+    approval_path = tmp_path / "approvals.json"
+    approval_path.write_text("{not-json}\n", encoding="utf-8")
+
+    exit_code, payload = _run_cli(
+        ["--approval-path", str(approval_path), "approvals", "list"],
+        capsys,
+    )
+
+    assert exit_code == 2
+    assert payload["status"] == "validation_error"

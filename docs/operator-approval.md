@@ -52,6 +52,7 @@ fingerprint. Consumed approvals emit an `approval_consumed` audit event.
 
 The CLI also supports an explicit local approval queue through
 `--approval-path`. See [Local Operator Approval Transport](operator-approval-transport.md).
+Queue storage and state details are in [Approval Queue](approval-queue.md).
 
 The local queue records `approval_required` results, lets an operator list,
 show, approve, deny, or expire requests, and converts approved records into the
