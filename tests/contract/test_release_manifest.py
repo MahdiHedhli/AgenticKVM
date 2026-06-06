@@ -27,12 +27,18 @@ def test_release_manifest_generator_writes_json_to_explicit_temp_path(tmp_path: 
     assert manifest["git"]["branch"]
     assert manifest["checks"]["pytest"] == "not_run"
     assert manifest["docs"]["coverage_policy"] is True
+    assert manifest["docs"]["sqlite_audit_hardening"] is True
+    assert manifest["docs"]["live_provider_preflight"] is True
+    assert manifest["docs"]["public_beta_risk_register"] is True
+    assert manifest["docs"]["public_beta_readiness"] is True
     assert manifest["site"]["pages_workflow_static_site_only"] is True
     assert manifest["workflows"]["uses_secrets"] is False
     assert manifest["safety"]["live_providers_enabled"] is False
     assert manifest["safety"]["sdk_trial_dependency_present"] is False
     assert manifest["safety"]["credential_refs_resolved"] is False
     assert manifest["safety"]["live_provider_network_calls"] is False
+    assert manifest["safety"]["live_provider_preflight_ci_block"] is True
+    assert manifest["safety"]["generated_local_artifacts_committed"] is False
 
 
 def test_release_manifest_generator_rejects_tracked_repo_paths() -> None:

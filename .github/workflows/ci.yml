@@ -51,5 +51,8 @@ jobs:
       - name: Validate static site
         run: python scripts/check-site.py
 
+      - name: Generate release manifest
+        run: python scripts/generate-release-manifest.py --output artifacts/release-manifest.json
+
       - name: Run mock-only test suite
         run: python -m pytest

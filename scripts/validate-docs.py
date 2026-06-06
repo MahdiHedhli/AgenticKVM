@@ -29,6 +29,12 @@ REQUIRED_FILES = (
     "docs/release-pr-review-package.md",
     "docs/release-readiness.md",
     "docs/release-checklist.md",
+    "docs/sqlite-audit-hardening.md",
+    "docs/approval-queue.md",
+    "docs/recovery-playbooks.md",
+    "docs/live-provider-preflight.md",
+    "docs/public-beta-risk-register.md",
+    "docs/public-beta-readiness.md",
     "docs/roadmap.md",
     "site/index.html",
     "site/styles.css",
@@ -48,6 +54,7 @@ REQUIRED_FILES = (
     "specs/003-real-provider-readiness/spec.md",
     "specs/006-mcp-sdk-adapter/spec.md",
     "specs/008-production-audit-store/spec.md",
+    "specs/008-production-audit-store/contracts/sqlite-audit-backend-v1.md",
 )
 
 SAFETY_EXPECTATIONS = {
@@ -72,6 +79,19 @@ SAFETY_EXPECTATIONS = {
         "Provider Must Not Decide",
         "Readiness Gates",
         "disabled placeholders",
+    ),
+    "docs/live-provider-preflight.md": (
+        "CI mode",
+        "test mode",
+        "credential_ref",
+        "artifact path",
+        "observe-only",
+    ),
+    "docs/public-beta-readiness.md": (
+        "mock-first",
+        "live-provider preflight",
+        "SDK trial dependency",
+        "human",
     ),
 }
 

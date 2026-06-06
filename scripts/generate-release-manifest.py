@@ -80,6 +80,18 @@ def _manifest() -> dict[str, Any]:
             "release_readiness": (ROOT / "docs" / "release-readiness.md").exists(),
             "release_checklist": (ROOT / "docs" / "release-checklist.md").exists(),
             "coverage_policy": (ROOT / "docs" / "coverage-policy.md").exists(),
+            "sqlite_audit_hardening": (
+                ROOT / "docs" / "sqlite-audit-hardening.md"
+            ).exists(),
+            "live_provider_preflight": (
+                ROOT / "docs" / "live-provider-preflight.md"
+            ).exists(),
+            "public_beta_risk_register": (
+                ROOT / "docs" / "public-beta-risk-register.md"
+            ).exists(),
+            "public_beta_readiness": (
+                ROOT / "docs" / "public-beta-readiness.md"
+            ).exists(),
         },
         "site": {
             "site_dir": (ROOT / "site").exists(),
@@ -98,6 +110,8 @@ def _manifest() -> dict[str, Any]:
             "credential_refs_resolved": False,
             "live_provider_network_calls": False,
             "requires_github_actions_secrets": "secrets." in workflow_text.lower(),
+            "live_provider_preflight_ci_block": True,
+            "generated_local_artifacts_committed": False,
         },
     }
 

@@ -15,6 +15,25 @@ ROOT = Path(__file__).resolve().parents[1]
 PYTHON_DIRS = ("src", "tests", "scripts")
 TEXT_DIRS = ("docs", "examples", "site")
 SKIP_PARTS = {"__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache", ".venv"}
+GENERATED_LOCAL_ARTIFACT_SUFFIXES = (
+    ".sqlite",
+    ".sqlite3",
+    ".db",
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".webp",
+)
+GENERATED_LOCAL_ARTIFACT_NAMES = {
+    "approvals.json",
+    "approval-queue.json",
+    "approval_queue.json",
+    "audit-export.json",
+    "audit_export.json",
+    "audit-checkpoint.json",
+    "audit_checkpoint.json",
+    "release-manifest.json",
+}
 DEBUG_PATTERNS = (
     "pdb" + ".set_trace",
     "ipdb" + ".set_trace",
@@ -50,6 +69,7 @@ def main() -> int:
             "python_files": _check_python_files(),
             "text_files": _check_text_files(),
             "metadata": _check_metadata(),
+            "generated_local_artifacts": _check_generated_local_artifacts(),
         }
     except Exception as exc:
         print(f"lint sanity failed: {exc}", file=sys.stderr)
@@ -110,6 +130,31 @@ def _check_metadata() -> dict[str, bool]:
     if "mcp==1.27.2" in pyproject:
         raise LintSanityFailure("trial MCP SDK dependency is present")
     return {"sdk_trial_dependency_present": False}
+
+
+def _check_generated_local_artifacts() -> dict[str, int]:
+    offenders: list[str] = []
+    for path in sorted(ROOT.rglob("*")):
+        if not path.is_file():
+            continue
+        relative = path.relative_to(ROOT)
+        if any(part in SKIP_PARTS for part in relative.parts):
+            continue
+        if relative.parts[:2] == ("tests", "fixtures"):
+            continue
+        lowered_name = path.name.lower()
+        if path.suffix.lower() in GENERATED_LOCAL_ARTIFACT_SUFFIXES:
+            offenders.append(str(relative))
+        elif lowered_name in GENERATED_LOCAL_ARTIFACT_NAMES:
+            offenders.append(str(relative))
+        elif "screenshot" in lowered_name and path.suffix.lower() in {".json", ".txt"}:
+            offenders.append(str(relative))
+    if offenders:
+        raise LintSanityFailure(
+            "generated local audit/approval/artifact files must not be committed: "
+            + ", ".join(offenders)
+        )
+    return {"committed_generated_artifacts": 0}
 
 
 def _paths(root_names: Iterable[str], *, suffixes: tuple[str, ...]) -> Iterable[Path]:
