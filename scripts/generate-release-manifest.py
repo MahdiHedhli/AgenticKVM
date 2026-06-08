@@ -74,7 +74,7 @@ def _manifest() -> dict[str, Any]:
         },
         "project": metadata,
         "git": {
-            "branch": _git(["branch", "--show-current"]),
+            "branch": _git_branch(),
             "commit": _git(["rev-parse", "HEAD"]),
         },
         "checks": {
@@ -183,6 +183,15 @@ def _git(args: list[str]) -> str:
         capture_output=True,
         text=True,
     ).stdout.strip()
+
+
+def _git_branch() -> str:
+    """Return a useful branch name even under detached CI checkouts."""
+
+    branch = _git(["branch", "--show-current"])
+    if branch:
+        return branch
+    return f"detached:{_git(['rev-parse', '--short', 'HEAD'])}"
 
 
 if __name__ == "__main__":

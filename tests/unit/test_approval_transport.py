@@ -281,7 +281,7 @@ def test_local_approval_cannot_grant_hard_invariant_action(tmp_path) -> None:
             "id": "hard-invariant",
             "status": "pending",
             "created_at": "2026-06-06T00:00:00+00:00",
-            "expires_at": "2026-06-07T01:00:00+00:00",
+            "expires_at": "2100-06-07T01:00:00+00:00",
             "session_id": "session-1",
             "target_id": "mock-host",
             "provider_id": "mock",

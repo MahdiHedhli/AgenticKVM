@@ -14,7 +14,15 @@ from typing import Iterable
 ROOT = Path(__file__).resolve().parents[1]
 PYTHON_DIRS = ("src", "tests", "scripts")
 TEXT_DIRS = ("docs", "examples", "site")
-SKIP_PARTS = {"__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache", ".venv"}
+SKIP_PARTS = {
+    "__pycache__",
+    ".pytest_cache",
+    ".mypy_cache",
+    ".ruff_cache",
+    ".venv",
+    "artifacts",
+    "agentickvm-artifacts",
+}
 GENERATED_LOCAL_ARTIFACT_SUFFIXES = (
     ".sqlite",
     ".sqlite3",
