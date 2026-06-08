@@ -133,6 +133,7 @@ automation.
 
 - static GitHub Pages-ready site under `site/`
 - GitHub Pages workflow that publishes only `site/`
+- public site at `https://mahdihedhli.github.io/AgenticKVM/`
 - mock-only CI
 - package metadata checks
 - package artifact readiness checks
@@ -144,7 +145,8 @@ automation.
 - public beta readiness check
 - release manifest generator
 
-GitHub Pages repository settings still need maintainer enablement.
+GitHub Pages is enabled for GitHub Actions and publishes the static `site/`
+directory.
 
 ## Install From Source
 

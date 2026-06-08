@@ -12,6 +12,8 @@ version bump.
 ### Added
 
 - Static GitHub Pages-ready site and safe Pages workflow.
+- GitHub Pages enabled for GitHub Actions with public site at
+  `https://mahdihedhli.github.io/AgenticKVM/`.
 - Mock-only CI and release-quality validation scripts.
 - Package metadata, CLI smoke, lint sanity, type sanity, docs/spec validation,
   site validation, and release manifest checks.
@@ -44,7 +46,6 @@ version bump.
 
 - Wheel/sdist build is deferred unless optional build tooling is available.
 - Full lint/type/coverage enforcement remains documented but deferred.
-- GitHub Pages repository settings require human enablement after merge.
 - The public beta tag and GitHub pre-release are not created by this branch and
   require explicit maintainer approval.
 - External production audit backend and SIEM integration are not implemented.

@@ -42,9 +42,10 @@ readiness work for implemented live-provider support.
 ## GitHub Pages
 
 - The static site and Pages workflow are present.
-- Repository Pages settings still require human enablement after merge.
-- Public URL and README badges remain placeholders until the repository URL is
-  confirmed.
+- GitHub Pages is enabled for GitHub Actions.
+- Public site URL: `https://mahdihedhli.github.io/AgenticKVM/`
+- README badges remain deferred until release cadence and badge policy are
+  settled.
 
 ## Production Use
 

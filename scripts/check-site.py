@@ -37,6 +37,10 @@ FORBIDDEN_TEXT = (
     "zero risk",
     "mcp==1.27.2",
 )
+ALLOWED_REMOTE_PREFIXES = (
+    "https://github.com/MahdiHedhli/AgenticKVM/blob/main/",
+    "https://github.com/MahdiHedhli/AgenticKVM/tree/main/",
+)
 
 
 class SiteFailure(RuntimeError):
@@ -114,6 +118,8 @@ def _check_local_links(parser: SiteHTMLParser) -> None:
                 raise SiteFailure(f"broken local anchor: {href}")
             continue
         if re.match(r"https?://", href, flags=re.I):
+            if href.startswith(ALLOWED_REMOTE_PREFIXES):
+                continue
             raise SiteFailure(f"remote link requires review: {href}")
         if not (SITE / href).resolve().exists():
             raise SiteFailure(f"broken local link: {href}")

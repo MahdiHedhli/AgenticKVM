@@ -33,8 +33,8 @@ def test_github_pages_site_contains_required_safety_messaging() -> None:
         "Public beta candidate",
         "What works today",
         "What is intentionally disabled",
-        "../docs/public-beta-known-limitations.md",
-        "../docs/public-beta-security-statement.md",
+        "https://github.com/MahdiHedhli/AgenticKVM/blob/main/docs/public-beta-known-limitations.md",
+        "https://github.com/MahdiHedhli/AgenticKVM/blob/main/docs/public-beta-security-statement.md",
     ):
         assert required in text
 
@@ -68,11 +68,12 @@ def test_github_pages_site_has_no_tracking_or_remote_assets() -> None:
         "plausible",
         "segment.com",
         "analytics",
-        "http://",
-        "https://",
         "<script",
     ):
         assert forbidden not in text
+
+    for href in re.findall(r'href="(https?://[^"]+)"', text):
+        assert href.startswith("https://github.com/mahdihedhli/agentickvm/")
 
 
 def test_github_pages_site_links_resolve_locally() -> None:
@@ -83,6 +84,8 @@ def test_github_pages_site_links_resolve_locally() -> None:
     for href in hrefs:
         if href.startswith("#"):
             assert href[1:] in ids
+            continue
+        if href.startswith("https://github.com/MahdiHedhli/AgenticKVM/"):
             continue
         path = (SITE / href).resolve()
         assert path.exists(), href

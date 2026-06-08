@@ -44,9 +44,9 @@ REQUIRED_FILES = (
 )
 
 SITE_REQUIRED_SNIPPETS = (
-    "../docs/releases/public-beta-0.1.0.md",
-    "../docs/public-beta-known-limitations.md",
-    "../docs/public-beta-security-statement.md",
+    "https://github.com/MahdiHedhli/AgenticKVM/blob/main/docs/releases/public-beta-0.1.0.md",
+    "https://github.com/MahdiHedhli/AgenticKVM/blob/main/docs/public-beta-known-limitations.md",
+    "https://github.com/MahdiHedhli/AgenticKVM/blob/main/docs/public-beta-security-statement.md",
     "Public beta candidate",
     "Live providers are deferred",
 )

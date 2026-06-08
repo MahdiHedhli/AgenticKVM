@@ -20,9 +20,9 @@ This beta is intended for code review, mock/fixture testing, documentation
 review, and provider-readiness planning. It is not a production hardware
 automation release.
 
-GitHub Pages site files and workflow are included, but repository Pages settings
-still require maintainer enablement after merge. The release tag and GitHub
-pre-release must also be created manually after final review.
+GitHub Pages is enabled for GitHub Actions and publishes the static site at
+`https://mahdihedhli.github.io/AgenticKVM/`. The release tag and GitHub
+pre-release must still be created manually after final review.
 
 ## What Works Today
 
@@ -102,8 +102,8 @@ The trial dependency `mcp==1.27.2` is not adopted in this beta candidate.
 - `scripts/build-package.py` reports `deferred` when the optional `build`
   module is unavailable.
 - Full lint/type/coverage tooling remains documented but deferred.
-- GitHub Pages settings must be enabled by a maintainer after merge before the
-  site is public.
+- Public site is live through GitHub Pages. README badges remain deferred until
+  the repository URL and release cadence are settled.
 - SQLite audit backend v1 is local and explicit-path only.
 - External production audit backend and SIEM integration are deferred.
 - No live provider smoke has been run.
