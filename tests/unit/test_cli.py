@@ -100,3 +100,44 @@ def test_cli_does_not_require_secrets(monkeypatch, capsys) -> None:
 
     assert exit_code == 0
     assert payload["providers"][0]["id"] == "mock"
+
+
+def test_cli_status_reports_local_operator_console_state(tmp_path, capsys) -> None:
+    approval_path = tmp_path / "approvals.json"
+    audit_path = tmp_path / "audit.jsonl"
+    _run(
+        [
+            "--approval-path",
+            str(approval_path),
+            "--audit-path",
+            str(audit_path),
+            "call",
+            "--target",
+            "mock-host",
+            "--tool",
+            "force_restart",
+        ],
+        capsys,
+    )
+
+    exit_code, payload = _run(
+        [
+            "--approval-path",
+            str(approval_path),
+            "--audit-path",
+            str(audit_path),
+            "status",
+        ],
+        capsys,
+    )
+
+    assert exit_code == 0
+    assert payload["status"] == "ok"
+    assert payload["mode"] == "Supervised"
+    assert payload["providers"][0]["id"] == "mock"
+    assert payload["targets"][0]["id"] == "mock-host"
+    assert len(payload["pending_approvals"]) == 1
+    assert payload["audit"]["configured"] is True
+    assert payload["audit"]["hash_chain_valid"] is True
+    assert payload["safety"]["live_providers_enabled_by_default"] is False
+    assert payload["safety"]["network_listener"] is False

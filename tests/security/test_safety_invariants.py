@@ -57,6 +57,7 @@ def test_provider_modules_are_mock_or_offline_observe_scaffolds() -> None:
         "pikvm.py",
         "pikvm_transport.py",
         "placeholders.py",
+        "preflight.py",
         "redfish.py",
         "registry.py",
         "transport_policy.py",

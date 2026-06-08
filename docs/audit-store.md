@@ -1,11 +1,11 @@
 # Audit Store
 
 AgenticKVM treats audit as mandatory evidence. The current implementation uses
-a local JSONL audit sink for mock and fixture workflows, plus checkpoint and
-export verification scaffolds for production-readiness design.
+a local JSONL audit sink for mock and fixture workflows, plus an explicit-path
+SQLite audit backend v1 for local persistence experiments.
 
-No production audit backend, cloud storage backend, SIEM integration, live MCP
-server, live provider, credential resolution, or live network path exists yet.
+No cloud storage backend, SIEM integration, live MCP server, live provider,
+credential resolution, or live network path exists yet.
 
 ## Current Local JSONL Sink
 
@@ -18,6 +18,68 @@ file path. Each record contains:
 
 This hash chain detects content tampering, middle-event deletion, and event
 reordering.
+
+## Local SQLite Backend V1
+
+`SQLiteAuditSink` stores redacted audit records in a local SQLite database at
+an explicitly configured path. It uses the Python standard library only.
+
+The SQLite table stores:
+
+- event index
+- previous hash
+- event hash
+- redacted event JSON
+
+The SQLite backend preserves the same hash-chain semantics as JSONL and can be
+verified with:
+
+```bash
+agentickvm audit verify --sqlite-path /tmp/agentickvm-audit.sqlite
+```
+
+Recent events can be listed with:
+
+```bash
+agentickvm audit list --sqlite-path /tmp/agentickvm-audit.sqlite
+```
+
+Single events can be inspected with:
+
+```bash
+agentickvm audit inspect --sqlite-path /tmp/agentickvm-audit.sqlite --event-index 1
+```
+
+SQLite checkpoints can be written to an explicit JSON path:
+
+```bash
+agentickvm audit checkpoint \
+  --sqlite-path /tmp/agentickvm-audit.sqlite \
+  --audit-log-id local-operator-run \
+  --output /tmp/agentickvm-audit-checkpoint.json
+```
+
+Exports require an explicit output path:
+
+```bash
+agentickvm audit export \
+  --sqlite-path /tmp/agentickvm-audit.sqlite \
+  --output /tmp/agentickvm-audit-export.json
+```
+
+Runtime use is opt-in:
+
+```bash
+agentickvm --audit-sqlite-path /tmp/agentickvm-audit.sqlite status
+```
+
+The SQLite backend does not enable live providers, open network connections,
+resolve credentials, or change policy behavior. Tests use temp directories
+only.
+
+Hardening details and known limitations are tracked in
+[SQLite Audit Backend Hardening](sqlite-audit-hardening.md).
+Command details are in [Audit CLI](audit-cli.md).
 
 ## Tail-Truncation Risk
 
@@ -43,6 +105,9 @@ is malformed, or the checkpoint hash does not match its content.
 
 Appending events after a checkpoint is allowed. Truncating events at or before
 the checkpoint is not allowed.
+
+SQLite audit checkpoints use the same model through
+`create_sqlite_audit_checkpoint` and `verify_sqlite_audit_checkpoint`.
 
 ## Export And Import Verification
 
@@ -145,10 +210,10 @@ Options to evaluate later:
 
 ## Deferred
 
-- actual production audit backend
 - cloud/SIEM integration
 - checkpoint signing
 - production retention period
 - production audit-store access control
+- production database hardening and locking policy
 - live MCP server integration
 - live provider integration

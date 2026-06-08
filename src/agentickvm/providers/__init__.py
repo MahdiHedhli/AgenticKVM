@@ -53,6 +53,15 @@ from agentickvm.providers.placeholders import (
     RealProviderNotEnabledError,
     RedfishProviderPlaceholder,
 )
+from agentickvm.providers.preflight import (
+    LiveProviderPreflightRequest,
+    LiveProviderPreflightResult,
+    OBSERVE_ONLY_PROVIDER_TYPES,
+    PreflightStatus,
+    detected_ci_mode,
+    detected_test_mode,
+    run_live_provider_preflight,
+)
 from agentickvm.providers.redfish import (
     REDFISH_OBSERVE_CAPABILITIES,
     RedfishObserveClient,
@@ -82,6 +91,7 @@ __all__ = [
     "KNOWN_PROVIDER_TYPES",
     "MockProvider",
     "OBSERVE_ONLY_REAL_PROVIDER_CAPABILITIES",
+    "OBSERVE_ONLY_PROVIDER_TYPES",
     "PIKVM_OBSERVE_CAPABILITIES",
     "PLACEHOLDER_PROVIDER_TYPES",
     "PiKVMProviderPlaceholder",
@@ -102,6 +112,8 @@ __all__ = [
     "ProviderError",
     "ProviderErrorInfo",
     "ProviderEntry",
+    "LiveProviderPreflightRequest",
+    "LiveProviderPreflightResult",
     "ProviderMutationBlockedError",
     "ProviderNotFoundError",
     "ProviderProtocolError",
@@ -117,6 +129,7 @@ __all__ = [
     "ProviderValidationResult",
     "REDFISH_OBSERVE_CAPABILITIES",
     "RETRYABLE_ERROR_CODES",
+    "PreflightStatus",
     "RealProviderNotEnabledError",
     "RedfishObserveClient",
     "RedfishObserveProvider",
@@ -129,5 +142,8 @@ __all__ = [
     "UnsupportedCapabilityError",
     "default_pikvm_fake_transport",
     "default_redfish_fake_transport",
+    "detected_ci_mode",
+    "detected_test_mode",
     "redact_pikvm_observe_payload",
+    "run_live_provider_preflight",
 ]

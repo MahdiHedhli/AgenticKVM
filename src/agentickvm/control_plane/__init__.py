@@ -134,6 +134,11 @@ from agentickvm.control_plane.approvals import (  # noqa: E402
     build_approval_request,
     fingerprint_parameters,
 )
+from agentickvm.control_plane.approval_transport import (  # noqa: E402
+    LocalApprovalQueue,
+    LocalApprovalRecord,
+    LocalApprovalStatus,
+)
 from agentickvm.control_plane.audit import (  # noqa: E402
     AuditEvent,
     AuditEventType,
@@ -162,6 +167,17 @@ from agentickvm.control_plane.audit_retention import (  # noqa: E402
     AuditRetentionPolicy,
     AuditRetentionPolicyError,
     AuditRotationDecision,
+)
+from agentickvm.control_plane.audit_sqlite import (  # noqa: E402
+    SQLiteAuditError,
+    SQLiteAuditSink,
+    SQLiteAuditVerification,
+    create_sqlite_audit_checkpoint,
+    export_sqlite_audit,
+    inspect_sqlite_audit_event,
+    list_sqlite_audit_events,
+    verify_sqlite_audit_checkpoint,
+    verify_sqlite_audit_chain,
 )
 from agentickvm.control_plane.engine import (  # noqa: E402
     CapabilityRequest,
@@ -201,6 +217,9 @@ __all__ = [
     "InMemoryAuditSink",
     "INTERNAL_DECISIONS",
     "LocalJSONLAuditSink",
+    "LocalApprovalQueue",
+    "LocalApprovalRecord",
+    "LocalApprovalStatus",
     "ProviderRef",
     "REQUIRED_FLOW",
     "SessionApprovalGrant",
@@ -219,6 +238,9 @@ __all__ = [
     "PolicyRule",
     "RiskLevel",
     "SessionScope",
+    "SQLiteAuditError",
+    "SQLiteAuditSink",
+    "SQLiteAuditVerification",
     "TargetScope",
     "TargetDefinition",
     "TargetRegistry",
@@ -226,13 +248,19 @@ __all__ = [
     "build_approval_request",
     "build_audit_event",
     "create_audit_checkpoint",
+    "create_sqlite_audit_checkpoint",
     "export_audit_log",
+    "export_sqlite_audit",
     "default_decision_for_unknown_capability",
     "fingerprint_parameters",
+    "inspect_sqlite_audit_event",
+    "list_sqlite_audit_events",
     "load_policy_file",
     "mode_preset",
     "redact_mapping",
     "verify_audit_checkpoint",
     "verify_audit_export",
     "verify_audit_chain",
+    "verify_sqlite_audit_checkpoint",
+    "verify_sqlite_audit_chain",
 ]

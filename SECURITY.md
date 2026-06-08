@@ -30,6 +30,19 @@ The following rules apply to all implementations:
 - Audit is mandatory.
 - Real hardware is never used in CI.
 
+## Public Beta Scope
+
+The public beta candidate is mock-first. It is appropriate for code review,
+local mock testing, fixture testing, docs review, and provider-readiness
+planning.
+
+Do not use the public beta for unattended production hardware recovery, live
+PiKVM input, Redfish mutation, live provider smoke, or credential handling
+without a separate reviewed operator-approved plan.
+
+The beta security statement is maintained in
+`docs/public-beta-security-statement.md`.
+
 ## Hard Invariants
 
 These apply even in Full Control:

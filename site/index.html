@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="AgenticKVM is a policy-controlled infrastructure control plane for AI-assisted machine observation, recovery, and operation."
+    >
+    <title>AgenticKVM - Safe Agentic Control For Real Machines</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="AgenticKVM home">
+        <span class="brand-mark">AK</span>
+        <span>AgenticKVM</span>
+      </a>
+      <nav class="site-nav" aria-label="Primary navigation">
+        <a href="#how">How it works</a>
+        <a href="#safety">Safety</a>
+        <a href="#providers">Providers</a>
+        <a href="#start">Getting started</a>
+        <a href="#roadmap">Roadmap</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Agent hands. Operator guardrails.</p>
+          <h1>Give your AI agent hands for real machines.</h1>
+          <p class="hero-subtitle">
+            AgenticKVM is a policy-controlled infrastructure control plane for
+            AI-assisted machine observation, recovery, and operation across
+            KVM, BMC, and future remote-session providers.
+          </p>
+          <div class="hero-actions" aria-label="Primary actions">
+            <a class="button primary" href="#start">Read the docs</a>
+            <a class="button" href="#roadmap">View the roadmap</a>
+            <a class="button" href="#safety">Explore the safety model</a>
+          </div>
+          <p class="beta-note">
+            Public beta candidate. Mock-first, live-provider gated, and not for
+            unattended production hardware use.
+          </p>
+          <dl class="status-strip" aria-label="Current project status">
+            <div>
+              <dt>Public beta</dt>
+              <dd>Candidate</dd>
+            </div>
+            <div>
+              <dt>Live providers</dt>
+              <dd>Deferred</dd>
+            </div>
+            <div>
+              <dt>Provider mode</dt>
+              <dd>Mock-first</dd>
+            </div>
+            <div>
+              <dt>CI</dt>
+              <dd>Offline fixtures</dd>
+            </div>
+          </dl>
+        </div>
+        <aside class="hero-panel" aria-label="Core safety properties">
+          <h2>Safety guardrails built in.</h2>
+          <ul class="check-list">
+            <li>Out-of-band first</li>
+            <li>Policy-controlled actions</li>
+            <li>Approval gates</li>
+            <li>Audit trail</li>
+            <li>Mock-first provider development</li>
+            <li>MCP-ready integration</li>
+          </ul>
+        </aside>
+      </section>
+
+      <section class="section" id="beta">
+        <div class="section-heading">
+          <p class="eyebrow">Public beta candidate</p>
+          <h2>What works today, and what is intentionally disabled.</h2>
+        </div>
+        <div class="mini-grid">
+          <article>
+            <h3>Works today</h3>
+            <ul>
+              <li>Mock provider and fake/fixture observe paths</li>
+              <li>Policy, approval, audit, provider, and target registries</li>
+              <li>Local approval queue and operator console</li>
+              <li>SQLite audit backend v1 with explicit local paths</li>
+              <li>Safe recovery playbooks through the control plane</li>
+              <li>Release-quality scripts and mock-only CI</li>
+            </ul>
+          </article>
+          <article>
+            <h3>What is intentionally disabled</h3>
+            <ul>
+              <li>Live PiKVM and Redfish execution</li>
+              <li>PiKVM keyboard, mouse, paste, and hotkey input</li>
+              <li>Live MCP server adoption</li>
+              <li>Python MCP SDK dependency on mainline</li>
+              <li>RustDesk, VNC, RDP, MeshCentral, and browser/session providers</li>
+              <li>Production external audit backend and SIEM integration</li>
+            </ul>
+          </article>
+        </div>
+        <div class="doc-links" aria-label="Public beta documents">
+          <a href="../docs/releases/public-beta-0.1.0.md">Release notes</a>
+          <a href="../docs/public-beta-known-limitations.md">Known limitations</a>
+          <a href="../docs/public-beta-security-statement.md">Security statement</a>
+          <a href="../docs/roadmap.md">Roadmap</a>
+        </div>
+      </section>
+
+      <section class="section" id="why">
+        <div class="section-heading">
+          <p class="eyebrow">Why AgenticKVM</p>
+          <h2>AI agents are useful until the machine falls off the normal path.</h2>
+        </div>
+        <div class="split">
+          <p>
+            Agents can reason, write code, and call APIs. They struggle when SSH
+            is down, the OS is broken, a machine is stuck at BIOS, the browser
+            session is unavailable, or recovery requires console-level access.
+          </p>
+          <p>
+            AgenticKVM is designed to put a safer control layer between agent
+            intent and machine access. Every action is translated into a
+            capability request, checked by policy, approved when required,
+            executed only through registered providers, and recorded in audit.
+          </p>
+        </div>
+      </section>
+
+      <section class="section band" id="how">
+        <div class="section-heading">
+          <p class="eyebrow">How it works</p>
+          <h2>Policy, approvals, audit, and provider registries before execution.</h2>
+        </div>
+        <ol class="flow" aria-label="AgenticKVM request flow">
+          <li>Agent or tool request</li>
+          <li>MCP or host adapter</li>
+          <li>Target and provider registry</li>
+          <li>Capability request</li>
+          <li>Policy decision</li>
+          <li>Approval if required</li>
+          <li>Provider adapter</li>
+          <li>Audit event</li>
+          <li>Structured result</li>
+        </ol>
+      </section>
+
+      <section class="section" id="safety">
+        <div class="section-heading">
+          <p class="eyebrow">Safety guardrails</p>
+          <h2>The interface is not the authority. Policy is.</h2>
+        </div>
+        <div class="card-grid">
+          <article class="card">
+            <h3>Fail closed</h3>
+            <p>
+              Unknown capabilities, providers, targets, mappings, and malformed
+              requests deny by default before provider execution.
+            </p>
+          </article>
+          <article class="card">
+            <h3>Registered scope</h3>
+            <p>
+              Providers and targets must be explicitly configured. Request-supplied
+              names are untrusted until validated by registries.
+            </p>
+          </article>
+          <article class="card">
+            <h3>Approval is first-class</h3>
+            <p>
+              `approval_required` is a structured outcome, not an implicit grant.
+              Gated actions wait for an explicit matching approval.
+            </p>
+          </article>
+          <article class="card">
+            <h3>Full Control still has limits</h3>
+            <p>
+              Full Control can reduce prompts for in-scope actions, but it does
+              not bypass audit, scope, emergency stop, redaction, or invariants.
+            </p>
+          </article>
+          <article class="card">
+            <h3>Audit trail</h3>
+            <p>
+              Local audit scaffolding is redacted and hash-chain/checkpoint ready.
+              Production audit-store decisions remain explicit gates.
+            </p>
+          </article>
+          <article class="card">
+            <h3>Mock-only CI</h3>
+            <p>
+              Real providers are disabled by default. CI uses mocks, fixtures,
+              contracts, and offline tests instead of live infrastructure.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section band" id="providers">
+        <div class="section-heading">
+          <p class="eyebrow">Provider roadmap</p>
+          <h2>Out-of-band providers are not the same as remote desktop providers.</h2>
+        </div>
+        <div class="provider-table" role="table" aria-label="Provider roadmap status">
+          <div class="provider-row header" role="row">
+            <div role="columnheader">Family</div>
+            <div role="columnheader">Examples</div>
+            <div role="columnheader">Current treatment</div>
+          </div>
+          <div class="provider-row" role="row">
+            <div role="cell">Mock and fixtures</div>
+            <div role="cell">Mock provider, PiKVM fixture, Redfish fixture</div>
+            <div role="cell">Implemented for offline tests and readiness work.</div>
+          </div>
+          <div class="provider-row" role="row">
+            <div role="cell">Out-of-band</div>
+            <div role="cell">PiKVM, Redfish, iLO, iDRAC, IPMI / Supermicro BMC</div>
+            <div role="cell">
+              PiKVM and Redfish are in observe-only readiness/spec stages.
+              Live providers are deferred and disabled by default.
+            </div>
+          </div>
+          <div class="provider-row" role="row">
+            <div role="cell">In-band remote session</div>
+            <div role="cell">RustDesk, VNC, RDP, MeshCentral</div>
+            <div role="cell">
+              Future roadmap only. These depend on a running OS, service,
+              network path, and credential model.
+            </div>
+          </div>
+          <div class="provider-row" role="row">
+            <div role="cell">Browser and session</div>
+            <div role="cell">BrowserBridge, desktop/session brokers</div>
+            <div role="cell">Future session-level provider family.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="mcp">
+        <div class="section-heading">
+          <p class="eyebrow">MCP and agents</p>
+          <h2>MCP tools route through the control plane.</h2>
+        </div>
+        <div class="split">
+          <p>
+            AgenticKVM includes MCP-style models, a router, a dependency-free
+            mock-only MCP adapter, and a mock-only host compatibility layer. These
+            interfaces are translators, not authority boundaries.
+          </p>
+          <p>
+            The mainline project does not adopt a live MCP server. A Python MCP
+            SDK trial exists separately and remains gated by human review; it is
+            not a mainline dependency. Any future live MCP server must preserve
+            provider registry, target registry, policy, approval, audit, and
+            redaction behavior.
+          </p>
+        </div>
+      </section>
+
+      <section class="section band" id="start">
+        <div class="section-heading">
+          <p class="eyebrow">Getting started</p>
+          <h2>Start with docs and mock-only tests. No live hardware by default.</h2>
+        </div>
+        <div class="command-grid">
+          <div>
+            <h3>Clone and inspect</h3>
+            <pre><code>git clone &lt;repository-url&gt;
+cd AgenticKVM</code></pre>
+          </div>
+          <div>
+            <h3>Run the test suite</h3>
+            <pre><code>uv run --offline --with pytest --python python3.13 python -m pytest</code></pre>
+          </div>
+        </div>
+        <p class="note">
+          Tests are designed for mocks, fixtures, and offline contracts. Do not
+          point AgenticKVM at real hardware, credentials, or live provider
+          endpoints unless a future operator-approved smoke plan explicitly says
+          to do so.
+        </p>
+        <div class="doc-links" aria-label="Getting started documents">
+          <a href="../README.md">Repository README</a>
+          <a href="../docs/public-beta-readiness.md">Beta readiness</a>
+          <a href="../docs/public-beta-known-limitations.md">Known limitations</a>
+          <a href="../docs/public-beta-security-statement.md">Security statement</a>
+        </div>
+      </section>
+
+      <section class="section" id="roadmap">
+        <div class="section-heading">
+          <p class="eyebrow">Roadmap</p>
+          <h2>Small verified slices before live infrastructure.</h2>
+        </div>
+        <div class="timeline">
+          <article>
+            <span>Achieved baseline</span>
+            <h3>Bootstrap, policy core, approval/audit, mock provider, MCP scaffold</h3>
+          </article>
+          <article>
+            <span>Advanced readiness</span>
+            <h3>Provider registries, target registries, config loader, CLI, host compatibility</h3>
+          </article>
+          <article>
+            <span>Readiness and gates</span>
+            <h3>PiKVM/Redfish observe-only specs, audit-store scaffolding, live MCP gates</h3>
+          </article>
+          <article>
+            <span>Future work</span>
+            <h3>Operator-reviewed live MCP server, observe-only real provider slices, in-band provider specs</h3>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div>
+        <strong>AgenticKVM</strong>
+        <p>Safe agentic control for real infrastructure, grown in mock-first slices.</p>
+      </div>
+      <nav aria-label="Footer navigation">
+        <a href="../README.md">Docs</a>
+        <a href="../docs/security-model.md">Security</a>
+        <a href="../docs/public-beta-known-limitations.md">Limitations</a>
+        <a href="../docs/roadmap.md">Roadmap</a>
+        <a href="../LICENSE">License</a>
+      </nav>
+    </footer>
+  </body>
+</html>

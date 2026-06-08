@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: Mock-only tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest
+          python -m pip install -e .
+
+      - name: Validate package metadata
+        run: python scripts/check-package.py
+
+      - name: Validate package artifacts
+        run: python scripts/build-package.py
+
+      - name: Run CLI smoke matrix
+        run: python scripts/smoke-cli.py
+
+      - name: Run lint sanity
+        run: python scripts/lint-sanity.py
+
+      - name: Run type sanity
+        run: python scripts/type-sanity.py
+
+      - name: Validate docs and specs
+        run: python scripts/validate-docs.py
+
+      - name: Validate static site
+        run: python scripts/check-site.py
+
+      - name: Generate release manifest
+        run: python scripts/generate-release-manifest.py --output artifacts/release-manifest.json
+
+      - name: Run public beta readiness check
+        run: python scripts/check-public-beta.py
+
+      - name: Run mock-only test suite
+        run: python -m pytest

@@ -1033,3 +1033,533 @@
   - `docs/heartbeat-log.md`
 - tests expected to run:
   - `uv run --with pytest --python python3.13 python -m pytest`
+## 2026-06-05T14:25:44Z
+
+- selected maturity level: public documentation and marketing foundation
+- selected task: create a simple GitHub Pages-ready static site on
+  `feature/github-pages-site` from `main`, with product positioning, safety
+  guardrails, provider taxonomy, MCP/agent integration, getting started, and
+  roadmap content
+- why this task is safe: work is on a mainline feature branch, not the SDK
+  trial branch; it adds static documentation/marketing files only; no
+  `mcp==1.27.2` dependency, live MCP server, live provider, hardware access,
+  credentials, provider network calls, deployment secrets, analytics, tracking,
+  or policy changes are introduced
+- files expected to change:
+  - `docs/github-pages.md`
+  - `site/index.html`
+  - `site/styles.css`
+  - `site/README.md`
+  - optional static site support files
+  - `tests/`
+  - `README.md`
+  - `docs/roadmap.md`
+  - `docs/heartbeat-log.md`
+- baseline tests run:
+  - `uv run --offline --with pytest --python python3.13 python -m pytest`
+- baseline result: 490 passed
+
+### Result
+
+- timestamp: 2026-06-05T14:25:44Z
+- commits:
+  - `ae87de2` docs: plan GitHub Pages site
+  - `ed27abc` docs: add AgenticKVM GitHub Pages site
+  - `8f9a5a3` docs: document GitHub Pages setup
+  - `95a6f60` docs: polish AgenticKVM site messaging
+  - `d2ecf4d` test: add GitHub Pages content safety checks
+- files changed:
+  - `docs/github-pages.md`
+  - `site/index.html`
+  - `site/styles.css`
+  - `site/README.md`
+  - `tests/security/test_github_pages_site_safety.py`
+  - `README.md`
+  - `docs/roadmap.md`
+  - `docs/heartbeat-log.md`
+- tests run:
+  - `uv run --offline --with pytest --python python3.13 python -m pytest`
+- result: 497 passed
+- risks found:
+  - GitHub Pages deployment still requires repository setting or a reviewed
+    workflow decision
+  - no GitHub Actions Pages workflow was added in this branch
+  - live providers and live MCP server remain deferred
+  - SDK trial dependency remains separate from `main`
+- next recommended task: human-review the static site, then enable GitHub
+  Pages through repository settings or add a minimal reviewed Pages workflow in
+  a follow-up branch
+- blockers:
+  - repository Pages source/workflow decision
+  - public repository URL confirmation for footer links
+## 2026-06-05T15:04:39Z
+
+- selected maturity level: release engineering and open-source project
+  scaffold hardening
+- selected task: add release-quality gates on
+  `feature/release-quality-gates`, including safe CI, static GitHub Pages
+  deployment, package metadata checks, docs/spec validation, safety regression
+  checks, developer workflow docs, release readiness docs, branch review
+  package, and repository hygiene
+- why this task is safe: work starts from `feature/github-pages-site`, not the
+  SDK trial branch; it does not add `mcp==1.27.2`, live MCP server behavior,
+  live providers, credentials, provider network calls, hardware access,
+  tracking, analytics, workflow secrets, or live provider CI jobs
+- files expected to change:
+  - `.github/workflows/`
+  - `scripts/`
+  - `tests/contract/`
+  - `tests/security/`
+  - `docs/release-quality-gates.md`
+  - `docs/packaging.md`
+  - `docs/development.md`
+  - `docs/testing.md`
+  - `docs/release-readiness.md`
+  - `docs/release-checklist.md`
+  - `docs/release-quality-branch-review.md`
+  - `docs/github-pages.md`
+  - `README.md`
+  - `CONTRIBUTING.md`
+  - `docs/roadmap.md`
+  - `docs/heartbeat-log.md`
+- baseline tests run:
+  - `uv run --offline --with pytest --python python3.13 python -m pytest`
+- baseline result: 497 passed
+
+### Result
+
+- timestamp: 2026-06-05T15:17:04Z
+- commits:
+  - `e0a87c3` docs: plan release quality gates
+  - `9d23ad0` ci: add safe mock-only CI workflow
+  - `ba398af` ci: add GitHub Pages static site workflow
+  - `a65febf` test: add package metadata and import checks
+  - `0bb5880` test: add docs and spec validation
+  - `a3f12e5` test: add release safety regression suite
+  - `26766b9` docs: add development and testing guide
+  - `9916bc1` docs: add release readiness checklist
+  - `6df4f1a` docs: polish README release links
+  - `7e3101c` docs: add release quality branch review package
+- files changed:
+  - `.github/workflows/ci.yml`
+  - `.github/workflows/pages.yml`
+  - `scripts/check-package.py`
+  - `scripts/validate-docs.py`
+  - `tests/contract/test_package_metadata.py`
+  - `tests/contract/test_docs_validation.py`
+  - `tests/security/test_workflow_safety.py`
+  - `tests/security/test_release_safety_regressions.py`
+  - `tests/security/test_github_pages_site_safety.py`
+  - `README.md`
+  - `CONTRIBUTING.md`
+  - `docs/development.md`
+  - `docs/testing.md`
+  - `docs/packaging.md`
+  - `docs/release-quality-gates.md`
+  - `docs/release-readiness.md`
+  - `docs/release-checklist.md`
+  - `docs/release-quality-branch-review.md`
+  - `docs/github-pages.md`
+  - `docs/roadmap.md`
+  - `docs/heartbeat-log.md`
+- tests run:
+  - `python3 scripts/check-package.py`
+  - `python3 scripts/validate-docs.py`
+  - `uv run --offline --with pytest --python python3.13 python -m pytest`
+- result: 521 passed
+- risks closed:
+  - mock-only CI workflow added with minimal permissions
+  - GitHub Pages workflow added for static `site/` only
+  - package metadata/import validation added
+  - docs/spec/site validation added
+  - release safety regression suite added
+  - developer, testing, packaging, release readiness, and branch review docs
+    added
+- risks remaining:
+  - GitHub Pages repository settings require human confirmation after merge
+  - wheel/sdist build verification remains a future hardening task
+  - lint/type gates remain future decisions
+  - live MCP server and live providers remain deferred
+  - SDK trial dependency remains isolated from this branch
+- next recommended task: human-review `feature/release-quality-gates`, then
+  decide whether to merge and enable GitHub Pages deployment from GitHub
+  Actions settings
+
+## 2026-06-06T00:09:02Z
+
+- selected maturity level: package and release hardening for public release
+  candidate review
+- selected task: create `feature/package-release-hardening` from
+  `feature/release-quality-gates` and add package artifact verification, CLI
+  smoke matrix, lint/type sanity gates, coverage policy, release manifest
+  generation, CI hardening, site preview checks, release artifact checklist,
+  PR review package, and final release-readiness docs
+- why this task is safe: work stays on a mainline feature branch; it does not
+  add the trial-only MCP SDK dependency, live MCP server behavior, live
+  providers, credentials, provider network calls, hardware access, workflow
+  secrets, analytics, tracking, or live-provider CI jobs
+- files expected to change:
+  - `.github/workflows/ci.yml`
+  - `scripts/`
+  - `tests/contract/`
+  - `tests/security/`
+  - `docs/packaging.md`
+  - `docs/cli-smoke.md`
+  - `docs/linting.md`
+  - `docs/type-checking.md`
+  - `docs/coverage-policy.md`
+  - `docs/site-preview.md`
+  - `docs/release-artifacts.md`
+  - `docs/release-pr-review-package.md`
+  - `docs/release-readiness.md`
+  - `docs/release-checklist.md`
+  - `README.md`
+  - `docs/roadmap.md`
+  - `docs/heartbeat-log.md`
+- baseline checks run:
+  - `python3 scripts/check-package.py`
+  - `python3 scripts/validate-docs.py`
+  - `uv run --offline --with pytest --python python3.13 python -m pytest`
+- baseline result: package check passed; docs validation passed; 521 passed
+
+### Result
+
+- timestamp: 2026-06-06T00:22:36Z
+- commits:
+  - `5042461` build: add package artifact verification
+  - `7d900cb` test: add CLI smoke matrix
+  - `34b99c6` test: add lint sanity gate
+  - `76b8594` test: add type sanity gate
+  - `0e50aa4` docs: add coverage policy
+  - `16dd8ed` build: add release manifest generator
+  - `07d1496` ci: harden release quality workflow
+  - `9e796c6` test: add site preview checks
+  - `5724d65` ci: add site preview gate
+  - `3555873` docs: add release artifact checklist
+  - `edf8acb` docs: add release PR review package
+  - `cdc5469` docs: polish README release links
+- files changed:
+  - `.github/workflows/ci.yml`
+  - `scripts/build-package.py`
+  - `scripts/smoke-cli.py`
+  - `scripts/lint-sanity.py`
+  - `scripts/type-sanity.py`
+  - `scripts/generate-release-manifest.py`
+  - `scripts/check-site.py`
+  - `scripts/validate-docs.py`
+  - `tests/contract/test_package_artifacts.py`
+  - `tests/contract/test_cli_smoke_matrix.py`
+  - `tests/contract/test_lint_sanity.py`
+  - `tests/contract/test_type_sanity.py`
+  - `tests/contract/test_release_manifest.py`
+  - `tests/security/test_site_preview_safety.py`
+  - `tests/security/test_workflow_safety.py`
+  - `docs/packaging.md`
+  - `docs/cli-smoke.md`
+  - `docs/linting.md`
+  - `docs/type-checking.md`
+  - `docs/coverage-policy.md`
+  - `docs/site-preview.md`
+  - `docs/release-artifacts.md`
+  - `docs/release-pr-review-package.md`
+  - `docs/release-readiness.md`
+  - `docs/release-checklist.md`
+  - `docs/release-quality-gates.md`
+  - `docs/roadmap.md`
+  - `docs/heartbeat-log.md`
+  - `README.md`
+- tests and scripts run:
+  - `python3 scripts/check-package.py`
+  - `python3 scripts/build-package.py`
+  - `python3 scripts/smoke-cli.py`
+  - `python3 scripts/lint-sanity.py`
+  - `python3 scripts/type-sanity.py`
+  - `python3 scripts/validate-docs.py`
+  - `python3 scripts/check-site.py`
+  - `python3 scripts/generate-release-manifest.py --output <temp path>`
+  - `uv run --offline --with pytest --python python3.13 python -m pytest`
+- result: 537 passed
+- risks closed:
+  - package artifact readiness gate added with safe deferred behavior when
+    optional build tooling is unavailable
+  - CLI smoke matrix added for mock and fixture-only flows
+  - lint and type sanity gates added without new dependencies
+  - coverage policy documented without premature percentage claims
+  - release manifest generator added with explicit-path output safety
+  - CI now runs package, artifact, CLI, lint, type, docs, site, and pytest
+    gates
+  - static site preview checks added
+  - release artifact checklist and PR review package added
+- risks remaining:
+  - optional wheel/sdist build tooling still needs human dependency decision
+  - full lint/type tooling remains deferred
+  - coverage percentage enforcement remains deferred
+  - public repository URL and badges remain undecided
+  - GitHub Pages repository settings require human confirmation after merge
+  - live MCP server, live providers, SDK trial adoption, and production audit
+    backend remain deferred
+- next recommended task: human-review `feature/package-release-hardening`,
+  then decide whether to merge into the release-quality branch or mainline
+  review path
+
+## 2026-06-06T05:36:26Z
+
+- selected maturity level: next-10 strategic integration planning and safe
+  scaffold implementation
+- selected task: create `feature/agentickvm-next-10-integration` from
+  `feature/package-release-hardening`, confirm release-quality and GitHub
+  Pages work is integrated, review the Python MCP SDK trial without merging it,
+  and advance safe local/mock/disabled-by-default scaffolds for approval,
+  provider readiness, audit, operator console, input-control, and recovery
+  playbooks where bounded
+- why this task is safe: baseline release gates passed on
+  `feature/package-release-hardening`; this branch does not add the trial-only
+  MCP SDK dependency, live MCP server default, live provider default,
+  credentials, provider network calls, hardware access, workflow secrets,
+  analytics, tracking, or live-provider CI jobs
+- branch integration baseline:
+  - `feature/github-pages-site` is included in `feature/package-release-hardening`
+  - `feature/release-quality-gates` is included in
+    `feature/package-release-hardening`
+  - integration branch created from clean `feature/package-release-hardening`
+- baseline checks run:
+  - `python3 scripts/check-package.py`
+  - `python3 scripts/build-package.py`
+  - `python3 scripts/smoke-cli.py`
+  - `python3 scripts/lint-sanity.py`
+  - `python3 scripts/type-sanity.py`
+  - `python3 scripts/validate-docs.py`
+  - `python3 scripts/check-site.py`
+  - `python3 scripts/generate-release-manifest.py --output <temp path>`
+  - `uv run --offline --with pytest --python python3.13 python -m pytest`
+- baseline result: all scripts passed; package artifact check reported
+  documented deferred build status; pytest result 537 passed
+- expected safe outputs:
+  - next-10 integration review
+  - SDK trial review decision
+  - MCP stdio mainline adoption hold/defer docs unless human review accepts SDK
+  - local approval transport scaffold if bounded
+  - disabled/fake-only provider readiness docs/tests where safe
+  - operator console, audit backend, input-control, and playbook scaffolds only
+    if they preserve `ControlPlane`, approval, audit, registry, and mock-only CI
+    boundaries
+
+## 2026-06-06T05:54:37Z
+
+- selected maturity level: next-10 integration branch advanced with safe
+  mainline-compatible scaffolds
+- branch: `feature/agentickvm-next-10-integration`
+- completed:
+  - release-quality and GitHub Pages branch integration confirmed through the
+    package-release hardening base
+  - Python MCP SDK trial reviewed without merging the trial branch
+  - MCP stdio mainline adoption deferred; no `mcp` dependency added
+  - local operator approval transport added with explicit approval queue path,
+    one-time/session scope, denial, expiry, redaction, and optional audit path
+  - local operator console added through `agentickvm status` and
+    `agentickvm console`
+  - SQLite audit backend v1 added with explicit-path opt-in, hash-chain
+    verification, list, export, and tamper-detection tests
+  - live PiKVM observe, live Redfish observe, and PiKVM input-control phases
+    gated in docs; no live provider or input-control code added
+  - safe recovery playbook framework added with dry-run and mock execution
+    through `MCPRouter` and `ControlPlane`
+- tests and scripts run:
+  - `python3 scripts/check-package.py`
+  - `python3 scripts/build-package.py`
+  - `python3 scripts/smoke-cli.py`
+  - `python3 scripts/lint-sanity.py`
+  - `python3 scripts/type-sanity.py`
+  - `python3 scripts/validate-docs.py`
+  - `python3 scripts/check-site.py`
+  - `python3 scripts/generate-release-manifest.py --output <temp path>`
+  - `uv run --offline --with pytest --python python3.13 python -m pytest`
+- result: all scripts passed; package artifact check reported documented
+  deferred build status; pytest result 555 passed
+- safety notes:
+  - real hardware touched: no
+  - live provider network calls made: no
+  - secrets touched: no
+  - live providers enabled by default: no
+  - live input implemented: no
+  - live MCP server enabled: no
+  - SDK trial dependency added: no
+  - policy gates weakened: no
+  - ControlPlane bypass added: no
+- deferred:
+  - mainline MCP SDK dependency adoption
+  - mock-only MCP stdio server mainline adoption
+  - disabled live PiKVM observe implementation
+  - disabled GET-only Redfish implementation
+  - fake-only PiKVM input-control phase
+  - lab-only live smoke plans
+- next recommended task: human review of
+  `feature/agentickvm-next-10-integration`, then choose either a focused
+  live-provider implementation plan or a focused MCP SDK adoption plan.
+
+## 2026-06-06T06:49:29Z
+
+- selected maturity level: audit beta readiness and public beta merge
+  hardening
+- selected task: create `feature/audit-beta-readiness` from
+  `feature/agentickvm-next-10-integration`, harden SQLite audit behavior,
+  approval/audit integration, playbook safety, live-provider preflight gates,
+  and public beta review docs without adding live providers or SDK trial
+  dependency
+- why this task is safe: baseline release gates passed on the new branch;
+  planned work is explicit-path, temp-path-tested, mock-only, docs/spec/test
+  heavy, and keeps live provider execution, live smoke, credentials, hardware,
+  and network listeners out of scope
+- baseline checks run:
+  - `python3 scripts/check-package.py`
+  - `python3 scripts/build-package.py`
+  - `python3 scripts/smoke-cli.py`
+  - `python3 scripts/lint-sanity.py`
+  - `python3 scripts/type-sanity.py`
+  - `python3 scripts/validate-docs.py`
+  - `python3 scripts/check-site.py`
+  - `python3 scripts/generate-release-manifest.py --output <temp path>`
+  - `uv run --offline --with pytest --python python3.13 python -m pytest`
+- baseline result: all scripts passed; package artifact check reported
+  documented deferred build status; pytest result 555 passed
+- expected safe outputs:
+  - SQLite audit backend hardening review and tests
+  - audit CLI query/export/checkpoint polish
+  - approval queue plus audit integration hardening
+  - playbook safety conformance tests
+  - live-provider preflight gate framework
+  - public beta risk register and readiness package
+  - release/CI checks for generated audit, approval, and artifact files
+
+## 2026-06-06T07:41:00Z
+
+- selected maturity level: audit beta readiness branch ready for final local
+  validation and human public beta review
+- branch: `feature/audit-beta-readiness`
+- completed:
+  - SQLite audit backend hardening review, contract, checkpoint verification,
+    checkpoint-aware export, event inspection, malformed DB handling, and
+    tamper/deletion tests
+  - audit CLI checkpoint and inspect workflows
+  - approval queue audit integration hardening for denial, expiry, consumption,
+    redaction, fingerprint mismatch, hard-invariant rejection, and malformed
+    stores
+  - recovery playbook safety hardening for known tool/capability mapping,
+    required risk/rollback metadata, redacted step output, and approval/policy
+    stop behavior
+  - live-provider preflight gate model and CLI with CI/test-mode blocking,
+    observe-only capability enforcement, explicit audit/approval/credential-ref
+    evidence, artifact path checks, TLS/timeout review, and manual smoke
+    acknowledgement
+  - public beta risk register, readiness checklist, and merge review package
+  - CI/release gates for beta/preflight/audit docs, release manifest beta
+    fields, and generated local artifact exclusions
+- safety notes:
+  - real hardware touched: no
+  - live provider network calls made: no
+  - secrets touched: no
+  - live providers enabled by default: no
+  - SDK trial dependency added: no
+  - generated audit DB/export/checkpoint/approval/artifact files committed: no
+  - approval auto-bypass added: no
+  - playbook ControlPlane bypass added: no
+- final validation: pending after this closeout commit
+- next recommended task: run final release script matrix and pytest, then send
+  the branch for human merge review if all checks pass.
+
+## 2026-06-06T11:09:33Z
+
+- selected maturity level: public beta cutover and first pre-release readiness
+  package
+- branch: `feature/public-beta-cutover`
+- selected task: prepare public beta cutover docs, release notes, changelog,
+  Pages enablement checklist, site polish, maintainer runbook, templates,
+  manifest/readiness checks, and final merge review without merging to main,
+  adding SDK trial dependency, enabling live MCP server, or touching live
+  providers
+- why this task is safe: baseline validation passed on
+  `feature/public-beta-cutover`; planned work is documentation, static-site,
+  metadata, templates, and offline validation only; no live provider network
+  calls, credentials, hardware access, live smoke, or live MCP behavior are in
+  scope
+- baseline checks run:
+  - `python3 scripts/check-package.py`
+  - `python3 scripts/build-package.py`
+  - `python3 scripts/smoke-cli.py`
+  - `python3 scripts/lint-sanity.py`
+  - `python3 scripts/type-sanity.py`
+  - `python3 scripts/validate-docs.py`
+  - `python3 scripts/check-site.py`
+  - `python3 scripts/generate-release-manifest.py --output <temp path>`
+  - `uv run --offline --with pytest --python python3.13 python -m pytest`
+- baseline result: all scripts passed; package artifact check reported
+  documented deferred build status; pytest result 572 passed
+- expected safe outputs:
+  - public beta cutover plan
+  - public beta release notes and changelog entry
+  - known limitations and security statement
+  - GitHub Pages enablement checklist
+  - site public beta copy polish
+  - maintainer runbook
+  - issue and PR templates that warn against secrets
+  - release manifest and public beta readiness checks
+  - final merge review package and roadmap update
+
+## 2026-06-06T11:42:00Z
+
+- selected maturity level: public beta cutover branch ready for final local
+  validation and human merge review
+- branch: `feature/public-beta-cutover`
+- completed:
+  - public beta cutover plan
+  - draft public beta release notes and changelog entry for proposed
+    `v0.1.0-public-beta.1`
+  - public beta known limitations and security statement
+  - GitHub Pages enablement checklist
+  - public beta site status polish with release notes, limitations, security,
+    and roadmap links
+  - maintainer public beta runbook
+  - GitHub issue and PR templates with no-secrets warnings
+  - release manifest public beta metadata and generated-artifact exclusion
+    fields
+  - public beta readiness script and CI hook
+  - finalized public beta merge review package
+  - README and roadmap public beta cutover links/status
+- safety notes:
+  - real hardware touched: no
+  - live provider network calls made: no
+  - secrets touched: no
+  - live providers enabled by default: no
+  - live MCP server enabled: no
+  - SDK trial dependency added: no
+  - generated audit DB/export/checkpoint/approval/artifact files committed: no
+  - tag pushed or release published: no
+- final validation: pending after this closeout commit
+- next recommended task: run final release script matrix and pytest, then send
+  `feature/public-beta-cutover` for human merge review if all checks pass.
+
+## 2026-06-06T12:50:19Z
+
+- selected maturity level: operator-controlled public beta merge/readiness
+  review
+- branch: `feature/public-beta-cutover`
+- completed:
+  - final public beta branch stack review
+  - final public beta safety verification
+  - human-only merge command plan
+  - GitHub Pages enablement runbook finalization
+  - public beta pre-release tagging plan
+  - public beta release notes polish
+  - final public beta handoff document
+  - public beta readiness scripts updated to require final review docs
+- safety notes:
+  - real hardware touched: no
+  - live provider network calls made: no
+  - secrets touched: no
+  - live providers enabled by default: no
+  - SDK trial dependency added: no
+  - generated audit DB/export/checkpoint/approval/artifact files committed: no
+  - tag pushed, release published, Pages setting changed, or main merged: no
+- final validation: pending after this closeout commit
+- next recommended task: run final validation matrix, then ask a human
+  maintainer to review `feature/public-beta-cutover` for merge readiness.
