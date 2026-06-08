@@ -1,11 +1,10 @@
 # AgenticKVM Public Beta 0.1.0 Release Notes
 
-Proposed tag: `v0.1.0-public-beta.1`
+Release tag: `v0.1.0-public-beta.1`
 
-Package metadata at the time of this draft: `0.0.0`
+Package metadata at release time: `0.0.0`
 
-Status: draft for human review. Do not tag or publish without maintainer
-approval.
+Status: published pre-release after explicit maintainer approval.
 
 ## Summary
 
