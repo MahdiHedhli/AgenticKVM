@@ -22,7 +22,8 @@ automation release.
 
 GitHub Pages is enabled for GitHub Actions and publishes the static site at
 `https://mahdihedhli.github.io/AgenticKVM/`. The release tag and GitHub
-pre-release must still be created manually after final review.
+pre-release are intentionally published through an operator-controlled manual
+cutover after final review, not by CI automation.
 
 ## What Works Today
 
