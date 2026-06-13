@@ -32,6 +32,8 @@ REQUIRED_FILES = (
     "docs/release-checklist.md",
     "docs/sqlite-audit-hardening.md",
     "docs/approval-queue.md",
+    "docs/approval-notifiers.md",
+    "docs/conversational-approval.md",
     "docs/recovery-playbooks.md",
     "docs/live-provider-preflight.md",
     "docs/public-beta-risk-register.md",
