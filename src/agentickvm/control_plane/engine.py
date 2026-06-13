@@ -17,12 +17,17 @@ from agentickvm.control_plane.approvals import (
     build_approval_request,
     fingerprint_parameters,
 )
+from agentickvm.control_plane.approval_broker import (
+    ApprovalGrantVerifier,
+    GrantVerificationContext,
+)
 from agentickvm.control_plane.audit import (
     AuditEventType,
     AuditSink,
     ProviderRef,
     build_audit_event,
 )
+from agentickvm.control_plane.grants import SignedApprovalGrant
 from agentickvm.control_plane.capabilities import (
     Capability,
     CapabilityRegistry,
@@ -58,6 +63,8 @@ class CapabilityRequest:
     intended_effect: str
     parameters: Mapping[str, Any] = field(default_factory=dict)
     credential_id: str | None = None
+    approval_request_id: str | None = None
+    signed_approval_grant: SignedApprovalGrant | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "parameters", MappingProxyType(dict(self.parameters)))
@@ -86,6 +93,7 @@ class ControlPlane:
         registry: CapabilityRegistry = DEFAULT_CAPABILITY_REGISTRY,
         approval_store: ApprovalStore | None = None,
         now_factory: Any | None = None,
+        approval_grant_verifier: ApprovalGrantVerifier | None = None,
     ) -> None:
         self.policy = policy
         self.provider = provider
@@ -93,6 +101,8 @@ class ControlPlane:
         self.registry = registry
         self.approval_store = approval_store
         self.now_factory = now_factory or (lambda: datetime.now(UTC))
+        self.approval_grant_verifier = approval_grant_verifier
+        self._consumed_signed_grant_ids: set[str] = set()
 
     def handle(self, request: CapabilityRequest) -> ControlPlaneResult:
         """Handle a capability request through the required control flow."""
@@ -174,6 +184,18 @@ class ControlPlane:
         if decision.requires_approval:
             if capability is None:
                 raise RuntimeError("Unknown capabilities cannot require approval")
+            signed_result = self._verify_signed_approval_grant(
+                request=request,
+                capability_ref=capability_ref,
+                decision=decision,
+            )
+            if signed_result is True:
+                return self._execute_provider(
+                    request=request,
+                    capability=capability,
+                    capability_ref=capability_ref,
+                    decision=decision,
+                )
             grant = self._matching_approval_grant(request)
             if grant is not None:
                 if self.approval_store is None:
@@ -298,6 +320,86 @@ class ControlPlane:
             params_fingerprint=fingerprint_parameters(request.parameters),
             now=self.now_factory(),
         )
+
+    def _verify_signed_approval_grant(
+        self,
+        *,
+        request: CapabilityRequest,
+        capability_ref: CapabilityRef,
+        decision: PolicyDecisionResult,
+    ) -> bool | None:
+        if request.signed_approval_grant is None:
+            return None
+        if self.approval_grant_verifier is None:
+            self._emit(
+                event_type=AuditEventType.APPROVAL_REJECTED,
+                request=request,
+                capability_ref=capability_ref,
+                policy_decision=decision.decision,
+                approval_payload={"reason": "signed approval verifier is not configured"},
+                material_risks=decision.material_risks,
+            )
+            return None
+        if request.approval_request_id is None:
+            self._emit(
+                event_type=AuditEventType.APPROVAL_REJECTED,
+                request=request,
+                capability_ref=capability_ref,
+                policy_decision=decision.decision,
+                approval_payload={"reason": "approval request id is required"},
+                material_risks=decision.material_risks,
+            )
+            return None
+        grant_id = request.signed_approval_grant.payload.grant_id
+        if grant_id in self._consumed_signed_grant_ids:
+            self._emit(
+                event_type=AuditEventType.APPROVAL_REJECTED,
+                request=request,
+                capability_ref=capability_ref,
+                policy_decision=decision.decision,
+                approval_payload={"grant_id": grant_id, "reason": "signed grant already consumed"},
+                material_risks=decision.material_risks,
+            )
+            return None
+        verification = self.approval_grant_verifier.verify(
+            request.signed_approval_grant,
+            context=GrantVerificationContext.from_parameters(
+                request_id=request.approval_request_id,
+                session_id=request.session_id,
+                target=request.target_id,
+                provider=self.provider.provider_id,
+                capability=request.capability_id,
+                parameters=request.parameters,
+                risk_family=capability_ref.family,
+                now=self.now_factory(),
+            ),
+        )
+        event_type = (
+            AuditEventType.APPROVAL_VERIFIED
+            if verification.valid
+            else AuditEventType.APPROVAL_REJECTED
+        )
+        self._emit(
+            event_type=event_type,
+            request=request,
+            capability_ref=capability_ref,
+            policy_decision=decision.decision,
+            approval_payload=verification.to_dict(),
+            material_risks=decision.material_risks,
+        )
+        if not verification.valid:
+            return None
+        if request.signed_approval_grant.payload.one_time:
+            self._consumed_signed_grant_ids.add(grant_id)
+            self._emit(
+                event_type=AuditEventType.APPROVAL_CONSUMED,
+                request=request,
+                capability_ref=capability_ref,
+                policy_decision=decision.decision,
+                approval_payload=verification.to_dict(),
+                material_risks=decision.material_risks,
+            )
+        return True
 
     def _emit(
         self,
