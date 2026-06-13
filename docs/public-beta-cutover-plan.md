@@ -1,8 +1,9 @@
 # Public Beta Cutover Plan
 
-This plan prepares AgenticKVM for a safe public beta merge and first tagged
-pre-release. It does not approve a merge to `main`, publish a release, push a
-tag, or authorize live hardware use.
+This plan is release-preparation history. Public beta is deferred until the
+killer demo: an agent recovering a real wedged machine through the full ACT
+clearance chain. This plan does not approve a merge to `main`, publish a
+release, push a tag, or authorize live hardware use.
 
 ## Branch Stack
 
@@ -141,7 +142,8 @@ After merge:
 
 ## Human Decisions Required
 
-- approve or reject public beta merge
+- approve or reject any future public beta merge after the ACT-cleared killer
+  demo exists
 - choose pre-release tag format
 - decide whether to enable GitHub Pages after merge
 - decide whether to publish a GitHub pre-release

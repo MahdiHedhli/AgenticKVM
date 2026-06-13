@@ -12,10 +12,10 @@ not an authoritative source for architecture or implementation.
 
 ## Status
 
-AgenticKVM is moving from public-beta preparation into the real out-of-band
-control-plane work: Approval Broker v1, signed grants, trusted operator
-approval channels, and the path to a killer demo where an agent recovers a real
-wedged machine through the full approval chain.
+AgenticKVM is moving from public-beta preparation into the real
+control-plane-to-tower work: Agentic Control Tower (ACT) clearance, trusted
+operator channels, and the path to a killer demo where an agent recovers a real
+wedged machine through the full clearance chain.
 
 AgenticKVM is out-of-band only. Active scope is KVM, BMC, PiKVM, Redfish, iLO,
 iDRAC, IPMI / Supermicro BMC, policy, approvals, audit, provider registries,
@@ -36,6 +36,7 @@ and is not part of mainline metadata.
 - [Security model](docs/security-model.md)
 - [Control plane](docs/control-plane.md)
 - [Operator approval](docs/operator-approval.md)
+- [ACT clearance client](docs/act-clearance-client.md)
 - [Approval notifiers](docs/approval-notifiers.md)
 - [Approval Broker v1 review](docs/approval-broker-v1-review.md)
 - [MCP elicitation](docs/mcp-elicitation.md)
@@ -75,7 +76,7 @@ directly. Every action must flow through:
 1. agent/tool request
 2. capability request
 3. policy decision
-4. operator approval if required
+4. ACT clearance if required
 5. provider adapter
 6. structured audit event
 7. result

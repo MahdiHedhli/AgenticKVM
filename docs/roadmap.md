@@ -72,7 +72,7 @@ When MCP server work resumes:
 - never block a tool call indefinitely
 - route through the host compatibility and ControlPlane path
 
-Status: deferred until Approval Broker v1 is merged and reviewed.
+Status: deferred until the ACT clearance client boundary is merged and reviewed.
 
 ### 3. Live PiKVM Observe Slice
 
@@ -103,7 +103,7 @@ Status: not started.
 ### 4. Killer Demo
 
 The launch-defining demo is an agent recovering a real wedged machine through
-the full approval chain:
+the full ACT clearance chain:
 
 ```text
 agent request

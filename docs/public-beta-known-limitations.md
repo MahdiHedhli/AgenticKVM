@@ -2,7 +2,7 @@
 
 This document describes the limits of the AgenticKVM pre-beta state. Public
 beta is deferred behind the killer demo: an agent recovering a real wedged
-machine through the full approval chain.
+machine through the full ACT clearance chain.
 
 ## Live Providers
 
@@ -56,7 +56,7 @@ appropriate for:
 - reviewing policy/approval/audit architecture
 - testing fake/fixture provider paths
 - reviewing release-quality gates
-- building toward Approval Broker v1 and the killer demo
+- building toward the ACT clearance client boundary and the killer demo
 - planning future live-provider work
 
 Do not use this beta for:

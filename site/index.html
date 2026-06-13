@@ -34,6 +34,8 @@
             AgenticKVM is a policy-controlled infrastructure control plane for
             AI-assisted machine observation, recovery, and operation across
             KVM, BMC, PiKVM, Redfish, and other out-of-band provider surfaces.
+            Agentic Control Tower grants or denies clearance; AgenticKVM flies
+            the plane.
           </p>
           <div class="hero-actions" aria-label="Primary actions">
             <a class="button primary" href="#start">Read the docs</a>
@@ -42,7 +44,7 @@
           </div>
           <p class="beta-note">
             Public beta is deferred behind the killer demo: an agent recovering
-            a real wedged machine through the full approval chain.
+            a real wedged machine through the full ACT clearance chain.
           </p>
           <dl class="status-strip" aria-label="Current project status">
             <div>
@@ -68,7 +70,7 @@
           <ul class="check-list">
             <li>Out-of-band first</li>
             <li>Policy-controlled actions</li>
-            <li>Approval gates</li>
+              <li>ACT clearance gates</li>
             <li>Audit trail</li>
             <li>Mock-first provider development</li>
             <li>MCP-ready integration</li>
@@ -86,8 +88,8 @@
             <h3>Works today</h3>
             <ul>
               <li>Mock provider and fake/fixture observe paths</li>
-              <li>Policy, approval, audit, provider, and target registries</li>
-              <li>Local approval queue and operator console</li>
+              <li>Policy, audit, provider, and target registries</li>
+              <li>ACT clearance client boundary and local operator console</li>
               <li>SQLite audit backend v1 with explicit local paths</li>
               <li>Safe recovery playbooks through the control plane</li>
               <li>Release-quality scripts and mock-only CI</li>
@@ -175,7 +177,7 @@
           <article class="card">
             <h3>Approval is first-class</h3>
             <p>
-              `approval_required` is a structured outcome, not an implicit grant.
+              `clearance_required` is a structured outcome, not an implicit grant.
               Gated actions wait for an explicit matching approval.
             </p>
           </article>
@@ -314,7 +316,7 @@ cd AgenticKVM</code></pre>
           </article>
           <article>
             <span>Future work</span>
-            <h3>Approval Broker v1, official MCP SDK stdio server, live PiKVM observe, killer demo</h3>
+            <h3>ACT clearance client, official MCP SDK stdio server, live PiKVM observe, killer demo</h3>
           </article>
         </div>
       </section>

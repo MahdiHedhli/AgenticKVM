@@ -5,7 +5,7 @@ Proposed tag: `v0.1.0-public-beta.1`
 Package metadata at the time of this draft: `0.0.0`
 
 Status: deferred. Public beta is deferred behind the killer demo: an agent
-recovering a real wedged machine through the full approval chain.
+recovering a real wedged machine through the full ACT clearance chain.
 
 ## Summary
 
@@ -13,8 +13,8 @@ AgenticKVM's previous public beta package remains useful release preparation,
 but it is not the launch criterion. The project is now focused on demonstrating
 the real authority path that future live providers must follow:
 
-agent/tool request -> registry resolution -> policy decision -> approval when
-required -> provider adapter -> audit event -> structured result.
+agent/tool request -> registry resolution -> policy decision -> ACT clearance
+when required -> provider adapter -> audit event -> structured result.
 
 This branch is intended for code review, mock/fixture testing, documentation
 review, and provider-readiness planning. It is not a production hardware
@@ -33,8 +33,9 @@ pre-release must also be created manually after final review.
 - Safe mock provider.
 - PiKVM and Redfish fake/fixture observe paths.
 - CLI commands for provider/target listing and mock/fixture capability calls.
-- Local operator approval queue with pending, approved, denied, expired, and
-  consumed states.
+- ACT clearance client boundary for future production approval authority.
+- Local operator approval queue retained as dev/test scaffold and UX history,
+  not production clearance authority.
 - Local operator console via `agentickvm status` and `agentickvm console`.
 - Local JSONL and SQLite audit paths with redaction and hash-chain
   verification.
@@ -57,7 +58,7 @@ This beta keeps safety behavior visible and testable:
 - tools and workflows must not call providers directly
 - unknown capabilities fail closed
 - disabled providers and targets fail closed
-- `approval_required` is a first-class result
+- `clearance_required` is a first-class result when ACT clearance is needed
 - audit is mandatory
 - secrets and credential refs are redacted
 - CI is mock-only
@@ -107,7 +108,7 @@ The trial dependency `mcp==1.27.2` is not adopted in this beta candidate.
 - SQLite audit backend v1 is local and explicit-path only.
 - External production audit backend and SIEM integration are deferred.
 - No live provider smoke has been run.
-- No killer demo has been completed yet.
+- No ACT-cleared killer demo has been completed yet.
 
 ## Security Posture
 
