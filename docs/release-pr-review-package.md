@@ -111,8 +111,9 @@ provider targets, live MCP server behavior, or the SDK trial dependency.
 - Any workflow reference to `secrets.*`.
 - Any live provider command or live smoke test in CI.
 - Any live provider implementation.
-- Any public claim that live PiKVM, Redfish, RustDesk, VNC, RDP, or MeshCentral
-  support exists today.
+- Any public claim that live PiKVM or Redfish support exists today.
+- Any public claim that in-band remote desktop/session providers are active
+  AgenticKVM roadmap scope.
 - Failing local checks or CI.
 
 ## Local Verification Commands

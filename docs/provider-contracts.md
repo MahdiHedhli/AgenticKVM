@@ -19,8 +19,8 @@ Provider declarations enter through the provider registry. Config cannot name an
 arbitrary class, module, factory, or import path to create a provider.
 
 Provider category and availability assumptions are documented in
-`docs/provider-taxonomy.md`. Future in-band remote session providers such as
-RustDesk, VNC, RDP, and MeshCentral are not out-of-band providers.
+`docs/provider-taxonomy.md`. In-band remote desktop/session providers are parked
+outside the AgenticKVM roadmap.
 
 ## Provider Must Not Decide
 
@@ -125,7 +125,3 @@ be downgraded to generic low-risk operations.
 | iLO placeholder | Disabled placeholder | Future observe-only subset | Unimplemented and non-executable | Placeholder only | Placeholder safety tests | Not started | Disabled | Provider-specific observe spec |
 | iDRAC placeholder | Disabled placeholder | Future observe-only subset | Unimplemented and non-executable | Placeholder only | Placeholder safety tests | Not started | Disabled | Provider-specific observe spec |
 | Supermicro/IPMI placeholder | Disabled placeholder | Future observe-only subset | Unimplemented and non-executable | Placeholder only | Placeholder safety tests | Not started | Disabled | Provider-specific observe spec |
-| RustDesk roadmap | Future in-band remote session provider, not OOB | Future session metadata observe-only | Remote desktop control, clipboard, file transfer, command execution, and agent install/update unimplemented | No config yet | Docs/spec only | Not started | No provider | In-band provider boundary spec |
-| VNC roadmap | Future in-band remote session provider, not OOB | Future session metadata observe-only | Remote desktop control, clipboard, file transfer, and command execution unimplemented | No config yet | Docs/spec only | Not started | No provider | In-band provider boundary spec |
-| RDP roadmap | Future in-band remote session provider, not OOB | Future session metadata observe-only | Remote desktop control, clipboard, drive redirection, and command execution unimplemented | No config yet | Docs/spec only | Not started | No provider | In-band provider boundary spec |
-| MeshCentral roadmap | Future in-band remote session/provider management surface, not OOB | Future session metadata observe-only | Remote desktop control, file transfer, command execution, agent install/update, and remote settings changes unimplemented | No config yet | Docs/spec only | Not started | No provider | In-band provider boundary spec |

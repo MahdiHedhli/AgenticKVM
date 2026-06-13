@@ -54,32 +54,27 @@ def test_policy_examples_exist_for_visible_modes() -> None:
         assert "secrets: redact_by_default" in text
 
 
-def test_provider_taxonomy_distinguishes_oob_from_inband_remote_sessions() -> None:
+def test_provider_taxonomy_is_oob_only_with_inband_parking_lot() -> None:
     taxonomy = (ROOT / "docs" / "provider-taxonomy.md").read_text()
 
     assert "Out-Of-Band Providers" in taxonomy
-    assert "In-Band Remote Session Providers" in taxonomy
-    for provider in ("RustDesk", "VNC", "RDP", "MeshCentral"):
-        assert provider in taxonomy
-    assert "must not be described as out-of-band" in taxonomy
-    assert "roadmap-only" in taxonomy
+    assert "AgenticKVM is out-of-band only" in taxonomy
+    assert "not on the AgenticKVM roadmap" in taxonomy
+    assert "Parking Lot: In-Band Remote Session Providers" in taxonomy
 
 
-def test_inband_remote_session_provider_spec_is_docs_only_and_gated() -> None:
+def test_inband_remote_session_provider_spec_is_parked_not_active() -> None:
     spec_dir = ROOT / "specs" / "007-inband-remote-session-providers"
+    parking_lot = ROOT / "docs" / "parking-lot" / "inband-remote-session-providers.md"
 
-    for filename in ("spec.md", "plan.md", "research.md", "tasks.md"):
-        assert (spec_dir / filename).exists()
-    boundary = (spec_dir / "contracts" / "inband-provider-boundary.md").read_text()
-
+    assert not spec_dir.exists()
+    text = parking_lot.read_text()
+    assert "not on the active AgenticKVM roadmap" in text
     for provider in ("RustDesk", "VNC", "RDP", "MeshCentral"):
-        assert provider in (spec_dir / "spec.md").read_text()
+        assert provider in text
     for forbidden in (
         "file transfer",
-        "clipboard write",
-        "credential reveal",
         "remote command execution",
-        "agent installation",
+        "remote access agent install",
     ):
-        assert forbidden in boundary
-    assert "CI must use fake transports" in boundary
+        assert forbidden in text

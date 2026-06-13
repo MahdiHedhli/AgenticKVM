@@ -115,20 +115,13 @@ successfully emitted. If audit persistence fails, approval submission fails
 closed and the grant is not usable. Approved resumption also fails closed when
 required audit emission fails before provider execution.
 
-## Future In-Band Provider Risks
+## Approval Broker Direction
 
-For future RustDesk, VNC, RDP, MeshCentral, BrowserBridge, or desktop/session
-providers, the following actions require explicit capability mapping and
-explainable approval before implementation:
+The local approval queue is no longer the authority model for future work.
+Approval authority moves to broker-owned signed grants. File-backed storage is
+cache only: the control plane must verify a signed grant against the original
+request, session, target, provider, capability, parameter fingerprint, risk
+family, channel constraints, expiry, and one-time consumption state before any
+approved provider execution.
 
-- keyboard and mouse control
-- clipboard read or write
-- file transfer
-- remote command execution
-- remote access agent install, update, or settings changes
-- privilege escalation
-- unattended control of production desktops
-- screenshot or stream capture when policy requires approval
-
-Approval must state whether the OS user is expected to be notified or involved
-when environment policy requires consent.
+MCP may request approval or deny approval. MCP must never grant approval.

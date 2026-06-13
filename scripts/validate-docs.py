@@ -18,6 +18,7 @@ REQUIRED_FILES = (
     "docs/security-model.md",
     "docs/provider-contracts.md",
     "docs/provider-taxonomy.md",
+    "docs/parking-lot/inband-remote-session-providers.md",
     "docs/github-pages.md",
     "docs/packaging.md",
     "docs/cli-smoke.md",
@@ -104,7 +105,7 @@ SAFETY_EXPECTATIONS = {
         "observe-only",
     ),
     "docs/public-beta-readiness.md": (
-        "mock-first",
+        "killer demo",
         "live-provider preflight",
         "SDK trial dependency",
         "human",
@@ -148,6 +149,7 @@ def main() -> int:
         _validate_readme_links()
         _validate_safety_language()
         _validate_public_claims()
+        _validate_oob_only_roadmap()
         _validate_local_markdown_links()
     except Exception as exc:
         print(f"docs validation failed: {exc}", file=sys.stderr)
@@ -190,6 +192,26 @@ def _validate_public_claims() -> None:
         for phrase in FORBIDDEN_PUBLIC_CLAIMS:
             if phrase in text:
                 raise ValidationFailure(f"{relative} contains forbidden claim {phrase!r}")
+
+
+def _validate_oob_only_roadmap() -> None:
+    roadmap = (ROOT / "docs" / "roadmap.md").read_text(encoding="utf-8").lower()
+    for phrase in (
+        "future in-band",
+        "future remote session",
+        "future session-level",
+        "roadmap-only",
+    ):
+        if phrase in roadmap:
+            raise ValidationFailure(f"roadmap still contains active parked-scope phrase {phrase!r}")
+    for phrase in ("rustdesk", "vnc", "rdp", "meshcentral"):
+        if phrase in roadmap and "parked scope" not in roadmap:
+            raise ValidationFailure(f"roadmap mentions {phrase!r} outside parking context")
+    parking = (ROOT / "docs" / "parking-lot" / "inband-remote-session-providers.md").read_text(
+        encoding="utf-8"
+    )
+    if "not on the active AgenticKVM roadmap" not in parking:
+        raise ValidationFailure("parking-lot doc must mark in-band providers as inactive")
 
 
 def _validate_local_markdown_links() -> None:

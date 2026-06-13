@@ -83,7 +83,8 @@ Use this checklist before merging a release-quality branch or cutting a release.
 - [ ] GitHub Pages docs are current.
 - [ ] Static site has no analytics or tracking.
 - [ ] Static site does not claim live PiKVM or Redfish support.
-- [ ] Static site does not claim live RustDesk, VNC, RDP, or MeshCentral support.
+- [ ] Static site does not put in-band remote desktop/session providers on the
+      active AgenticKVM roadmap.
 - [ ] Static site describes future provider families as roadmap or readiness
       work only.
 

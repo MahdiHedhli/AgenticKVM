@@ -28,9 +28,9 @@ def test_github_pages_site_contains_required_safety_messaging() -> None:
         "Out-of-band first",
         "approval_required",
         "Live providers are deferred",
-        "Future roadmap only",
+        "Killer demo",
         "not a mainline dependency",
-        "Public beta candidate",
+        "Public beta is deferred",
         "What works today",
         "What is intentionally disabled",
         "../docs/public-beta-known-limitations.md",
@@ -54,6 +54,7 @@ def test_github_pages_site_does_not_overclaim_live_support() -> None:
         "secure by default",
         "zero risk",
         "hands-off production operation",
+        "Future roadmap only",
     ):
         assert forbidden not in text
 

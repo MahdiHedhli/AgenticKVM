@@ -29,7 +29,7 @@ The following remain deferred:
 - live PiKVM transport
 - live Redfish transport
 - live MCP server adoption
-- live remote desktop providers
+- in-band remote desktop/session providers
 - external production audit backend or SIEM integration
 
 ## Release Principles
@@ -89,7 +89,8 @@ Before release:
 - security model is current
 - control-plane docs reflect the implementation
 - provider contracts remain fail-closed
-- provider taxonomy distinguishes out-of-band and in-band providers
+- provider taxonomy keeps AgenticKVM out-of-band only and points parked
+  in-band/session scope to the parking lot
 - roadmap reflects achieved, partial, and deferred work
 - GitHub Pages site does not claim deferred live support
 - release branch review package is complete

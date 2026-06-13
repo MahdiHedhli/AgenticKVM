@@ -1,24 +1,24 @@
-# AgenticKVM Public Beta 0.1.0 Release Notes
+# AgenticKVM Public Beta Release Notes
 
 Proposed tag: `v0.1.0-public-beta.1`
 
 Package metadata at the time of this draft: `0.0.0`
 
-Status: draft for human review. Do not tag or publish without maintainer
-approval.
+Status: deferred. Public beta is blocked behind the killer demo: an agent
+recovering a real wedged machine through the full approval chain.
 
 ## Summary
 
-AgenticKVM public beta is a mock-first, safety-first control-plane release
-candidate for agentic infrastructure operations. It demonstrates the authority
-path that future live providers must follow:
+AgenticKVM's previous public beta package remains useful release preparation,
+but it is not the launch criterion. The project is now focused on demonstrating
+the real authority path that future live providers must follow:
 
 agent/tool request -> registry resolution -> policy decision -> approval when
 required -> provider adapter -> audit event -> structured result.
 
-This beta is intended for code review, mock/fixture testing, documentation
+This branch is intended for code review, mock/fixture testing, documentation
 review, and provider-readiness planning. It is not a production hardware
-automation release.
+automation release and it is not the public beta launch.
 
 GitHub Pages site files and workflow are included, but repository Pages settings
 still require maintainer enablement after merge. The release tag and GitHub
@@ -71,8 +71,8 @@ This beta keeps safety behavior visible and testable:
 - Redfish POST/PATCH/DELETE or mutation actions.
 - Live MCP server adoption.
 - Python MCP SDK dependency on mainline.
-- RustDesk, VNC, RDP, MeshCentral, BrowserBridge, or other live session
-  providers.
+- In-band remote desktop/session providers. That scope is parked outside
+  AgenticKVM.
 - Production external audit backend, SIEM integration, or cloud storage backend.
 - Production hardware recovery guarantees.
 
@@ -107,6 +107,7 @@ The trial dependency `mcp==1.27.2` is not adopted in this beta candidate.
 - SQLite audit backend v1 is local and explicit-path only.
 - External production audit backend and SIEM integration are deferred.
 - No live provider smoke has been run.
+- No killer demo has been completed yet.
 
 ## Security Posture
 

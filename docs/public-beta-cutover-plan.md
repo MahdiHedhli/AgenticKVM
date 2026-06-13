@@ -111,7 +111,8 @@ Do not create or push a tag without explicit maintainer instruction.
 - PiKVM input control
 - live MCP server
 - Python MCP SDK dependency on mainline
-- RustDesk, VNC, RDP, MeshCentral, and browser/session providers
+- in-band remote desktop/session providers; that scope is parked outside the
+  AgenticKVM roadmap
 - production external audit backend and SIEM integration
 - provider mutation actions against real hardware
 

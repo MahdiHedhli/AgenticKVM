@@ -47,7 +47,7 @@ SITE_REQUIRED_SNIPPETS = (
     "../docs/releases/public-beta-0.1.0.md",
     "../docs/public-beta-known-limitations.md",
     "../docs/public-beta-security-statement.md",
-    "Public beta candidate",
+    "Killer demo",
     "Live providers are deferred",
 )
 

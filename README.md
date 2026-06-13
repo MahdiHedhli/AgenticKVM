@@ -12,12 +12,21 @@ not an authoritative source for architecture or implementation.
 
 ## Status
 
-AgenticKVM is a mock-first, safety-first project scaffold. The current
-repository establishes the constitution, control-plane specifications, policy
-core, approval/audit baseline, mock provider, MCP scaffold, host compatibility
-layers, provider readiness contracts, static site, and release quality gates.
+AgenticKVM is moving from public-beta preparation into the real out-of-band
+control-plane work: Approval Broker v1, signed grants, trusted operator
+approval channels, and the path to a killer demo where an agent recovers a real
+wedged machine through the full approval chain.
 
-Real hardware providers are intentionally not implemented yet.
+AgenticKVM is out-of-band only. Active scope is KVM, BMC, PiKVM, Redfish, iLO,
+iDRAC, IPMI / Supermicro BMC, policy, approvals, audit, provider registries,
+and target registries. In-band remote desktop/session providers are parked and
+are not on the AgenticKVM roadmap.
+
+Public beta is deferred until after the killer demo. The existing site, release
+quality gates, and beta docs remain useful preparation, but mocks talking to
+mocks are not the launch criterion.
+
+Real hardware providers are intentionally not enabled by default.
 
 The Python MCP SDK dependency trial remains isolated on a separate trial branch
 and is not part of mainline metadata.
@@ -29,6 +38,7 @@ and is not part of mainline metadata.
 - [Provider contracts](docs/provider-contracts.md)
 - [Provider taxonomy](docs/provider-taxonomy.md)
 - [Roadmap](docs/roadmap.md)
+- [Parking lot: in-band remote session providers](docs/parking-lot/inband-remote-session-providers.md)
 - [Development guide](docs/development.md)
 - [Testing guide](docs/testing.md)
 - [Packaging notes](docs/packaging.md)
@@ -121,8 +131,8 @@ This branch includes a static GitHub Pages-ready site under `site/`.
 
 The site is plain HTML/CSS with no JavaScript, tracking, remote fonts, live
 provider behavior, credentials, or MCP SDK dependency. It presents
-AgenticKVM's safety-first architecture and roadmap while keeping live providers
-and live MCP server work explicitly gated.
+AgenticKVM's safety-first architecture and roadmap while keeping public beta,
+live providers, and live MCP server work explicitly gated.
 
 GitHub Pages setup notes are in `docs/github-pages.md`.
 

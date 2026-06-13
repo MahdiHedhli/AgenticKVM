@@ -122,7 +122,6 @@ approval before merging.
   account mutation
 - live MCP server adoption
 - Python MCP SDK mainline adoption
-- RustDesk, VNC, RDP, MeshCentral, BrowserBridge, or desktop/session provider
-  implementation
+- in-band remote desktop/session provider implementation
 - external production audit backend or SIEM integration
 - unattended production hardware recovery

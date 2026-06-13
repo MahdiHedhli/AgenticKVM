@@ -1563,3 +1563,37 @@
 - final validation: pending after this closeout commit
 - next recommended task: run final validation matrix, then ask a human
   maintainer to review `feature/public-beta-cutover` for merge readiness.
+
+## 2026-06-12T00:00:00-04:00
+
+- selected maturity level: Approval Broker v1 start
+- branch: `feature/approval-broker-v1`
+- starting point: branched from `feature/public-beta-cutover`
+- locked direction:
+  - AgenticKVM is out-of-band only; in-band remote desktop/session providers
+    move to the parking lot and are not on the AgenticKVM roadmap.
+  - Public beta is deferred behind the killer demo: an agent recovering a real
+    wedged machine through the full approval chain.
+  - Approval authority moves from file-backed queues to broker-owned signed
+    grants; storage is cache only and signatures are truth.
+- baseline checks before changes:
+  - `python3 scripts/check-package.py`: passed
+  - `python3 scripts/build-package.py`: passed with documented deferred build
+    status
+  - `python3 scripts/smoke-cli.py`: passed
+  - `python3 scripts/lint-sanity.py`: passed
+  - `python3 scripts/type-sanity.py`: passed
+  - `python3 scripts/validate-docs.py`: passed
+  - `python3 scripts/check-site.py`: passed
+  - `python3 scripts/check-public-beta.py`: passed
+  - `uv run --offline --with pytest --python python3.13 python -m pytest`:
+    575 passed
+- planned safe outputs:
+  - roadmap reset and Spec 007 parking lot
+  - Approval Broker v1 spec and contracts
+  - signed grant model, dev/test signer, verification, cache storage, short
+    code flow, notifier abstraction, and operator watch commands
+  - MCP approval verbs restricted to request/deny with no grant tool
+  - ControlPlane verifier for signed grants before provider execution
+  - host elicitation docs, conformance matrix, beta reset, and validation
+    updates

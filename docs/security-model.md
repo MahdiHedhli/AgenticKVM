@@ -19,11 +19,9 @@ approval, scope, provider contracts, audit, and tests.
 - Provider and target registries are validation gates, not permission grants.
 - Audit is mandatory evidence.
 
-Provider categories have different trust and availability assumptions.
-Out-of-band providers can operate below or outside the OS. Future in-band
-remote session providers such as RustDesk, VNC, RDP, and MeshCentral generally
-depend on a running OS, reachable network path, remote access service, and
-credentials or user/session state.
+AgenticKVM provider scope is out-of-band only. KVM, BMC, PiKVM, Redfish, iLO,
+iDRAC, IPMI, and Supermicro BMC surfaces can operate below or outside the OS
+and are the active recovery focus.
 
 ## Default-Deny Behavior
 
@@ -89,10 +87,10 @@ Responses must match the pending request by session, target, provider,
 capability, parameter fingerprint, scope, and expiry. Mismatches, denial, and
 expiry fail closed. Approval resumption still routes through `ControlPlane`.
 
-Public beta validation remains mock-only and fixture-only. The beta security
-statement in `docs/public-beta-security-statement.md` records that live
-providers, live MCP server behavior, PiKVM input, and production hardware
-recovery are outside public beta scope.
+Public beta is deferred behind the killer demo: an agent recovering a real
+wedged machine through the full approval chain. Current validation remains
+mock-only and fixture-only while Approval Broker v1, signed grants, and live
+observe gates are built.
 
 ## Emergency Stop
 
@@ -153,8 +151,6 @@ It must not swallow audit errors, downgrade audit failures into generic success
 or provider errors, log raw tool arguments as a substitute for audit, or expose
 live providers before mock-only checkpoint/export/failure conformance passes.
 
-Remote desktop streams, screenshots, clipboard contents, file transfer,
-remote command execution, remote access agent changes, and unattended control
-are high-risk in-band provider behaviors. They are roadmap-only and must require
-explicit capability mapping, policy gates, approval behavior, redaction, and
-audit before implementation.
+In-band remote desktop/session providers are parked and are not on the active
+AgenticKVM roadmap. The parking-lot document may inform a separate future
+project, but AgenticKVM itself remains out-of-band only.

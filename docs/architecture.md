@@ -47,10 +47,10 @@ PiKVM and Redfish fixture-mode integrations are available only for offline
 observe tests. They still enter through the same registry and control-plane
 path and do not create live provider access.
 
-Future provider families are documented in `docs/provider-taxonomy.md`.
-Out-of-band providers such as PiKVM, Redfish, iLO, iDRAC, and IPMI/BMC systems
-have different availability assumptions from future in-band remote session
-providers such as RustDesk, VNC, RDP, and MeshCentral.
+Provider taxonomy is documented in `docs/provider-taxonomy.md`. AgenticKVM is
+out-of-band only: PiKVM, Redfish, iLO, iDRAC, IPMI, Supermicro BMC, and related
+KVM/BMC surfaces are active scope. In-band remote desktop/session providers are
+parked outside the AgenticKVM roadmap.
 
 ### Provider Registry
 
@@ -78,7 +78,9 @@ Unknown capabilities return `deny`.
 ### Approval Broker
 
 The approval broker creates explainable operator prompts for decisions such as
-`ask_each_time` and `ask_once_per_session`.
+`ask_each_time` and `ask_once_per_session`. The v1 direction is broker-owned
+signed grants: editable local files are cache only and are not approval
+authority.
 
 ### Audit Writer
 
@@ -111,9 +113,9 @@ The current implementation includes:
 - CLI/MCP consistency matrix
 - offline tests
 
-Real provider implementations and live MCP SDK testing remain deferred.
-RustDesk, VNC, RDP, MeshCentral, BrowserBridge, and desktop/session brokers are
-roadmap-only; no remote desktop live behavior exists.
+Real provider implementations and live MCP SDK testing remain deferred. In-band
+remote desktop/session providers are parked; no remote desktop live behavior
+exists.
 
 ## Design Rule
 
