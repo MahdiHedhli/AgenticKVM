@@ -35,6 +35,11 @@ and is not part of mainline metadata.
 
 - [Security model](docs/security-model.md)
 - [Control plane](docs/control-plane.md)
+- [Operator approval](docs/operator-approval.md)
+- [Approval notifiers](docs/approval-notifiers.md)
+- [Approval Broker v1 review](docs/approval-broker-v1-review.md)
+- [MCP elicitation](docs/mcp-elicitation.md)
+- [Host conformance matrix](docs/conformance-matrix.md)
 - [Provider contracts](docs/provider-contracts.md)
 - [Provider taxonomy](docs/provider-taxonomy.md)
 - [Roadmap](docs/roadmap.md)

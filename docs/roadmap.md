@@ -55,7 +55,10 @@ Status: current sprint.
 
 ### 2. MCP Server On Official SDK
 
-Adopt the official Python MCP SDK later on mainline, stdio transport first.
+Live MCP SDK server and client integration deferred. Adopt the official Python
+MCP SDK later on mainline, stdio transport first.
+
+Keep CI mock-only.
 HTTP and OAuth remain later work.
 
 When MCP server work resumes:

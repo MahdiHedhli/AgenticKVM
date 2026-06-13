@@ -33,6 +33,7 @@ REQUIRED_FILES = (
     "docs/sqlite-audit-hardening.md",
     "docs/approval-queue.md",
     "docs/approval-notifiers.md",
+    "docs/approval-broker-v1-review.md",
     "docs/conversational-approval.md",
     "docs/mcp-elicitation.md",
     "docs/conformance-matrix.md",

@@ -1597,3 +1597,40 @@
   - ControlPlane verifier for signed grants before provider execution
   - host elicitation docs, conformance matrix, beta reset, and validation
     updates
+
+## 2026-06-12T23:30:00-04:00
+
+- selected maturity level: Approval Broker v1 mock-safe implementation ready
+  for review
+- branch: `feature/approval-broker-v1`
+- completed:
+  - out-of-band-only roadmap reset and Spec 007 parking lot
+  - public beta deferred behind the killer demo
+  - Approval Broker v1 spec and contracts
+  - signed grant models and stable parameter fingerprints
+  - development/test signer abstraction and signed grant verifier
+  - signed approval cache with explicit path, atomic write, advisory lock, and
+    `0600` mode
+  - approval short-code and operator-message flow
+  - MCP approval tools restricted to request and deny
+  - ControlPlane signed grant verification before provider execution
+  - local out-of-band notifier payload model
+  - operator approval broker CLI watch, allow, and deny commands
+  - local file-backed approval queue changed to cache/UX state only
+  - conversational approval policy limits
+  - MCP elicitation capability model and host conformance matrix
+  - validation checks for parked in-band scope, deferred beta language, and no
+    MCP grant tool
+  - `docs/approval-broker-v1-review.md`
+- safety notes:
+  - real hardware touched: no
+  - live provider network calls made: no
+  - secrets touched: no
+  - live providers enabled by default: no
+  - SDK trial dependency added: no
+  - MCP grant tool added: no
+  - file-backed approval queue authority removed from CLI provider execution:
+    yes
+- final validation: pending after this closeout commit
+- next recommended task: review the broker trust-anchor design and implement a
+  production signer path before resuming official MCP SDK stdio server work.
