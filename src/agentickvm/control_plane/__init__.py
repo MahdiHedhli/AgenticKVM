@@ -169,6 +169,11 @@ from agentickvm.control_plane.grants import (  # noqa: E402
     GrantVerificationStatus,
     SignedApprovalGrant,
 )
+from agentickvm.control_plane.notifiers import (  # noqa: E402
+    ApprovalNotification,
+    ApprovalNotifier,
+    LocalApprovalNotifier,
+)
 from agentickvm.control_plane.audit import (  # noqa: E402
     AuditEvent,
     AuditEventType,
@@ -227,6 +232,8 @@ __all__ = [
     "ApprovalResponse",
     "ApprovalStore",
     "ApprovalGrantVerifier",
+    "ApprovalNotification",
+    "ApprovalNotifier",
     "ApprovalBroker",
     "ApprovalSigner",
     "BrokerApprovalRequest",
@@ -267,6 +274,7 @@ __all__ = [
     "LocalApprovalQueue",
     "LocalApprovalRecord",
     "LocalApprovalStatus",
+    "LocalApprovalNotifier",
     "ProviderRef",
     "REQUIRED_FLOW",
     "SessionApprovalGrant",
