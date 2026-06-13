@@ -72,6 +72,10 @@ REQUIRED_FILES = (
     "specs/006-mcp-sdk-adapter/spec.md",
     "specs/008-production-audit-store/spec.md",
     "specs/008-production-audit-store/contracts/sqlite-audit-backend-v1.md",
+    "specs/009-approval-broker-v1/spec.md",
+    "specs/009-approval-broker-v1/contracts/signed-grant-contract.md",
+    "specs/009-approval-broker-v1/contracts/approval-channel-policy.md",
+    "specs/009-approval-broker-v1/contracts/mcp-approval-tools.md",
 )
 
 SAFETY_EXPECTATIONS = {
