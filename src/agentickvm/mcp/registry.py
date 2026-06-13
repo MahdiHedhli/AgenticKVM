@@ -98,6 +98,16 @@ DEFAULT_MCP_TOOLS: tuple[MCPToolDefinition, ...] = (
         description="Read boot status.",
     ),
     MCPToolDefinition(
+        tool_name="request_approval",
+        capability_id="runtime.request_approval",
+        description="Request operator approval without granting approval.",
+    ),
+    MCPToolDefinition(
+        tool_name="deny_approval",
+        capability_id="runtime.deny_approval",
+        description="Deny an approval request without granting approval.",
+    ),
+    MCPToolDefinition(
         tool_name="power_on",
         capability_id="power.on",
         description="Power on an in-scope target.",

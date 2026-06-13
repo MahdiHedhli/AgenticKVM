@@ -441,6 +441,20 @@ DEFAULT_CAPABILITIES: tuple[Capability, ...] = (
         required_scope=("session",),
     ),
     _capability(
+        "runtime.request_approval",
+        "Request approval",
+        "Request broker approval without granting or executing provider actions.",
+        RiskLevel.LOW,
+        required_scope=("session",),
+    ),
+    _capability(
+        "runtime.deny_approval",
+        "Deny approval",
+        "Record an approval denial without granting or executing provider actions.",
+        RiskLevel.LOW,
+        required_scope=("session",),
+    ),
+    _capability(
         "runtime.run_approved_playbook",
         "Run approved playbook",
         "Run a pre-approved playbook inside explicit scope.",
