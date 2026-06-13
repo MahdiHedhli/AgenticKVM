@@ -141,7 +141,10 @@ from agentickvm.control_plane.approval_transport import (  # noqa: E402
 )
 from agentickvm.control_plane.approval_broker import (  # noqa: E402
     ApprovalGrantVerifier,
+    ApprovalBroker,
     ApprovalSigner,
+    BrokerApprovalRequest,
+    DEFAULT_APPROVAL_TIMEOUT_SECONDS,
     GrantVerificationContext,
     HMACDevelopmentSigner,
     build_grant_payload,
@@ -224,7 +227,9 @@ __all__ = [
     "ApprovalResponse",
     "ApprovalStore",
     "ApprovalGrantVerifier",
+    "ApprovalBroker",
     "ApprovalSigner",
+    "BrokerApprovalRequest",
     "ApprovalChannel",
     "ApprovalCacheError",
     "ApprovalRiskSummary",
@@ -244,6 +249,7 @@ __all__ = [
     "CONTROL_MODES",
     "DANGEROUS_ACTIONS",
     "DEFAULT_CAPABILITY_REGISTRY",
+    "DEFAULT_APPROVAL_TIMEOUT_SECONDS",
     "EmergencyStopActive",
     "EmergencyStopState",
     "FingerprintError",
