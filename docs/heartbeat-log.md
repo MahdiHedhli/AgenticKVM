@@ -1671,3 +1671,52 @@
     tools
   - donor PiKVM port targets, roadmap reset, conformance matrix, validation
     gates, and review docs
+
+## 2026-06-13T02:30:00-04:00
+
+- selected maturity level: ACT clearance client boundary complete
+- branch: `feature/act-clearance-client-boundary`
+- completed:
+  - local production broker direction superseded by ACT clearance authority
+  - ACT clearance client documentation and Spec 011
+  - clearance request/response models labeled as ACT client-side mirrors
+  - ACT client interface, mock ACT client, and fail-closed verification seam
+  - ControlPlane ACT clearance path for approval-required policy decisions
+  - MCP clearance verbs restricted to `request_clearance` and
+    `deny_clearance`
+  - `clearance_required` result contract with short code, risk summary,
+    operator message, retry guidance, and redacted params preview
+  - donor PiKVM cert-pinning, HID redaction, and screenshot mouse calibration
+    port targets recorded
+  - roadmap, site, public beta docs, and conformance matrix reset around the
+    ACT-cleared killer demo
+  - validation gates for ACT source-of-truth language, no MCP grant tools,
+    parked in-band scope, and donor port targets
+- safety notes:
+  - AgenticKVM production broker crypto duplicated: no
+  - clearance contract authored as AgenticKVM-owned: no
+  - proof/signature format invented locally: no
+  - local grant authority retained for production: no
+  - MCP grant path exists: no
+  - file queue authority exists: no
+  - timeout rule preserved: yes
+  - donor PiKVM port targets captured: yes
+  - real hardware touched: no
+  - live provider network calls made: no
+  - secrets touched: no
+  - SDK trial dependency added: no
+- final validation:
+  - `python3 scripts/check-package.py`: passed
+  - `python3 scripts/build-package.py`: passed with documented deferred build
+    status
+  - `python3 scripts/smoke-cli.py`: passed
+  - `python3 scripts/lint-sanity.py`: passed
+  - `python3 scripts/type-sanity.py`: passed
+  - `python3 scripts/validate-docs.py`: passed
+  - `python3 scripts/check-site.py`: passed
+  - `python3 scripts/check-public-beta.py`: passed
+  - `uv run --offline --with pytest --python python3.13 python -m pytest`:
+    633 passed
+- next recommended task: align the mirror models with ACT's canonical clearance
+  contract as soon as ACT publishes it, then implement the real ACT transport
+  and proof verifier behind the existing fail-closed seam.
