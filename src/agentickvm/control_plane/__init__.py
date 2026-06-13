@@ -146,6 +146,10 @@ from agentickvm.control_plane.approval_broker import (  # noqa: E402
     HMACDevelopmentSigner,
     build_grant_payload,
 )
+from agentickvm.control_plane.approval_store import (  # noqa: E402
+    ApprovalCacheError,
+    SignedApprovalCache,
+)
 from agentickvm.control_plane.fingerprints import (  # noqa: E402
     FingerprintError,
     canonical_json,
@@ -222,6 +226,7 @@ __all__ = [
     "ApprovalGrantVerifier",
     "ApprovalSigner",
     "ApprovalChannel",
+    "ApprovalCacheError",
     "ApprovalRiskSummary",
     "ApprovalShortCode",
     "AuditEvent",
@@ -259,6 +264,7 @@ __all__ = [
     "ProviderRef",
     "REQUIRED_FLOW",
     "SessionApprovalGrant",
+    "SignedApprovalCache",
     "SignedApprovalGrant",
     "UNKNOWN_CAPABILITY_DECISION",
     "Capability",
