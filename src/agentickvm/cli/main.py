@@ -23,7 +23,6 @@ from agentickvm.control_plane import (
     SQLiteAuditSink,
     create_sqlite_audit_checkpoint,
     export_sqlite_audit,
-    fingerprint_parameters,
     inspect_sqlite_audit_event,
     list_sqlite_audit_events,
     mode_preset,
@@ -57,7 +56,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         runtime = build_runtime(
             load_config(args.config),
             audit_sink=audit_sink,
-            approval_store=approval_queue.to_approval_store() if approval_queue else None,
+            approval_store=None,
         )
         if args.command == "list-providers":
             _print_json(_providers_payload(runtime))
@@ -123,24 +122,6 @@ def _call(
             "approval_id": queued.id,
             "status": queued.status.value,
         }
-    elif (
-        approval_queue is not None
-        and result.status in {MCPResultStatus.OK, MCPResultStatus.PROVIDER_ERROR}
-        and result.capability is not None
-    ):
-        consumed = approval_queue.mark_matching_consumed(
-            capability_id=result.capability,
-            session_id=args.session_id,
-            target_id=args.target,
-            provider_id=result.provider,
-            params_fingerprint=fingerprint_parameters(params),
-        )
-        if consumed is not None:
-            payload["approval_queue"] = {
-                "path": str(approval_queue.path),
-                "approval_id": consumed.id,
-                "status": consumed.status.value,
-            }
     _print_json(payload)
     if result.status in {
         MCPResultStatus.VALIDATION_ERROR,

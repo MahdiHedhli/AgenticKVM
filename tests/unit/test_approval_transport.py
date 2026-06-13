@@ -27,7 +27,7 @@ def _approval_required(cli_args, capsys):
     return payload
 
 
-def test_local_approval_queue_grants_and_consumes_one_time_mock_action(tmp_path, capsys) -> None:
+def test_local_approval_queue_records_approval_but_is_not_authority(tmp_path, capsys) -> None:
     approval_path = tmp_path / "approvals.json"
     audit_path = tmp_path / "audit.jsonl"
     base = [
@@ -68,13 +68,15 @@ def test_local_approval_queue_grants_and_consumes_one_time_mock_action(tmp_path,
     assert exit_code == 0
     assert granted["status"] == "approval_granted"
 
-    exit_code, resumed = _run_cli([*base, *call], capsys)
-    assert exit_code == 0
-    assert resumed["status"] == "ok"
-    assert resumed["approval_queue"]["status"] == "consumed"
+    resumed = _approval_required([*base, *call], capsys)
+    assert resumed["approval_queue"]["approval_id"] != approval_id
+    assert LocalApprovalQueue(approval_path).get(approval_id).status == LocalApprovalStatus.APPROVED
 
     second_required = _approval_required([*base, *call], capsys)
-    assert second_required["approval_queue"]["approval_id"] != approval_id
+    assert second_required["approval_queue"]["approval_id"] not in {
+        approval_id,
+        resumed["approval_queue"]["approval_id"],
+    }
     assert verify_audit_chain(audit_path)
     events = [
         json.loads(line)["event"]["event_type"]
@@ -82,10 +84,10 @@ def test_local_approval_queue_grants_and_consumes_one_time_mock_action(tmp_path,
     ]
     assert "approval_requested" in events
     assert "approval_granted" in events
-    assert "approval_consumed" in events
+    assert "approval_consumed" not in events
 
 
-def test_local_approval_queue_session_scope_remains_reusable(tmp_path, capsys) -> None:
+def test_local_approval_queue_session_scope_does_not_resume_execution(tmp_path, capsys) -> None:
     approval_path = tmp_path / "approvals.json"
     base = ["--approval-path", str(approval_path)]
     call = [
@@ -121,9 +123,13 @@ def test_local_approval_queue_session_scope_remains_reusable(tmp_path, capsys) -
     first = _run_cli([*base, *call], capsys)[1]
     second = _run_cli([*base, *call], capsys)[1]
 
-    assert first["status"] == "ok"
-    assert "approval_queue" not in first
-    assert second["status"] == "ok"
+    assert first["status"] == "approval_required"
+    assert first["approval_queue"]["approval_id"] != approval_id
+    assert second["status"] == "approval_required"
+    assert second["approval_queue"]["approval_id"] not in {
+        approval_id,
+        first["approval_queue"]["approval_id"],
+    }
     assert LocalApprovalQueue(approval_path).get(approval_id).status == LocalApprovalStatus.APPROVED
 
 
