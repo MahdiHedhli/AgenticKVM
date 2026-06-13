@@ -4,7 +4,7 @@ Proposed tag: `v0.1.0-public-beta.1`
 
 Package metadata at the time of this draft: `0.0.0`
 
-Status: deferred. Public beta is blocked behind the killer demo: an agent
+Status: deferred. Public beta is deferred behind the killer demo: an agent
 recovering a real wedged machine through the full approval chain.
 
 ## Summary

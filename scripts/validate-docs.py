@@ -159,6 +159,8 @@ def main() -> int:
         _validate_safety_language()
         _validate_public_claims()
         _validate_oob_only_roadmap()
+        _validate_mcp_approval_tools()
+        _validate_public_beta_deferred()
         _validate_local_markdown_links()
     except Exception as exc:
         print(f"docs validation failed: {exc}", file=sys.stderr)
@@ -221,6 +223,40 @@ def _validate_oob_only_roadmap() -> None:
     )
     if "not on the active AgenticKVM roadmap" not in parking:
         raise ValidationFailure("parking-lot doc must mark in-band providers as inactive")
+
+
+def _validate_mcp_approval_tools() -> None:
+    registry = (ROOT / "src" / "agentickvm" / "mcp" / "registry.py").read_text(
+        encoding="utf-8"
+    )
+    if 'tool_name="request_approval"' not in registry:
+        raise ValidationFailure("MCP registry missing request_approval tool")
+    if 'tool_name="deny_approval"' not in registry:
+        raise ValidationFailure("MCP registry missing deny_approval tool")
+    forbidden = (
+        'tool_name="grant_approval"',
+        'tool_name="approve"',
+        'tool_name="approve_approval"',
+        'tool_name="sign_approval"',
+    )
+    for snippet in forbidden:
+        if snippet in registry:
+            raise ValidationFailure(f"MCP registry contains forbidden approval tool {snippet}")
+
+
+def _validate_public_beta_deferred() -> None:
+    for relative in (
+        "README.md",
+        "docs/roadmap.md",
+        "docs/public-beta-readiness.md",
+        "docs/releases/public-beta-0.1.0.md",
+        "site/index.html",
+    ):
+        text = (ROOT / relative).read_text(encoding="utf-8").lower()
+        if "killer demo" not in text:
+            raise ValidationFailure(f"{relative} must name the killer demo launch gate")
+        if "public beta is deferred" not in text:
+            raise ValidationFailure(f"{relative} must state that public beta is deferred")
 
 
 def _validate_local_markdown_links() -> None:
