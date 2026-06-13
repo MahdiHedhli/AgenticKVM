@@ -164,6 +164,28 @@ class GrantPayload:
             "signer_key_id": self.signer_key_id,
         }
 
+    @classmethod
+    def from_dict(cls, values: Mapping[str, Any]) -> "GrantPayload":
+        """Build a grant payload from a JSON-safe mapping."""
+
+        return cls(
+            payload_version=_required_str(values, "payload_version"),
+            grant_id=_required_str(values, "grant_id"),
+            request_id=_required_str(values, "request_id"),
+            session_id=_required_str(values, "session_id"),
+            target=_required_str(values, "target"),
+            provider=_required_str(values, "provider"),
+            capability=_required_str(values, "capability"),
+            params_fingerprint=_required_str(values, "params_fingerprint"),
+            risk_family=_required_str(values, "risk_family"),
+            channel=ApprovalChannel(_required_str(values, "channel")),
+            expires_at=_parse_datetime(_required_str(values, "expires_at")),
+            one_time=bool(values.get("one_time", True)),
+            consumed_at=_parse_optional_datetime(values.get("consumed_at")),
+            policy_constraints=_mapping(values.get("policy_constraints", {})),
+            signer_key_id=_required_str(values, "signer_key_id"),
+        )
+
     def canonical_payload(self) -> str:
         """Return the canonical string that must be signed."""
 
@@ -214,6 +236,19 @@ class SignedApprovalGrant:
             "signature_algorithm": self.signature_algorithm,
         }
 
+    @classmethod
+    def from_dict(cls, values: Mapping[str, Any]) -> "SignedApprovalGrant":
+        """Build a signed grant from a JSON-safe mapping."""
+
+        payload = values.get("payload")
+        if not isinstance(payload, Mapping):
+            raise ValueError("signed grant payload is required")
+        return cls(
+            payload=GrantPayload.from_dict(payload),
+            signature=_required_str(values, "signature"),
+            signature_algorithm=_required_str(values, "signature_algorithm"),
+        )
+
 
 @dataclass(frozen=True)
 class GrantVerificationResult:
@@ -241,3 +276,31 @@ class GrantVerificationResult:
             "grant_id": self.grant_id,
             "signer_key_id": self.signer_key_id,
         }
+
+
+def _required_str(values: Mapping[str, Any], key: str) -> str:
+    value = values.get(key)
+    if not isinstance(value, str) or not value:
+        raise ValueError(f"{key} is required")
+    return value
+
+
+def _mapping(value: Any) -> Mapping[str, Any]:
+    if not isinstance(value, Mapping):
+        raise ValueError("mapping value is required")
+    return value
+
+
+def _parse_datetime(value: str) -> datetime:
+    parsed = datetime.fromisoformat(value)
+    if parsed.tzinfo is None:
+        raise ValueError("datetime value must be timezone-aware")
+    return parsed
+
+
+def _parse_optional_datetime(value: Any) -> datetime | None:
+    if value is None:
+        return None
+    if not isinstance(value, str):
+        raise ValueError("optional datetime must be a string")
+    return _parse_datetime(value)

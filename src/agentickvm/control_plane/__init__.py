@@ -139,6 +139,13 @@ from agentickvm.control_plane.approval_transport import (  # noqa: E402
     LocalApprovalRecord,
     LocalApprovalStatus,
 )
+from agentickvm.control_plane.approval_broker import (  # noqa: E402
+    ApprovalGrantVerifier,
+    ApprovalSigner,
+    GrantVerificationContext,
+    HMACDevelopmentSigner,
+    build_grant_payload,
+)
 from agentickvm.control_plane.fingerprints import (  # noqa: E402
     FingerprintError,
     canonical_json,
@@ -212,6 +219,8 @@ __all__ = [
     "ApprovalRequest",
     "ApprovalResponse",
     "ApprovalStore",
+    "ApprovalGrantVerifier",
+    "ApprovalSigner",
     "ApprovalChannel",
     "ApprovalRiskSummary",
     "ApprovalShortCode",
@@ -236,9 +245,11 @@ __all__ = [
     "GrantDecision",
     "GrantPayload",
     "GrantScope",
+    "GrantVerificationContext",
     "GrantVerificationResult",
     "GrantVerificationStatus",
     "HARD_INVARIANTS",
+    "HMACDevelopmentSigner",
     "InMemoryAuditSink",
     "INTERNAL_DECISIONS",
     "LocalJSONLAuditSink",
@@ -273,6 +284,7 @@ __all__ = [
     "TargetRegistryError",
     "build_approval_request",
     "build_audit_event",
+    "build_grant_payload",
     "canonical_json",
     "create_audit_checkpoint",
     "create_sqlite_audit_checkpoint",
