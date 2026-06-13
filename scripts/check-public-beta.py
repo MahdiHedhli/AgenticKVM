@@ -36,6 +36,7 @@ REQUIRED_FILES = (
     "docs/public-beta-merge-commands.md",
     "docs/public-beta-tagging-plan.md",
     "docs/public-beta-final-handoff.md",
+    "docs/act-clearance-client.md",
     "site/index.html",
     ".github/ISSUE_TEMPLATE/bug_report.yml",
     ".github/ISSUE_TEMPLATE/feature_request.yml",
@@ -47,6 +48,8 @@ SITE_REQUIRED_SNIPPETS = (
     "../docs/releases/public-beta-0.1.0.md",
     "../docs/public-beta-known-limitations.md",
     "../docs/public-beta-security-statement.md",
+    "Agentic Control Tower",
+    "ACT clearance",
     "Killer demo",
     "Live providers are deferred",
 )

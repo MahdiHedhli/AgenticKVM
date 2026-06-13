@@ -2,7 +2,7 @@
 
 Canonical source: Agentic Control Tower. AgenticKVM consumes ACT clearance and
 mirrors only the client-side expectations needed to build the seam before ACT's
-canonical contract is published.
+canonical contract is published. This is not an AgenticKVM-owned clearance contract.
 
 ## Boundary
 

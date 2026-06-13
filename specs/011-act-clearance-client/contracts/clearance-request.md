@@ -1,8 +1,7 @@
 # ACT Clearance Request Mirror
 
 Canonical source: Agentic Control Tower. This AgenticKVM file is a client-side
-mirror pending alignment with ACT's canonical clearance contract. It is not an
-AgenticKVM-owned wire contract.
+mirror pending alignment with ACT's canonical clearance contract. It is not an AgenticKVM-owned wire contract.
 
 ## Mirrored Expected Fields
 

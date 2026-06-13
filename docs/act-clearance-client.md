@@ -40,8 +40,9 @@ that describes clearance request or response fields is a client-side mirror
 pending alignment with the canonical ACT contract. AgenticKVM must not author a
 competing clearance wire contract or invent a clearance-proof format.
 
-When ACT publishes its contract, AgenticKVM alignment must be a field-mapping
-pass against that authoritative source.
+AgenticKVM must not author a competing clearance wire contract. When ACT
+publishes its contract, AgenticKVM alignment must be a field-mapping pass
+against that authoritative source.
 
 ## Clearance Flow
 

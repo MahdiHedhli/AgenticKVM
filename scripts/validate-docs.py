@@ -33,6 +33,7 @@ REQUIRED_FILES = (
     "docs/sqlite-audit-hardening.md",
     "docs/approval-queue.md",
     "docs/approval-notifiers.md",
+    "docs/act-clearance-client.md",
     "docs/approval-broker-v1-review.md",
     "docs/conversational-approval.md",
     "docs/mcp-elicitation.md",
@@ -82,6 +83,10 @@ REQUIRED_FILES = (
     "specs/009-approval-broker-v1/contracts/signed-grant-contract.md",
     "specs/009-approval-broker-v1/contracts/approval-channel-policy.md",
     "specs/009-approval-broker-v1/contracts/mcp-approval-tools.md",
+    "specs/011-act-clearance-client/spec.md",
+    "specs/011-act-clearance-client/contracts/clearance-request.md",
+    "specs/011-act-clearance-client/contracts/clearance-response.md",
+    "specs/011-act-clearance-client/contracts/act-client-boundary.md",
 )
 
 SAFETY_EXPECTATIONS = {
@@ -90,7 +95,7 @@ SAFETY_EXPECTATIONS = {
         "must not use real hardware",
         "Secrets",
         "Provider and target registries",
-        "approval_required",
+        "clearance",
         "Audit",
     ),
     "docs/control-plane.md": (
@@ -161,6 +166,8 @@ def main() -> int:
         _validate_public_claims()
         _validate_oob_only_roadmap()
         _validate_mcp_approval_tools()
+        _validate_act_clearance_boundary()
+        _validate_donor_port_targets()
         _validate_public_beta_deferred()
         _validate_local_markdown_links()
     except Exception as exc:
@@ -247,6 +254,52 @@ def _validate_mcp_approval_tools() -> None:
     for snippet in forbidden:
         if snippet in registry:
             raise ValidationFailure(f"MCP registry contains forbidden approval tool {snippet}")
+
+
+def _validate_act_clearance_boundary() -> None:
+    act_doc = (ROOT / "docs" / "act-clearance-client.md").read_text(encoding="utf-8")
+    required = (
+        "ACT owns",
+        "AgenticKVM consumes ACT clearance",
+        "client-side mirror",
+        "must not author a competing clearance wire contract",
+        "must never expose grant, approve, clear, sign, or trust-signer tools",
+    )
+    for snippet in required:
+        if snippet not in act_doc:
+            raise ValidationFailure(f"ACT clearance doc missing {snippet!r}")
+    for relative in (
+        "specs/011-act-clearance-client/contracts/clearance-request.md",
+        "specs/011-act-clearance-client/contracts/clearance-response.md",
+        "specs/011-act-clearance-client/contracts/act-client-boundary.md",
+    ):
+        text = (ROOT / relative).read_text(encoding="utf-8")
+        if "Canonical source: Agentic Control Tower" not in text:
+            raise ValidationFailure(f"{relative} must name ACT as canonical source")
+        if "not an AgenticKVM-owned" not in text:
+            raise ValidationFailure(f"{relative} must reject AgenticKVM-owned contract framing")
+    source_files = (
+        ROOT / "src" / "agentickvm" / "control_plane" / "clearance.py",
+        ROOT / "src" / "agentickvm" / "control_plane" / "act_client.py",
+    )
+    for path in source_files:
+        text = path.read_text(encoding="utf-8")
+        if "ACT is the source of truth" not in text:
+            raise ValidationFailure(f"{path.relative_to(ROOT)} missing ACT source-of-truth header")
+        if "not an AgenticKVM-owned wire contract" not in text:
+            raise ValidationFailure(f"{path.relative_to(ROOT)} missing mirror-contract warning")
+
+
+def _validate_donor_port_targets() -> None:
+    donor = (ROOT / "docs" / "donor-spike-inventory.md").read_text(encoding="utf-8")
+    for snippet in (
+        "PiKVM Cert-Pinning Preflight",
+        "HID Text Redaction With Explicit Full-Capture Opt-In",
+        "Real PiKVM Tool Surface And Screenshot Mouse Calibration",
+        "Port target",
+    ):
+        if snippet not in donor:
+            raise ValidationFailure(f"donor spike inventory missing port target {snippet!r}")
 
 
 def _validate_public_beta_deferred() -> None:
