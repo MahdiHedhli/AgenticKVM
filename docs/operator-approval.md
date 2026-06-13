@@ -125,3 +125,35 @@ family, channel constraints, expiry, and one-time consumption state before any
 approved provider execution.
 
 MCP may request approval or deny approval. MCP must never grant approval.
+
+## Approval Broker CLI Surface
+
+Approval Broker v1 adds an operator-facing signed-cache surface:
+
+```bash
+agentickvm --broker-cache-path /explicit/temp/path/approvals.json approvals watch
+agentickvm --broker-cache-path /explicit/temp/path/approvals.json approvals allow <request-id> \
+  --operator-id <operator> \
+  --session-id <session> \
+  --target <target> \
+  --provider <provider> \
+  --capability <capability> \
+  --params-fingerprint <fingerprint> \
+  --risk-family <family> \
+  --expires-at <timestamp> \
+  --dev-signer
+agentickvm --broker-cache-path /explicit/temp/path/approvals.json approvals deny <request-id> \
+  --operator-id <operator>
+```
+
+The `allow` command is an operator surface, not an MCP tool. In this branch it
+uses a development/test HMAC signer only when `--dev-signer` is explicit. That
+signer is useful for local tests and demos, but it is not a production trust
+anchor if the agent can read the key material. Production approval authority is
+deferred to a stronger signer such as keychain user presence, a separate-UID
+daemon, or a remote broker.
+
+The signed cache is written with explicit paths, atomic replacement, advisory
+locking, and `0600` file mode. The cache remains non-authoritative: editing the
+file cannot grant approval unless the signature and exact request binding still
+verify.
