@@ -1,5 +1,15 @@
 # Approval Broker v1 Review
 
+Status: superseded for production authority by Agentic Control Tower.
+
+This review remains useful as implementation history and regression coverage for
+cache-only storage, MCP no-grant rules, parameter fingerprinting, and fail-closed
+approval semantics. It is not the production approval authority direction.
+
+Production clearance authority now lives in ACT. AgenticKVM consumes ACT
+clearance, mirrors ACT's contract pending canonical publication, and does not
+author the clearance wire contract or proof format.
+
 Branch: `feature/approval-broker-v1`
 
 Status: implemented for development and mock-only verification. Production

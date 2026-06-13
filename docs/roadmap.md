@@ -3,16 +3,17 @@
 AgenticKVM is an out-of-band control-plane project.
 
 The current priority is not another public beta package, mock demo, or in-band
-session provider. The priority is Approval Broker v1, signed grants,
-out-of-band trust, and the path toward the killer demo: an agent recovering a
-real wedged machine through the full approval chain.
+session provider. The priority is the ACT clearance client boundary and the path
+toward the killer demo: an agent recovering a real wedged machine through the
+full Agentic Control Tower clearance chain.
 
 ## Locked Direction
 
 1. AgenticKVM is out-of-band only.
 2. Public beta is deferred behind the killer demo.
-3. Approval authority is rebuilt around broker-owned signed grants.
-4. MCP grants are forbidden. MCP may request approval or deny approval only.
+3. AgenticKVM consumes ACT clearance; ACT owns signing, mobile approval, replay
+   defense, clearance audit, and one-time clearance consumption.
+4. MCP grants are forbidden. MCP may request clearance or deny clearance only.
 5. Live providers remain disabled by default and excluded from CI.
 
 ## Active Provider Scope
@@ -44,12 +45,12 @@ It is not on the AgenticKVM roadmap.
 
 ## Current Order Of Work
 
-### 1. Approval Broker v1
+### 1. ACT Clearance Client Boundary
 
-Implement broker-owned approval state, signed grants, parameter fingerprint
-binding, expiry, one-time consumption, storage-as-cache semantics, out-of-band
-approval channels, MCP request/deny-only tools, and ControlPlane verification
-before provider execution.
+Implement the control-plane-to-tower seam. AgenticKVM mirrors ACT clearance
+request/response expectations until ACT publishes the canonical contract, calls
+ACT when local policy requires clearance, verifies tower responses through a
+fail-closed client seam, and proceeds only on verified `cleared` responses.
 
 Status: current sprint.
 
@@ -109,9 +110,10 @@ agent request
 -> MCP/CLI/control-plane entry
 -> provider and target registry
 -> policy decision
--> approval_required with short code and risk summary
--> broker-owned signed grant through trusted operator surface
--> ControlPlane verifies grant
+-> clearance_required with short code and risk summary
+-> ACT pushes approval to the operator phone
+-> operator clears through trusted mobile approval
+-> ControlPlane verifies ACT clearance response
 -> provider observe/recovery action
 -> audit evidence
 -> operator-readable result
@@ -120,7 +122,7 @@ agent request
 The demo must use explicit operator approval and must not rely on chat as the
 trust anchor.
 
-Status: blocked on Approval Broker v1 and live PiKVM observe.
+Status: blocked on ACT clearance client boundary and live PiKVM observe.
 
 ### 5. Public Beta
 
@@ -142,6 +144,7 @@ Status: deferred.
 - CLI mock/fixture workflows
 - dependency-free MCP scaffold and host compatibility layer
 - local operator approval transport and console
+- Approval Broker v1 dev/test scaffold proving file queues are not authority
 - safe recovery playbook framework for mock/fake providers
 - release-quality scripts, static site, and mock-only CI
 
@@ -150,9 +153,9 @@ Status: deferred.
 - no real hardware in CI
 - no live providers enabled by default
 - no credential resolution in tests
-- no MCP grant tool
-- no approval authority from editable JSON files
-- no provider execution without policy and signed grant verification where
-  approval is required
+- no MCP grant/approve/clear tool
+- no approval or clearance authority from editable JSON files
+- no provider execution without policy and verified ACT clearance where
+  clearance is required
 - no live PiKVM input until a separate gated phase
 - no public beta launch before the killer demo

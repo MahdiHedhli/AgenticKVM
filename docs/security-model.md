@@ -15,6 +15,10 @@ approval, scope, provider contracts, audit, and tests.
   translated through `MCPSDKAdapter`; it is local only and is not a live server
   or authority boundary.
 - Policy is the authority boundary.
+- ACT is the production clearance authority when local policy requires operator
+  clearance. AgenticKVM consumes ACT clearance as a client and does not own the
+  clearance contract, proof format, mobile approval channel, replay defense, or
+  production signing.
 - Providers are execution adapters, not trust anchors.
 - Provider and target registries are validation gates, not permission grants.
 - Audit is mandatory evidence.
@@ -88,9 +92,16 @@ capability, parameter fingerprint, scope, and expiry. Mismatches, denial, and
 expiry fail closed. Approval resumption still routes through `ControlPlane`.
 
 Public beta is deferred behind the killer demo: an agent recovering a real
-wedged machine through the full approval chain. Current validation remains
-mock-only and fixture-only while Approval Broker v1, signed grants, and live
-observe gates are built.
+wedged machine through the full ACT clearance chain. Current validation remains
+mock-only and fixture-only while the ACT client boundary and live observe gates
+are built.
+
+The earlier AgenticKVM-local signed-grant broker is superseded for production
+authority. It may remain only as dev/test scaffold and regression coverage. ACT
+owns clearance signing, mobile approval, replay defense, one-time clearance
+consumption, and clearance audit. AgenticKVM verifies tower responses through a
+client seam and fails closed when ACT is unavailable or the response cannot be
+verified.
 
 ## Emergency Stop
 

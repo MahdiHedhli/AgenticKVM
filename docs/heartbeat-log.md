@@ -1634,3 +1634,40 @@
 - final validation: pending after this closeout commit
 - next recommended task: review the broker trust-anchor design and implement a
   production signer path before resuming official MCP SDK stdio server work.
+
+## 2026-06-13T00:00:00-04:00
+
+- selected maturity level: ACT clearance client boundary
+- branch: `feature/act-clearance-client-boundary`
+- starting point: branched from `feature/approval-broker-v1` at `4432434`
+- locked direction:
+  - AgenticKVM is a client aircraft of Agentic Control Tower.
+  - ACT owns clearance contract, signing, mobile approval, replay defense,
+    clearance audit, and operator channel.
+  - AgenticKVM owns capability resolution, local policy, provider/target safety,
+    provider execution, local audit, recovery behavior, and fail-closed behavior.
+  - AgenticKVM mirrors ACT clearance contract expectations until ACT publishes
+    the canonical contract; it does not author a competing wire contract or
+    proof format.
+- baseline checks before changes:
+  - `python3 scripts/check-package.py`: passed
+  - `python3 scripts/build-package.py`: passed with documented deferred build
+    status
+  - `python3 scripts/smoke-cli.py`: passed
+  - `python3 scripts/lint-sanity.py`: passed
+  - `python3 scripts/type-sanity.py`: passed
+  - `python3 scripts/validate-docs.py`: passed
+  - `python3 scripts/check-site.py`: passed
+  - `python3 scripts/check-public-beta.py`: passed
+  - `uv run --offline --with pytest --python python3.13 python -m pytest`:
+    617 passed
+- planned safe outputs:
+  - supersede local production broker authority with ACT clearance client docs
+  - ACT clearance client spec framed as a client-side mirror
+  - clearance request/response models with no local production proof format
+  - verification seam that fails closed outside mock/test proof verification
+  - ControlPlane route from approval-required policy to ACT clearance client
+  - MCP request-clearance and deny-only surface, with no grant/approve/clear
+    tools
+  - donor PiKVM port targets, roadmap reset, conformance matrix, validation
+    gates, and review docs
