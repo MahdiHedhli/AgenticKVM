@@ -98,14 +98,14 @@ DEFAULT_MCP_TOOLS: tuple[MCPToolDefinition, ...] = (
         description="Read boot status.",
     ),
     MCPToolDefinition(
-        tool_name="request_approval",
-        capability_id="runtime.request_approval",
-        description="Request operator approval without granting approval.",
+        tool_name="request_clearance",
+        capability_id="runtime.request_clearance",
+        description="Request ACT clearance without granting clearance.",
     ),
     MCPToolDefinition(
-        tool_name="deny_approval",
-        capability_id="runtime.deny_approval",
-        description="Deny an approval request without granting approval.",
+        tool_name="deny_clearance",
+        capability_id="runtime.deny_clearance",
+        description="Deny an ACT clearance request without granting clearance.",
     ),
     MCPToolDefinition(
         tool_name="power_on",

@@ -36,18 +36,21 @@ def _request(tool_name: str) -> MCPToolRequest:
     )
 
 
-def test_mcp_exposes_request_and_deny_approval_only() -> None:
+def test_mcp_exposes_request_and_deny_clearance_only() -> None:
     tools = DEFAULT_MCP_TOOL_REGISTRY.tools
 
-    assert "request_approval" in tools
-    assert "deny_approval" in tools
-    assert tools["request_approval"].capability_id == "runtime.request_approval"
-    assert tools["deny_approval"].capability_id == "runtime.deny_approval"
+    assert "request_clearance" in tools
+    assert "deny_clearance" in tools
+    assert tools["request_clearance"].capability_id == "runtime.request_clearance"
+    assert tools["deny_clearance"].capability_id == "runtime.deny_clearance"
 
     for forbidden in (
         "grant_approval",
         "approve_approval",
         "approval_grant",
+        "grant_clearance",
+        "approve_clearance",
+        "clear_clearance",
         "sign_grant",
         "consume_grant",
     ):
@@ -57,20 +60,27 @@ def test_mcp_exposes_request_and_deny_approval_only() -> None:
 def test_mcp_grant_and_approve_tool_names_fail_closed() -> None:
     router = _router()
 
-    for forbidden in ("grant_approval", "approve_approval", "sign_grant"):
+    for forbidden in (
+        "grant_approval",
+        "approve_approval",
+        "sign_grant",
+        "grant_clearance",
+        "approve_clearance",
+        "clear_clearance",
+    ):
         result = router.handle_tool_request(_request(forbidden))
 
         assert result.status == MCPResultStatus.VALIDATION_ERROR
         assert result.reason == "unknown MCP tool"
 
 
-def test_mcp_request_and_deny_approval_route_through_control_plane() -> None:
+def test_mcp_request_and_deny_clearance_route_through_control_plane() -> None:
     router = _router()
 
-    request_result = router.handle_tool_request(_request("request_approval"))
-    deny_result = router.handle_tool_request(_request("deny_approval"))
+    request_result = router.handle_tool_request(_request("request_clearance"))
+    deny_result = router.handle_tool_request(_request("deny_clearance"))
 
     assert request_result.status == MCPResultStatus.OK
-    assert request_result.capability == "runtime.request_approval"
+    assert request_result.capability == "runtime.request_clearance"
     assert deny_result.status == MCPResultStatus.OK
-    assert deny_result.capability == "runtime.deny_approval"
+    assert deny_result.capability == "runtime.deny_clearance"

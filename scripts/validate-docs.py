@@ -230,15 +230,19 @@ def _validate_mcp_approval_tools() -> None:
     registry = (ROOT / "src" / "agentickvm" / "mcp" / "registry.py").read_text(
         encoding="utf-8"
     )
-    if 'tool_name="request_approval"' not in registry:
-        raise ValidationFailure("MCP registry missing request_approval tool")
-    if 'tool_name="deny_approval"' not in registry:
-        raise ValidationFailure("MCP registry missing deny_approval tool")
+    if 'tool_name="request_clearance"' not in registry:
+        raise ValidationFailure("MCP registry missing request_clearance tool")
+    if 'tool_name="deny_clearance"' not in registry:
+        raise ValidationFailure("MCP registry missing deny_clearance tool")
     forbidden = (
         'tool_name="grant_approval"',
         'tool_name="approve"',
         'tool_name="approve_approval"',
         'tool_name="sign_approval"',
+        'tool_name="grant_clearance"',
+        'tool_name="approve_clearance"',
+        'tool_name="clear_clearance"',
+        'tool_name="sign_clearance"',
     )
     for snippet in forbidden:
         if snippet in registry:
