@@ -165,9 +165,13 @@ from agentickvm.control_plane.act_client import (  # noqa: E402
 from agentickvm.control_plane.clearance import (  # noqa: E402
     ACT_AIRCRAFT_ID,
     DEFAULT_CLEARANCE_TIMEOUT_SECONDS,
+    ClearanceOperatorMessage,
+    ClearanceParamsFingerprint,
     ClearanceRequest,
     ClearanceResponse,
+    ClearanceRiskFamily,
     ClearanceRiskSummary,
+    ClearanceShortCode,
     ClearanceStatus,
     ClearanceVerificationResult,
     build_clearance_request,
@@ -193,6 +197,9 @@ from agentickvm.control_plane.notifiers import (  # noqa: E402
     ApprovalNotification,
     ApprovalNotifier,
     LocalApprovalNotifier,
+)
+from agentickvm.control_plane.risk_families import (  # noqa: E402
+    clearance_risk_family_for_capability,
 )
 from agentickvm.control_plane.audit import (  # noqa: E402
     AuditEvent,
@@ -262,9 +269,13 @@ __all__ = [
     "BrokerApprovalRequest",
     "ClearanceClient",
     "ClearanceProofVerifier",
+    "ClearanceOperatorMessage",
+    "ClearanceParamsFingerprint",
     "ClearanceRequest",
     "ClearanceResponse",
+    "ClearanceRiskFamily",
     "ClearanceRiskSummary",
+    "ClearanceShortCode",
     "ClearanceStatus",
     "ClearanceVerificationResult",
     "ApprovalChannel",
@@ -340,6 +351,7 @@ __all__ = [
     "build_clearance_request",
     "build_grant_payload",
     "build_operator_message",
+    "clearance_risk_family_for_capability",
     "canonical_json",
     "cleared_response_for",
     "create_audit_checkpoint",

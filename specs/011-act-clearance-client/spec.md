@@ -37,6 +37,10 @@ local policy requires clearance
 - ACT must remain the production authority for signing, mobile approval,
   clearance audit, replay defense, and one-time clearance consumption.
 - The client timeout defaults to 20 seconds and must be configurable.
+- Every AgenticKVM-built clearance request must include explicit non-null
+  `risk_family`; missing capability mappings resolve to the restrictive
+  `high_risk` family.
+- AgenticKVM does not choose ACT operator channel or tier from `risk_family`.
 - `operator_message` must be suitable for model/chat rendering and must not
   contain the double-period defect.
 

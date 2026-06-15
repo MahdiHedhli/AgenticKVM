@@ -13,7 +13,7 @@ published spec.
 - `provider`
 - `capability`
 - `params_fingerprint`
-- `risk_family`
+- `risk_family` (required, explicit, non-null)
 - `risk_summary`
 - `operator_message`
 - `requested_by`
@@ -32,6 +32,8 @@ published spec.
 - `provider`
 - `capability`
 - `params_fingerprint`
+- `risk_family`
+- `short_code`
 - `expires_at`
 - `tower_id`
 - `proof`
@@ -46,3 +48,13 @@ published spec.
 - `reason`
 - `tower_id`
 - `request_id`
+
+## Risk Family Mirror
+
+AgenticKVM labels the request; ACT owns tier and channel decisions.
+
+- `low_risk`: observe/read capability labels.
+- `high_risk`: consequential capability labels and any unmapped capability.
+
+An unmapped capability must never omit `risk_family` and must never fall back to
+a permissive value.

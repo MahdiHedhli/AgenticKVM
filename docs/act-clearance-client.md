@@ -32,6 +32,7 @@ AgenticKVM owns:
 - local structured audit
 - PiKVM and Redfish provider transport work
 - recovery workflows
+- explicit aircraft-side `risk_family` labels on clearance requests
 
 ## Contract Ownership
 
@@ -59,6 +60,19 @@ AgenticKVM policy says clearance is required
 If ACT is unavailable or the response cannot be verified, AgenticKVM fails
 closed or returns `clearance_required` where policy explicitly allows waiting
 for out-of-band operator action.
+
+## Risk Family Labeling
+
+AgenticKVM always sends an explicit `risk_family` in every ACT clearance
+request. It does not rely on ACT to derive a missing value. Observe/read
+capabilities are labeled `low_risk`; consequential capabilities such as power
+cycle, force restart, HID input, virtual media, and boot-device changes are
+labeled `high_risk`.
+
+If a capability has no explicit AgenticKVM mapping, the aircraft labels it
+`high_risk`. This is intentionally restrictive and avoids the permissive
+default failure mode. ACT still owns channel and tier decisions, including any
+mobile-mandatory requirement.
 
 ## Local Broker Work
 

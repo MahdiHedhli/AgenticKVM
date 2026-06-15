@@ -12,7 +12,11 @@ from agentickvm.control_plane.act_client import (
     cleared_response_for,
 )
 from agentickvm.control_plane.clearance import (
+    ClearanceOperatorMessage,
+    ClearanceParamsFingerprint,
     ClearanceResponse,
+    ClearanceRiskFamily,
+    ClearanceShortCode,
     ClearanceStatus,
     build_clearance_request,
 )
@@ -28,7 +32,7 @@ def _request(**params: object):
         provider="mock",
         capability="power.force_restart",
         parameters=params or {"reason": "wedged"},
-        risk_family="power",
+        risk_family=ClearanceRiskFamily.HIGH_RISK,
         risk_summary="forced restart",
         material_risks=("availability disruption",),
         intended_effect="recover wedged machine",
@@ -47,10 +51,14 @@ def test_clearance_request_serializes_with_short_code_and_operator_message() -> 
 
     assert payload["aircraft"] == "AgenticKVM"
     assert payload["request_id"] == "request-1"
+    assert payload["risk_family"] == "high_risk"
     assert payload["short_code"]
     assert "Clearance" in payload["operator_message"]
     assert "Surface this code to the operator" in payload["operator_message"]
     assert ".." not in payload["operator_message"]
+    assert isinstance(request.operator_message, ClearanceOperatorMessage)
+    assert isinstance(request.params_fingerprint, ClearanceParamsFingerprint)
+    assert isinstance(request.short_code, ClearanceShortCode)
 
 
 def test_clearance_fingerprint_is_stable_and_changes_with_params() -> None:
@@ -75,6 +83,9 @@ def test_mock_act_client_returns_expected_statuses() -> None:
     assert pending.status == ClearanceStatus.CLEARANCE_REQUIRED
     assert cleared.status == ClearanceStatus.CLEARED
     assert denied.status == ClearanceStatus.DENIED
+    assert pending.risk_family == ClearanceRiskFamily.HIGH_RISK
+    assert pending.expires_at == request.expires_at
+    assert isinstance(pending.short_code, ClearanceShortCode)
 
 
 def test_matching_mock_clearance_verifies_in_test_mode() -> None:
@@ -99,9 +110,15 @@ def test_matching_mock_clearance_verifies_in_test_mode() -> None:
         ("provider", "other-provider", "provider mismatch"),
         ("capability", "observe.status", "capability mismatch"),
         ("params_fingerprint", "wrong", "params_fingerprint mismatch"),
+        ("risk_family", ClearanceRiskFamily.LOW_RISK, "risk_family mismatch"),
+        ("short_code", "DIFF-0000", "short_code mismatch"),
     ],
 )
-def test_mismatched_mock_clearance_fails_closed(field: str, value: str, reason: str) -> None:
+def test_mismatched_mock_clearance_fails_closed(
+    field: str,
+    value: str | ClearanceRiskFamily,
+    reason: str,
+) -> None:
     request = _request()
     response = cleared_response_for(request)
     response = replace(response, **{field: value})
@@ -127,6 +144,8 @@ def test_missing_proof_fails_closed_outside_mock_mode() -> None:
         provider=request.provider,
         capability=request.capability,
         params_fingerprint=request.params_fingerprint,
+        risk_family=request.risk_summary.risk_family,
+        short_code=request.short_code,
         expires_at=request.expires_at,
         tower_id="act",
         proof=None,
@@ -150,6 +169,8 @@ def test_expired_clearance_fails_closed() -> None:
         provider=request.provider,
         capability=request.capability,
         params_fingerprint=request.params_fingerprint,
+        risk_family=request.risk_summary.risk_family,
+        short_code=request.short_code,
         expires_at=NOW - timedelta(seconds=1),
         tower_id="mock-act",
         proof={"mock_act_proof": "verified"},

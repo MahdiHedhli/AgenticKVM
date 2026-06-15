@@ -132,6 +132,11 @@ class ACTClearanceVerifier:
                     response.params_fingerprint,
                     request.params_fingerprint,
                 ),
+                "risk_family": (
+                    response.risk_family.value,
+                    request.risk_summary.risk_family.value,
+                ),
+                "short_code": (response.short_code, request.short_code),
                 "audit_correlation_id": (
                     response.audit_correlation_id,
                     request.audit_correlation_id,
@@ -215,6 +220,8 @@ class MockACTClient:
             provider=request.provider,
             capability=request.capability,
             params_fingerprint=request.params_fingerprint,
+            risk_family=request.risk_summary.risk_family,
+            short_code=request.short_code,
             expires_at=request.expires_at,
             tower_id=self.tower_id,
             proof=(
@@ -245,6 +252,8 @@ class MockACTClient:
             provider="unknown",
             capability="runtime.deny_clearance",
             params_fingerprint="unknown",
+            risk_family="high_risk",
+            short_code="UNKNOWN",
             tower_id=self.tower_id,
             reason=reason,
         )
@@ -261,6 +270,8 @@ def cleared_response_for(request: ClearanceRequest, *, tower_id: str = "mock-act
         provider=request.provider,
         capability=request.capability,
         params_fingerprint=request.params_fingerprint,
+        risk_family=request.risk_summary.risk_family,
+        short_code=request.short_code,
         expires_at=request.expires_at,
         tower_id=tower_id,
         proof={"mock_act_proof": "verified"},

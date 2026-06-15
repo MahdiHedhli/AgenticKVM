@@ -26,5 +26,13 @@ mirror pending alignment with ACT's canonical clearance contract. It is not an A
 
 - Request parameters are represented by fingerprint and redacted preview, not
   raw secret-bearing payloads.
+- `risk_family` is required. AgenticKVM must send an explicit non-null value and
+  must never rely on ACT deriving a permissive default.
+- AgenticKVM labels observe/read capabilities as `low_risk`.
+- AgenticKVM labels consequential capabilities such as power, HID input, media,
+  boot, and provider mutation as `high_risk`.
+- If a capability has no explicit AgenticKVM mapping, AgenticKVM labels it
+  `high_risk` and fails toward the restrictive tower path. ACT still owns
+  channel and tier decisions.
 - `operator_message` tells the agent/model what to surface to the operator.
 - AgenticKVM must update this mirror from ACT once the canonical contract lands.

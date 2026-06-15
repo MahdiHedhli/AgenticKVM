@@ -46,6 +46,7 @@ from agentickvm.control_plane.capabilities import (
 )
 from agentickvm.control_plane.decisions import PolicyDecision
 from agentickvm.control_plane.policy import CapabilityPolicy, PolicyDecisionResult
+from agentickvm.control_plane.risk_families import clearance_risk_family_for_capability
 from agentickvm.providers.base import (
     Provider,
     ProviderActionRequest,
@@ -299,7 +300,7 @@ class ControlPlane:
             provider=self.provider.provider_id,
             capability=request.capability_id,
             parameters=request.parameters,
-            risk_family=capability_ref.family,
+            risk_family=clearance_risk_family_for_capability(capability),
             risk_summary=decision.reason,
             material_risks=decision.material_risks,
             intended_effect=request.intended_effect,

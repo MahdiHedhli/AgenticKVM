@@ -22,6 +22,42 @@ ACT_AIRCRAFT_ID = "AgenticKVM"
 DEFAULT_CLEARANCE_TIMEOUT_SECONDS = 20
 
 
+class ClearanceRiskFamily(StrEnum):
+    """ACT-mirrored risk-family labels assigned by the AgenticKVM aircraft."""
+
+    LOW_RISK = "low_risk"
+    HIGH_RISK = "high_risk"
+
+
+class ClearanceParamsFingerprint(str):
+    """Typed ACT-mirrored params fingerprint."""
+
+    def __new__(cls, value: str) -> "ClearanceParamsFingerprint":
+        if not value:
+            raise ValueError("clearance params_fingerprint is required")
+        return str.__new__(cls, value)
+
+
+class ClearanceShortCode(str):
+    """Typed ACT-mirrored operator short code."""
+
+    def __new__(cls, value: str) -> "ClearanceShortCode":
+        if not value:
+            raise ValueError("clearance short_code is required")
+        return str.__new__(cls, value)
+
+
+class ClearanceOperatorMessage(str):
+    """Typed ACT-mirrored operator message."""
+
+    def __new__(cls, value: str) -> "ClearanceOperatorMessage":
+        if not value:
+            raise ValueError("clearance operator_message is required")
+        if ".." in value:
+            raise ValueError("operator message must not contain double periods")
+        return str.__new__(cls, value)
+
+
 class ClearanceStatus(StrEnum):
     """ACT clearance response states mirrored by the AgenticKVM client."""
 
@@ -38,13 +74,12 @@ class ClearanceStatus(StrEnum):
 class ClearanceRiskSummary:
     """Operator-readable risk summary mirrored for ACT clearance requests."""
 
-    risk_family: str
+    risk_family: ClearanceRiskFamily | str
     summary: str
     material_risks: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
-        if not self.risk_family:
-            raise ValueError("risk family is required")
+        object.__setattr__(self, "risk_family", _risk_family(self.risk_family))
         if not self.summary:
             raise ValueError("risk summary is required")
 
@@ -52,7 +87,7 @@ class ClearanceRiskSummary:
         """Return a JSON-safe dictionary."""
 
         return {
-            "risk_family": self.risk_family,
+            "risk_family": self.risk_family.value,
             "summary": self.summary,
             "material_risks": list(self.material_risks),
         }
@@ -67,13 +102,13 @@ class ClearanceRequest:
     target: str
     provider: str
     capability: str
-    params_fingerprint: str
+    params_fingerprint: ClearanceParamsFingerprint | str
     risk_summary: ClearanceRiskSummary
-    operator_message: str
+    operator_message: ClearanceOperatorMessage | str
     requested_by: str
     created_at: datetime
     expires_at: datetime
-    short_code: str
+    short_code: ClearanceShortCode | str
     policy_context: Mapping[str, Any] = field(default_factory=dict)
     audit_correlation_id: str = ""
     aircraft: str = ACT_AIRCRAFT_ID
@@ -95,12 +130,21 @@ class ClearanceRequest:
         missing = [name for name, value in required.items() if not value]
         if missing:
             raise ValueError(f"clearance request missing required fields: {', '.join(missing)}")
+        object.__setattr__(
+            self,
+            "params_fingerprint",
+            ClearanceParamsFingerprint(str(self.params_fingerprint)),
+        )
+        object.__setattr__(
+            self,
+            "operator_message",
+            ClearanceOperatorMessage(str(self.operator_message)),
+        )
+        object.__setattr__(self, "short_code", ClearanceShortCode(str(self.short_code)))
         if self.created_at.tzinfo is None or self.expires_at.tzinfo is None:
             raise ValueError("clearance timestamps must be timezone-aware")
         if self.expires_at <= self.created_at:
             raise ValueError("clearance expiry must be after creation")
-        if ".." in self.operator_message:
-            raise ValueError("operator message must not contain double periods")
         object.__setattr__(self, "policy_context", MappingProxyType(dict(self.policy_context)))
 
     def to_dict(self) -> dict[str, Any]:
@@ -114,7 +158,7 @@ class ClearanceRequest:
             "provider": self.provider,
             "capability": self.capability,
             "params_fingerprint": self.params_fingerprint,
-            "risk_family": self.risk_summary.risk_family,
+            "risk_family": self.risk_summary.risk_family.value,
             "risk_summary": self.risk_summary.to_dict(),
             "operator_message": self.operator_message,
             "requested_by": self.requested_by,
@@ -136,19 +180,32 @@ class ClearanceResponse:
     target: str
     provider: str
     capability: str
-    params_fingerprint: str
+    params_fingerprint: ClearanceParamsFingerprint | str
+    risk_family: ClearanceRiskFamily | str
+    short_code: ClearanceShortCode | str
     expires_at: datetime | None = None
     tower_id: str | None = None
     proof: Mapping[str, Any] | None = None
     audit_correlation_id: str = ""
-    operator_message: str = ""
+    operator_message: ClearanceOperatorMessage | str = ""
     reason: str = ""
 
     def __post_init__(self) -> None:
+        object.__setattr__(
+            self,
+            "params_fingerprint",
+            ClearanceParamsFingerprint(str(self.params_fingerprint)),
+        )
+        object.__setattr__(self, "risk_family", _risk_family(self.risk_family))
+        object.__setattr__(self, "short_code", ClearanceShortCode(str(self.short_code)))
+        if self.operator_message:
+            object.__setattr__(
+                self,
+                "operator_message",
+                ClearanceOperatorMessage(str(self.operator_message)),
+            )
         if self.expires_at is not None and self.expires_at.tzinfo is None:
             raise ValueError("clearance response expiry must be timezone-aware")
-        if self.operator_message and ".." in self.operator_message:
-            raise ValueError("operator message must not contain double periods")
         if self.proof is not None:
             object.__setattr__(self, "proof", MappingProxyType(dict(self.proof)))
 
@@ -163,6 +220,8 @@ class ClearanceResponse:
             "provider": self.provider,
             "capability": self.capability,
             "params_fingerprint": self.params_fingerprint,
+            "risk_family": self.risk_family.value,
+            "short_code": self.short_code,
             "expires_at": self.expires_at.astimezone(UTC).isoformat()
             if self.expires_at
             else None,
@@ -203,7 +262,7 @@ def build_clearance_request(
     provider: str,
     capability: str,
     parameters: Mapping[str, object],
-    risk_family: str,
+    risk_family: ClearanceRiskFamily | str,
     risk_summary: str,
     material_risks: tuple[str, ...],
     intended_effect: str,
@@ -221,8 +280,8 @@ def build_clearance_request(
     if ttl_seconds > DEFAULT_CLEARANCE_TIMEOUT_SECONDS:
         raise ValueError("clearance ttl cannot exceed default without explicit policy")
     request_id = request_id or uuid4().hex
-    params_fingerprint = fingerprint_parameters(parameters)
-    short_code = _short_code(request_id, params_fingerprint)
+    params_fingerprint = ClearanceParamsFingerprint(fingerprint_parameters(parameters))
+    short_code = ClearanceShortCode(_short_code(request_id, params_fingerprint))
     risk = ClearanceRiskSummary(
         risk_family=risk_family,
         summary=risk_summary,
@@ -280,3 +339,14 @@ def _short_code(request_id: str, params_fingerprint: str) -> str:
     digest = hashlib.sha256(f"{request_id}:{params_fingerprint}".encode("utf-8")).hexdigest()
     raw = digest[:8].upper()
     return f"{raw[:4]}-{raw[4:]}"
+
+
+def _risk_family(value: ClearanceRiskFamily | str) -> ClearanceRiskFamily:
+    if isinstance(value, ClearanceRiskFamily):
+        return value
+    if not value:
+        raise ValueError("clearance risk_family is required")
+    try:
+        return ClearanceRiskFamily(str(value))
+    except ValueError as exc:
+        raise ValueError(f"unknown clearance risk_family: {value}") from exc

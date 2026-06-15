@@ -55,7 +55,7 @@ def test_clearance_required_result_contains_operator_contract() -> None:
     assert ".." not in clearance["operator_message"]
     assert "Surface this code to the operator" in clearance["operator_message"]
     assert "retry with identical parameters" in payload["data"]["retry_guidance"]
-    assert clearance["risk_summary"]["risk_family"] == "power"
+    assert clearance["risk_summary"]["risk_family"] == "high_risk"
     assert payload["data"]["params_preview"]["password"] == "[REDACTED]"
     assert "params.password" in payload["redactions"]
     assert "chat approval" not in clearance["operator_message"].lower()
