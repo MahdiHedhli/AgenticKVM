@@ -26,6 +26,7 @@ class MCPResultStatus(StrEnum):
     OK = "ok"
     DENIED = "denied"
     APPROVAL_REQUIRED = "approval_required"
+    CLEARANCE_REQUIRED = "clearance_required"
     VALIDATION_ERROR = "validation_error"
     PROVIDER_ERROR = "provider_error"
     POLICY_ERROR = "policy_error"
@@ -120,7 +121,34 @@ def mcp_result_from_control_plane(
             risks=result.decision.material_risks,
         )
 
-    if result.status == ControlPlaneStatus.APPROVAL_REQUIRED:
+    if result.status in {
+        ControlPlaneStatus.APPROVAL_REQUIRED,
+        ControlPlaneStatus.CLEARANCE_REQUIRED,
+    }:
+        if result.status == ControlPlaneStatus.CLEARANCE_REQUIRED:
+            clearance = result.clearance_request
+            preview, redactions = redact_mapping(request.params)
+            return MCPToolResult(
+                status=MCPResultStatus.CLEARANCE_REQUIRED,
+                tool_name=request.tool_name,
+                capability=capability_id,
+                target=request.target,
+                provider=provider_id,
+                reason=result.message,
+                data={
+                    "clearance_request": clearance.to_dict() if clearance is not None else {},
+                    "params_preview": dict(preview),
+                    "params_fingerprint": fingerprint_parameters(request.params),
+                    "policy_decision": result.decision.decision.value,
+                    "retry_guidance": (
+                        "Surface this code to the operator and retry with "
+                        "identical parameters after approval."
+                    ),
+                },
+                approval_request_id=clearance.request_id if clearance is not None else None,
+                risks=result.decision.material_risks,
+                redactions=tuple(f"params.{path}" for path in redactions),
+            )
         approval = result.approval_request
         preview, redactions = redact_mapping(request.params)
         return MCPToolResult(

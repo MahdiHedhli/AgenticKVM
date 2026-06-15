@@ -19,8 +19,8 @@ Provider declarations enter through the provider registry. Config cannot name an
 arbitrary class, module, factory, or import path to create a provider.
 
 Provider category and availability assumptions are documented in
-`docs/provider-taxonomy.md`. Future in-band remote session providers such as
-RustDesk, VNC, RDP, and MeshCentral are not out-of-band providers.
+`docs/provider-taxonomy.md`. In-band remote desktop/session providers are parked
+outside the AgenticKVM roadmap.
 
 ## Provider Must Not Decide
 
@@ -120,12 +120,8 @@ be downgraded to generic low-risk operations.
 | Provider | Current status | Allowed observe capabilities | Mutating actions status | Config status | Test status | Live smoke status | CI status | Next gate |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Mock | Default executable safe provider | All current mock observations plus fake state families | Fake only and policy-gated | Built-in and example config enabled | Unit, contract, security | Not applicable | Mock-only | Continue provider conformance tests |
-| PiKVM | Offline observe fixture adapter plus disabled placeholder | `observe.status`, `observe.screen`, `observe.screenshot`, `observe.power_state`, `observe.hardware_inventory`, `observe.event_logs`, `observe.boot_status` | Unsupported, denied by policy, or provider-error without hardware action | Disabled placeholder examples; explicit fixture mode for tests | Fake transport, contract, CLI/MCP tests | Deferred, manual only | Fixtures only | Live transport spec and operator-approved smoke |
+| PiKVM | Offline observe fixture adapter plus disabled placeholder; cert-pinning live transport foundation behind injected adapters | `observe.status`, `observe.screen`, `observe.screenshot`, `observe.power_state`, `observe.hardware_inventory`, `observe.event_logs`, `observe.boot_status` | Unsupported, denied by policy, or provider-error without hardware action | Disabled placeholder examples; explicit fixture mode for tests; live transport requires credential ref and cert-pinning gate for self-signed targets | Fake transport, cert preflight unit tests, contract, CLI/MCP tests | Deferred, manual only | Fixtures and mock TLS/HTTP only | Operator-approved live observe smoke after credential strategy |
 | Redfish | Offline observe fixture adapter plus disabled placeholder; live transport deferred behind PiKVM parity path | `observe.status`, `observe.power_state`, `observe.hardware_inventory`, `observe.sensors`, `observe.event_logs`, `observe.boot_status` | Unsupported, denied by policy, or provider-error without hardware action; fake transport rejects non-GET | Disabled placeholder examples; explicit fixture mode for tests | Fake GET transport, contract, CLI/MCP tests | Deferred, manual only | Fixtures only | Redfish live observe ADR after PiKVM boundary is proven |
 | iLO placeholder | Disabled placeholder | Future observe-only subset | Unimplemented and non-executable | Placeholder only | Placeholder safety tests | Not started | Disabled | Provider-specific observe spec |
 | iDRAC placeholder | Disabled placeholder | Future observe-only subset | Unimplemented and non-executable | Placeholder only | Placeholder safety tests | Not started | Disabled | Provider-specific observe spec |
 | Supermicro/IPMI placeholder | Disabled placeholder | Future observe-only subset | Unimplemented and non-executable | Placeholder only | Placeholder safety tests | Not started | Disabled | Provider-specific observe spec |
-| RustDesk roadmap | Future in-band remote session provider, not OOB | Future session metadata observe-only | Remote desktop control, clipboard, file transfer, command execution, and agent install/update unimplemented | No config yet | Docs/spec only | Not started | No provider | In-band provider boundary spec |
-| VNC roadmap | Future in-band remote session provider, not OOB | Future session metadata observe-only | Remote desktop control, clipboard, file transfer, and command execution unimplemented | No config yet | Docs/spec only | Not started | No provider | In-band provider boundary spec |
-| RDP roadmap | Future in-band remote session provider, not OOB | Future session metadata observe-only | Remote desktop control, clipboard, drive redirection, and command execution unimplemented | No config yet | Docs/spec only | Not started | No provider | In-band provider boundary spec |
-| MeshCentral roadmap | Future in-band remote session/provider management surface, not OOB | Future session metadata observe-only | Remote desktop control, file transfer, command execution, agent install/update, and remote settings changes unimplemented | No config yet | Docs/spec only | Not started | No provider | In-band provider boundary spec |

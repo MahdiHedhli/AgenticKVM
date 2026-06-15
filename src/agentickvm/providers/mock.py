@@ -11,6 +11,7 @@ from agentickvm.providers.base import (
     ProviderActionRequest,
     ProviderActionResult,
 )
+from agentickvm.redaction import hid_capture_posture
 
 
 @dataclass
@@ -117,7 +118,11 @@ class MockProvider(Provider):
                 "boot_override": self.state.boot_override,
             }
         elif request.capability.startswith("input."):
-            event = {"capability": request.capability, "parameters": parameters}
+            event = {
+                "capability": request.capability,
+                "parameters": parameters,
+                "hid_capture": hid_capture_posture(full_capture=False),
+            }
             self.state.input_events.append(event)
             data["input_events"] = list(self.state.input_events)
         elif request.capability == "power.on":

@@ -3,9 +3,10 @@
 AgenticKVM now includes a local, file-backed approval queue for operator
 workflows. This is a local transport, not an authority boundary.
 
-The approval queue records approval-required actions, explicit operator
-decisions, and enough exact-action binding data to resume approved mock flows
-through the existing MCP router and `ControlPlane`.
+The approval queue records approval-required actions and explicit operator
+decisions for local operator workflow. It does not grant execution authority.
+Approval authority now comes from broker-owned signed grants verified by the
+control plane.
 
 ## Scope
 
@@ -16,9 +17,9 @@ Allowed:
 - pending approval listing
 - pending approval detail
 - approve, deny, and expire decisions
-- one-time approval consumption
-- session-scoped approval reuse
-- mock and fixture-only resumption through `ControlPlane`
+- request/decision cache semantics
+- exact-action binding previews for operator review
+- migration aid while Approval Broker v1 becomes the authority path
 
 Disallowed:
 
@@ -65,7 +66,7 @@ events for the same flow.
 
 ## Binding
 
-An approved record is bound to:
+The queue records the binding that a signed broker grant must later satisfy:
 
 - approval request id
 - session id
@@ -77,21 +78,20 @@ An approved record is bound to:
 - operator id
 - scope
 
-A matching approved record is converted into the existing in-memory
-`ApprovalStore` when the CLI runtime is built. The resumed action is then a
-normal MCP tool call routed through `MCPRouter`, target/provider registries,
-policy, approval checks, audit, and `ControlPlane`.
+The queue does not convert approved records into executable grants. Editing the
+queue file, or marking an entry approved, cannot authorize provider execution.
+The operator must use a broker signer, such as the Approval Broker CLI
+`approvals allow` command in development mode or a future production trust
+anchor.
 
 ## One-Time And Session Scope
 
-One-time approval records are marked `consumed` after a matching successful or
-provider-error resumed execution. This mirrors the control-plane behavior:
-approval is consumed before provider execution.
+Queue records can still show intended one-time or session scope for operator
+review, but that scope is informational in the file-backed queue. One-time
+consumption and session reuse are enforced by signed broker grants and the
+control-plane verifier.
 
-Session approval records remain `approved`, but only match the same session,
-target, provider, capability, params fingerprint, and unexpired time window.
-
-Denied, expired, consumed, and mismatched approvals fail closed.
+Denied, expired, and mismatched queue records cannot authorize execution.
 
 ## Audit
 
@@ -100,7 +100,7 @@ When `--audit-path` is supplied:
 - approval-required tool calls emit existing control-plane audit events
 - approval decisions emit `approval_granted`, `approval_denied`, or
   `approval_expired`
-- resumed one-time execution emits existing `approval_consumed` events
+- signed broker grant consumption emits `approval_consumed` events
 - audit writes use the existing local JSONL hash chain
 
 Audit data is redacted before persistence. Raw secrets, credential material,

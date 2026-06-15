@@ -1,7 +1,8 @@
 # Transport Security
 
-AgenticKVM does not implement live provider transports yet. This document
-defines the policy future transports must satisfy.
+AgenticKVM now includes a PiKVM live transport foundation, but it is not enabled
+by default and automated tests still use mocks only. This document defines the
+policy live transports must satisfy.
 
 ## Defaults
 
@@ -11,8 +12,11 @@ defines the policy future transports must satisfy.
 - PiKVM first live slice is observe-only.
 - Redirects are disabled unless a provider spec explicitly allows them.
 - Tests use fake transports only.
-- PiKVM fixture tests use `FakePiKVMObserveTransport`; no default live PiKVM
-  transport can be instantiated.
+- PiKVM fixture tests use `FakePiKVMObserveTransport`.
+- PiKVM cert-pinning tests use injected mock TLS/HTTP layers; no automated test
+  calls a live PiKVM.
+- HID typed text and observed screen text are redacted by default in provider
+  results, audit records, and local result shapes.
 
 ## Timeouts
 
@@ -34,16 +38,47 @@ retried.
 ## TLS
 
 An insecure TLS override must be explicit, manual, audited, and never default.
-It is not available in tests.
+For self-signed PiKVM deployments, `verify_ssl=false` is acceptable only when a
+`cert_fingerprint` is configured and verified before credentials are sent.
+
+PiKVM certificate pinning uses a preflight:
+
+1. Open an unauthenticated TLS connection.
+2. Compute the presented certificate SHA-256 fingerprint.
+3. Compare it with the configured `cert_fingerprint`.
+4. Abort before credential use on mismatch.
+5. Only on match, construct the authenticated client and trust the pinned
+   certificate as the sole trust root.
+
+This is why `verify_ssl=false` can be intentional for self-signed PiKVM only
+when paired with pinning. Without pinning, it is a misconfiguration.
 
 ## Redfish And PiKVM
 
 - Redfish first-slice methods: `GET` only.
 - PiKVM first-slice behavior: observe-only, no input or mutation.
-- PiKVM live observe is currently design-only. The implemented PiKVM transport
-  boundary is fake-only and validates synthetic fixture response shapes.
+- PiKVM live observe transport foundation exists for observe-class calls only:
+  health/status, screen/screenshot metadata, ATX power-state read, boot status,
+  and device info. It uses injectable TLS/HTTP adapters in tests and is not
+  enabled by default.
 - PiKVM screenshot observations are sensitive artifacts; audit records metadata
   only and must not include raw image bytes.
+
+## HID And Screen Text Redaction
+
+Typed text and observed screen text can contain passwords, BIOS fields,
+recovery keys, MFA codes, and other operator secrets. AgenticKVM therefore
+redacts HID text and screen text by default before values enter audit records,
+logs, or result shapes.
+
+Full capture is allowed only through an explicit opt-in such as
+`PIKVM_FULL_CAPTURE` or an equivalent per-call posture flag. This posture is
+recorded as reduced protection in audit metadata. Full capture does not mean
+"capture everything": credential-class fields and token-shaped strings are
+still stripped by exact field policy plus entropy and secret-pattern backstops.
+
+Tests use only synthetic secret-shaped strings and never require real hardware
+or real credentials.
 
 ## Audit
 
@@ -54,8 +89,11 @@ timeout policy.
 ## Current Implementation
 
 `TransportSecurityPolicy` validates defaults and retry decisions. It does not
-create a transport, open a connection, resolve credentials, or approve live
-provider use.
+resolve credentials or approve live provider use.
 
 `FakePiKVMObserveTransport` accepts the policy object for future boundary
 compatibility, but it still performs no network IO.
+
+`LivePiKVMObserveTransport` is a foundation with injected TLS probe and HTTP
+client factory. Tests prove fingerprint mismatch aborts before credentials are
+handed to the authenticated client factory.

@@ -14,6 +14,7 @@ from uuid import uuid4
 
 from agentickvm.control_plane.approvals import Actor, CapabilityRef
 from agentickvm.control_plane.decisions import PolicyDecision
+from agentickvm.redaction import redact_mapping as redact_agentickvm_mapping
 
 
 class AuditEventType(StrEnum):
@@ -28,6 +29,8 @@ class AuditEventType(StrEnum):
     APPROVAL_DENIED = "approval_denied"
     APPROVAL_EXPIRED = "approval_expired"
     APPROVAL_REUSED = "approval_reused"
+    APPROVAL_VERIFIED = "approval_verified"
+    APPROVAL_REJECTED = "approval_rejected"
     APPROVAL_CONSUMED = "approval_consumed"
     PROVIDER_EXECUTION_STARTED = "provider_execution_started"
     PROVIDER_EXECUTION_COMPLETED = "provider_execution_completed"
@@ -184,59 +187,7 @@ def verify_audit_chain(path: str | Path) -> bool:
 def redact_mapping(values: Mapping[str, Any]) -> tuple[Mapping[str, Any], tuple[str, ...]]:
     """Return a redacted copy of a mapping and the redacted paths."""
 
-    redactions: list[str] = []
-
-    def redact_value(path: str, key: str, value: Any) -> Any:
-        lowered = key.lower()
-        raw_byte_field = lowered != "raw_bytes_included" and any(
-            token in lowered
-            for token in (
-                "raw_bytes",
-                "image_bytes",
-                "raw_image",
-                "screenshot_bytes",
-            )
-        )
-        if any(
-            token in lowered
-            for token in (
-                "password",
-                "secret",
-                "token",
-                "otp",
-                "api_key",
-                "private_key",
-                "credential",
-                "bearer",
-                "session_cookie",
-            )
-        ) or raw_byte_field:
-            redactions.append(path)
-            return "[REDACTED]"
-        if lowered == "text":
-            redactions.append(path)
-            return "[REDACTED]"
-        if isinstance(value, Mapping):
-            return {
-                str(child_key): redact_value(
-                    f"{path}.{child_key}",
-                    str(child_key),
-                    child_value,
-                )
-                for child_key, child_value in value.items()
-            }
-        if isinstance(value, list):
-            return [
-                redact_value(f"{path}[{index}]", "", item)
-                for index, item in enumerate(value)
-            ]
-        return value
-
-    redacted = {
-        str(key): redact_value(str(key), str(key), value)
-        for key, value in values.items()
-    }
-    return MappingProxyType(redacted), tuple(redactions)
+    return redact_agentickvm_mapping(values)
 
 
 def build_audit_event(

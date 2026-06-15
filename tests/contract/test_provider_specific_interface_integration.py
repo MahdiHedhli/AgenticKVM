@@ -110,7 +110,7 @@ def test_mcp_observes_pikvm_fake_target_screen_and_status() -> None:
     assert screen.status == MCPResultStatus.OK
     assert (
         screen.data["provider_result"]["data"]["screen"]["content"]
-        == "PiKVM fixture screen"
+        == "[REDACTED]"
     )
     assert status.status == MCPResultStatus.OK
     assert status.data["provider_result"]["data"]["status"]["health"] == "ok"
@@ -252,7 +252,7 @@ def test_cli_calls_pikvm_fake_observe_screen_and_status(tmp_path, capsys) -> Non
     assert screen["status"] == "ok"
     assert (
         screen["data"]["provider_result"]["data"]["screen"]["content"]
-        == "PiKVM fixture screen"
+        == "[REDACTED]"
     )
     assert status_code == 0
     assert status["status"] == "ok"

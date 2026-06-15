@@ -98,6 +98,16 @@ DEFAULT_MCP_TOOLS: tuple[MCPToolDefinition, ...] = (
         description="Read boot status.",
     ),
     MCPToolDefinition(
+        tool_name="request_clearance",
+        capability_id="runtime.request_clearance",
+        description="Request ACT clearance without granting clearance.",
+    ),
+    MCPToolDefinition(
+        tool_name="deny_clearance",
+        capability_id="runtime.deny_clearance",
+        description="Deny an ACT clearance request without granting clearance.",
+    ),
+    MCPToolDefinition(
         tool_name="power_on",
         capability_id="power.on",
         description="Power on an in-scope target.",

@@ -128,7 +128,8 @@ def _check_local_links(parser: SiteHTMLParser) -> None:
 def _check_provider_language(html: str) -> None:
     required = (
         "Live providers are deferred",
-        "Future roadmap only",
+        "Killer demo",
+        "Not on the AgenticKVM roadmap",
         "observe-only readiness/spec stages",
         "not a mainline dependency",
     )

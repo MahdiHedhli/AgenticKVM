@@ -17,11 +17,27 @@ from agentickvm.control_plane.approvals import (
     build_approval_request,
     fingerprint_parameters,
 )
+from agentickvm.control_plane.approval_broker import (
+    ApprovalGrantVerifier,
+    GrantVerificationContext,
+)
+from agentickvm.control_plane.act_client import (
+    ACTClearanceVerifier,
+    ClearanceClient,
+)
 from agentickvm.control_plane.audit import (
     AuditEventType,
     AuditSink,
     ProviderRef,
     build_audit_event,
+)
+from agentickvm.control_plane.grants import SignedApprovalGrant
+from agentickvm.control_plane.clearance import (
+    DEFAULT_CLEARANCE_TIMEOUT_SECONDS,
+    ClearanceRequest,
+    ClearanceResponse,
+    ClearanceStatus,
+    build_clearance_request,
 )
 from agentickvm.control_plane.capabilities import (
     Capability,
@@ -30,6 +46,7 @@ from agentickvm.control_plane.capabilities import (
 )
 from agentickvm.control_plane.decisions import PolicyDecision
 from agentickvm.control_plane.policy import CapabilityPolicy, PolicyDecisionResult
+from agentickvm.control_plane.risk_families import clearance_risk_family_for_capability
 from agentickvm.providers.base import (
     Provider,
     ProviderActionRequest,
@@ -42,6 +59,7 @@ class ControlPlaneStatus(StrEnum):
 
     DENIED = "denied"
     APPROVAL_REQUIRED = "approval_required"
+    CLEARANCE_REQUIRED = "clearance_required"
     COMPLETED = "completed"
     FAILED = "failed"
 
@@ -58,6 +76,8 @@ class CapabilityRequest:
     intended_effect: str
     parameters: Mapping[str, Any] = field(default_factory=dict)
     credential_id: str | None = None
+    approval_request_id: str | None = None
+    signed_approval_grant: SignedApprovalGrant | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "parameters", MappingProxyType(dict(self.parameters)))
@@ -70,6 +90,8 @@ class ControlPlaneResult:
     status: ControlPlaneStatus
     decision: PolicyDecisionResult
     approval_request: ApprovalRequest | None = None
+    clearance_request: ClearanceRequest | None = None
+    clearance_response: ClearanceResponse | None = None
     provider_result: ProviderActionResult | None = None
     message: str = ""
 
@@ -86,6 +108,10 @@ class ControlPlane:
         registry: CapabilityRegistry = DEFAULT_CAPABILITY_REGISTRY,
         approval_store: ApprovalStore | None = None,
         now_factory: Any | None = None,
+        approval_grant_verifier: ApprovalGrantVerifier | None = None,
+        clearance_client: ClearanceClient | None = None,
+        clearance_verifier: ACTClearanceVerifier | None = None,
+        clearance_timeout_seconds: int = DEFAULT_CLEARANCE_TIMEOUT_SECONDS,
     ) -> None:
         self.policy = policy
         self.provider = provider
@@ -93,6 +119,11 @@ class ControlPlane:
         self.registry = registry
         self.approval_store = approval_store
         self.now_factory = now_factory or (lambda: datetime.now(UTC))
+        self.approval_grant_verifier = approval_grant_verifier
+        self.clearance_client = clearance_client
+        self.clearance_verifier = clearance_verifier
+        self.clearance_timeout_seconds = clearance_timeout_seconds
+        self._consumed_signed_grant_ids: set[str] = set()
 
     def handle(self, request: CapabilityRequest) -> ControlPlaneResult:
         """Handle a capability request through the required control flow."""
@@ -174,6 +205,25 @@ class ControlPlane:
         if decision.requires_approval:
             if capability is None:
                 raise RuntimeError("Unknown capabilities cannot require approval")
+            if self.clearance_client is not None:
+                return self._handle_act_clearance(
+                    request=request,
+                    capability=capability,
+                    capability_ref=capability_ref,
+                    decision=decision,
+                )
+            signed_result = self._verify_signed_approval_grant(
+                request=request,
+                capability_ref=capability_ref,
+                decision=decision,
+            )
+            if signed_result is True:
+                return self._execute_provider(
+                    request=request,
+                    capability=capability,
+                    capability_ref=capability_ref,
+                    decision=decision,
+                )
             grant = self._matching_approval_grant(request)
             if grant is not None:
                 if self.approval_store is None:
@@ -233,6 +283,145 @@ class ControlPlane:
             capability=capability,
             capability_ref=capability_ref,
             decision=decision,
+        )
+
+    def _handle_act_clearance(
+        self,
+        *,
+        request: CapabilityRequest,
+        capability: Capability,
+        capability_ref: CapabilityRef,
+        decision: PolicyDecisionResult,
+    ) -> ControlPlaneResult:
+        now = self.now_factory()
+        clearance_request = build_clearance_request(
+            session_id=request.session_id,
+            target=request.target_id,
+            provider=self.provider.provider_id,
+            capability=request.capability_id,
+            parameters=request.parameters,
+            risk_family=clearance_risk_family_for_capability(capability),
+            risk_summary=decision.reason,
+            material_risks=decision.material_risks,
+            intended_effect=request.intended_effect,
+            requested_by=request.requester.id,
+            audit_correlation_id=request.correlation_id,
+            policy_context={"decision": decision.decision.value},
+            now=now,
+            ttl_seconds=self.clearance_timeout_seconds,
+            request_id=request.approval_request_id,
+        )
+        self._emit(
+            event_type=AuditEventType.APPROVAL_REQUESTED,
+            request=request,
+            capability_ref=capability_ref,
+            policy_decision=decision.decision,
+            approval_payload={
+                "clearance_request": clearance_request.to_dict(),
+                "authority": "Agentic Control Tower",
+                "contract_source": "ACT",
+            },
+            material_risks=decision.material_risks,
+        )
+        clearance_response = self.clearance_client.request_clearance(
+            clearance_request,
+            timeout_seconds=self.clearance_timeout_seconds,
+        )
+        if clearance_response.status == ClearanceStatus.CLEARED:
+            if self.clearance_verifier is None:
+                self._emit(
+                    event_type=AuditEventType.APPROVAL_REJECTED,
+                    request=request,
+                    capability_ref=capability_ref,
+                    policy_decision=decision.decision,
+                    approval_payload={
+                        "clearance_response": clearance_response.to_dict(),
+                        "reason": "ACT clearance verifier is not configured",
+                    },
+                    material_risks=decision.material_risks,
+                )
+                self._emit_result_returned(
+                    request,
+                    capability_ref,
+                    decision,
+                    ControlPlaneStatus.DENIED,
+                )
+                return ControlPlaneResult(
+                    status=ControlPlaneStatus.DENIED,
+                    decision=decision,
+                    clearance_request=clearance_request,
+                    clearance_response=clearance_response,
+                    message="ACT clearance verifier is not configured",
+                )
+            verification = self.clearance_verifier.verify(
+                request=clearance_request,
+                response=clearance_response,
+                now=now,
+            )
+            self._emit(
+                event_type=(
+                    AuditEventType.APPROVAL_VERIFIED
+                    if verification.valid
+                    else AuditEventType.APPROVAL_REJECTED
+                ),
+                request=request,
+                capability_ref=capability_ref,
+                policy_decision=decision.decision,
+                approval_payload={
+                    "clearance_response": clearance_response.to_dict(),
+                    "verification": verification.to_dict(),
+                },
+                material_risks=decision.material_risks,
+            )
+            if verification.valid:
+                return self._execute_provider(
+                    request=request,
+                    capability=capability,
+                    capability_ref=capability_ref,
+                    decision=decision,
+                )
+            self._emit_result_returned(
+                request,
+                capability_ref,
+                decision,
+                ControlPlaneStatus.DENIED,
+            )
+            return ControlPlaneResult(
+                status=ControlPlaneStatus.DENIED,
+                decision=decision,
+                clearance_request=clearance_request,
+                clearance_response=clearance_response,
+                message=verification.reason,
+            )
+        if clearance_response.status == ClearanceStatus.DENIED:
+            self._emit(
+                event_type=AuditEventType.APPROVAL_REJECTED,
+                request=request,
+                capability_ref=capability_ref,
+                policy_decision=decision.decision,
+                approval_payload={"clearance_response": clearance_response.to_dict()},
+                material_risks=decision.material_risks,
+            )
+            self._emit_result_returned(request, capability_ref, decision, ControlPlaneStatus.DENIED)
+            return ControlPlaneResult(
+                status=ControlPlaneStatus.DENIED,
+                decision=decision,
+                clearance_request=clearance_request,
+                clearance_response=clearance_response,
+                message=clearance_response.reason or "ACT denied clearance",
+            )
+        self._emit_result_returned(
+            request,
+            capability_ref,
+            decision,
+            ControlPlaneStatus.CLEARANCE_REQUIRED,
+        )
+        return ControlPlaneResult(
+            status=ControlPlaneStatus.CLEARANCE_REQUIRED,
+            decision=decision,
+            clearance_request=clearance_request,
+            clearance_response=clearance_response,
+            message="ACT clearance required",
         )
 
     def _execute_provider(
@@ -298,6 +487,86 @@ class ControlPlane:
             params_fingerprint=fingerprint_parameters(request.parameters),
             now=self.now_factory(),
         )
+
+    def _verify_signed_approval_grant(
+        self,
+        *,
+        request: CapabilityRequest,
+        capability_ref: CapabilityRef,
+        decision: PolicyDecisionResult,
+    ) -> bool | None:
+        if request.signed_approval_grant is None:
+            return None
+        if self.approval_grant_verifier is None:
+            self._emit(
+                event_type=AuditEventType.APPROVAL_REJECTED,
+                request=request,
+                capability_ref=capability_ref,
+                policy_decision=decision.decision,
+                approval_payload={"reason": "signed approval verifier is not configured"},
+                material_risks=decision.material_risks,
+            )
+            return None
+        if request.approval_request_id is None:
+            self._emit(
+                event_type=AuditEventType.APPROVAL_REJECTED,
+                request=request,
+                capability_ref=capability_ref,
+                policy_decision=decision.decision,
+                approval_payload={"reason": "approval request id is required"},
+                material_risks=decision.material_risks,
+            )
+            return None
+        grant_id = request.signed_approval_grant.payload.grant_id
+        if grant_id in self._consumed_signed_grant_ids:
+            self._emit(
+                event_type=AuditEventType.APPROVAL_REJECTED,
+                request=request,
+                capability_ref=capability_ref,
+                policy_decision=decision.decision,
+                approval_payload={"grant_id": grant_id, "reason": "signed grant already consumed"},
+                material_risks=decision.material_risks,
+            )
+            return None
+        verification = self.approval_grant_verifier.verify(
+            request.signed_approval_grant,
+            context=GrantVerificationContext.from_parameters(
+                request_id=request.approval_request_id,
+                session_id=request.session_id,
+                target=request.target_id,
+                provider=self.provider.provider_id,
+                capability=request.capability_id,
+                parameters=request.parameters,
+                risk_family=capability_ref.family,
+                now=self.now_factory(),
+            ),
+        )
+        event_type = (
+            AuditEventType.APPROVAL_VERIFIED
+            if verification.valid
+            else AuditEventType.APPROVAL_REJECTED
+        )
+        self._emit(
+            event_type=event_type,
+            request=request,
+            capability_ref=capability_ref,
+            policy_decision=decision.decision,
+            approval_payload=verification.to_dict(),
+            material_risks=decision.material_risks,
+        )
+        if not verification.valid:
+            return None
+        if request.signed_approval_grant.payload.one_time:
+            self._consumed_signed_grant_ids.add(grant_id)
+            self._emit(
+                event_type=AuditEventType.APPROVAL_CONSUMED,
+                request=request,
+                capability_ref=capability_ref,
+                policy_decision=decision.decision,
+                approval_payload=verification.to_dict(),
+                material_risks=decision.material_risks,
+            )
+        return True
 
     def _emit(
         self,

@@ -6,18 +6,23 @@ import argparse
 import json
 import sys
 from collections.abc import Sequence
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 from agentickvm.config import build_runtime, load_config
 from agentickvm.control_plane import (
+    ApprovalCacheError,
+    ApprovalChannel,
     ApprovalGrantScope,
+    GrantPayload,
+    HMACDevelopmentSigner,
     LocalApprovalQueue,
     LocalJSONLAuditSink,
+    SignedApprovalCache,
     SQLiteAuditSink,
     create_sqlite_audit_checkpoint,
     export_sqlite_audit,
-    fingerprint_parameters,
     inspect_sqlite_audit_event,
     list_sqlite_audit_events,
     mode_preset,
@@ -51,7 +56,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         runtime = build_runtime(
             load_config(args.config),
             audit_sink=audit_sink,
-            approval_store=approval_queue.to_approval_store() if approval_queue else None,
+            approval_store=None,
         )
         if args.command == "list-providers":
             _print_json(_providers_payload(runtime))
@@ -117,24 +122,6 @@ def _call(
             "approval_id": queued.id,
             "status": queued.status.value,
         }
-    elif (
-        approval_queue is not None
-        and result.status in {MCPResultStatus.OK, MCPResultStatus.PROVIDER_ERROR}
-        and result.capability is not None
-    ):
-        consumed = approval_queue.mark_matching_consumed(
-            capability_id=result.capability,
-            session_id=args.session_id,
-            target_id=args.target,
-            provider_id=result.provider,
-            params_fingerprint=fingerprint_parameters(params),
-        )
-        if consumed is not None:
-            payload["approval_queue"] = {
-                "path": str(approval_queue.path),
-                "approval_id": consumed.id,
-                "status": consumed.status.value,
-            }
     _print_json(payload)
     if result.status in {
         MCPResultStatus.VALIDATION_ERROR,
@@ -154,6 +141,10 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--approval-path",
         help="Explicit local approval queue JSON path.",
+    )
+    parser.add_argument(
+        "--broker-cache-path",
+        help="Explicit signed approval broker cache path.",
     )
     parser.add_argument(
         "--audit-path",
@@ -188,6 +179,7 @@ def _parser() -> argparse.ArgumentParser:
     approvals = subparsers.add_parser("approvals")
     approval_actions = approvals.add_subparsers(dest="approval_command")
     approval_actions.add_parser("list")
+    approval_actions.add_parser("watch")
     show = approval_actions.add_parser("show")
     show.add_argument("approval_id")
     approve = approval_actions.add_parser("approve")
@@ -207,6 +199,31 @@ def _parser() -> argparse.ArgumentParser:
     expire.add_argument("approval_id")
     expire.add_argument("--operator-id", required=True)
     expire.add_argument("--reason")
+    allow = approval_actions.add_parser("allow")
+    allow.add_argument("approval_id")
+    allow.add_argument("--operator-id", required=True)
+    allow.add_argument("--session-id", required=True)
+    allow.add_argument("--target", required=True)
+    allow.add_argument("--provider", required=True)
+    allow.add_argument("--capability", required=True)
+    allow.add_argument("--params-fingerprint", required=True)
+    allow.add_argument("--risk-family", required=True)
+    allow.add_argument("--expires-at", required=True)
+    allow.add_argument(
+        "--channel",
+        choices=[ApprovalChannel.OUT_OF_BAND.value, ApprovalChannel.WATCH_TUI.value],
+        default=ApprovalChannel.WATCH_TUI.value,
+    )
+    allow.add_argument(
+        "--dev-signer",
+        action="store_true",
+        help="Use the development/test signer. Not a production trust anchor.",
+    )
+    allow.add_argument(
+        "--signer-key-id",
+        default="agentickvm-dev-test-signer",
+        help="Signer key id for the development/test signer.",
+    )
 
     audit = subparsers.add_parser("audit")
     audit_actions = audit.add_subparsers(dest="audit_command")
@@ -263,6 +280,22 @@ def _approvals(
     args: argparse.Namespace,
     approval_queue: LocalApprovalQueue | None,
 ) -> int:
+    if args.approval_command in {"watch", "allow"}:
+        return _broker_approvals(args)
+    if args.approval_command == "deny" and approval_queue is None and args.broker_cache_path:
+        _print_json(
+            {
+                "status": "approval_denied",
+                "approval": {
+                    "id": args.approval_id,
+                    "operator_id": args.operator_id,
+                    "reason": args.reason,
+                    "operator_surface": "approval_broker_cli",
+                    "grant_created": False,
+                },
+            }
+        )
+        return 0
     if approval_queue is None:
         raise ValueError("approvals commands require --approval-path")
     if args.approval_command == "list":
@@ -304,6 +337,105 @@ def _approvals(
         _print_json({"status": "approval_expired", "approval": record.to_summary()})
         return 0
     raise ValueError("unknown approvals command")
+
+
+def _broker_approvals(args: argparse.Namespace) -> int:
+    if not args.broker_cache_path:
+        raise ValueError("broker approval commands require --broker-cache-path")
+    cache = SignedApprovalCache(args.broker_cache_path)
+    if args.approval_command == "watch":
+        try:
+            grants = cache.read_signed_grants()
+        except ApprovalCacheError as exc:
+            _print_json(
+                {
+                    "status": "approval_cache_error",
+                    "path": args.broker_cache_path,
+                    "reason": str(exc),
+                }
+            )
+            return 2
+        _print_json(
+            {
+                "status": "ok",
+                "operator_surface": "approval_broker_cli",
+                "path": args.broker_cache_path,
+                "authority": "cache_only_signature_required",
+                "signed_grants": [
+                    {
+                        "grant_id": grant.payload.grant_id,
+                        "request_id": grant.payload.request_id,
+                        "session_id": grant.payload.session_id,
+                        "target": grant.payload.target,
+                        "provider": grant.payload.provider,
+                        "capability": grant.payload.capability,
+                        "risk_family": grant.payload.risk_family,
+                        "channel": grant.payload.channel.value,
+                        "expires_at": grant.payload.expires_at.astimezone(UTC).isoformat(),
+                        "signer_key_id": grant.payload.signer_key_id,
+                    }
+                    for grant in grants
+                ],
+            }
+        )
+        return 0
+    if args.approval_command == "allow":
+        if not args.dev_signer:
+            _print_json(
+                {
+                    "status": "validation_error",
+                    "reason": (
+                        "operator allow requires a configured signer; only "
+                        "--dev-signer is available in this development build"
+                    ),
+                }
+            )
+            return 2
+        payload = GrantPayload(
+            grant_id=f"grant-{args.approval_id}",
+            request_id=args.approval_id,
+            session_id=args.session_id,
+            target=args.target,
+            provider=args.provider,
+            capability=args.capability,
+            params_fingerprint=args.params_fingerprint,
+            risk_family=args.risk_family,
+            channel=ApprovalChannel(args.channel),
+            expires_at=_parse_utc_datetime(args.expires_at),
+            one_time=True,
+            signer_key_id=args.signer_key_id,
+        )
+        signer = HMACDevelopmentSigner(
+            key_id=args.signer_key_id,
+            secret=b"agentickvm-development-signer-not-production",
+        )
+        signed_grant = signer.sign(payload)
+        cache.append_signed_grant(signed_grant)
+        _print_json(
+            {
+                "status": "approval_granted",
+                "operator_surface": "approval_broker_cli",
+                "operator_id": args.operator_id,
+                "path": args.broker_cache_path,
+                "production_authority": False,
+                "grant": {
+                    "grant_id": signed_grant.payload.grant_id,
+                    "request_id": signed_grant.payload.request_id,
+                    "session_id": signed_grant.payload.session_id,
+                    "target": signed_grant.payload.target,
+                    "provider": signed_grant.payload.provider,
+                    "capability": signed_grant.payload.capability,
+                    "params_fingerprint": signed_grant.payload.params_fingerprint,
+                    "risk_family": signed_grant.payload.risk_family,
+                    "channel": signed_grant.payload.channel.value,
+                    "expires_at": signed_grant.payload.expires_at.astimezone(UTC).isoformat(),
+                    "signer_key_id": signed_grant.payload.signer_key_id,
+                    "signature_algorithm": signed_grant.signature_algorithm,
+                },
+            }
+        )
+        return 0
+    raise ValueError("unknown broker approvals command")
 
 
 def _audit(args: argparse.Namespace) -> int:
@@ -522,6 +654,14 @@ def _params_from_cli(values: Sequence[str]) -> dict[str, str]:
             raise ValueError("CLI param key cannot be empty")
         params[key] = item
     return params
+
+
+def _parse_utc_datetime(value: str) -> datetime:
+    normalized = value.replace("Z", "+00:00")
+    parsed = datetime.fromisoformat(normalized)
+    if parsed.tzinfo is None:
+        raise ValueError("timestamp must include timezone")
+    return parsed.astimezone(UTC)
 
 
 def _approval_queue_from_args(

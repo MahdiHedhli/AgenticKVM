@@ -48,6 +48,43 @@ on branch `feat/redfish-backend-x10`.
 | Router preference/fallback between Redfish and IPMI for reads | `tools/router.py`, `tests/test_router.py` | redesign | Useful behavior, but routing must be a provider decision after policy, not a tool shortcut. |
 | Safe target inventory that omits secrets | `agentic_kvm_targets` tests | preserve | Rebuild as an observe capability and config summary. |
 
+## Port This: PiKVM Provider Controls
+
+These donor-spike items are AgenticKVM-specific provider knowledge and should be
+ported into future PiKVM provider slices. They do not live in ACT.
+
+### PiKVM Cert-Pinning Preflight
+
+Port target: PiKVM live transport.
+
+When `cert_fingerprint` is configured, the PiKVM transport must open an
+unauthenticated TLS connection first and verify the presented certificate
+fingerprint before sending credentials. Only after the fingerprint matches may
+the authenticated client be constructed, trusting that pinned certificate as the
+sole trust root.
+
+This preserves the donor reasoning that `verify_ssl: false` for self-signed
+PiKVM can be intentional only when paired with certificate pinning. Credentials
+must not go over the wire on certificate mismatch.
+
+### HID Text Redaction With Explicit Full-Capture Opt-In
+
+Port target: redaction overhaul and future PiKVM input phase.
+
+Typed HID text is redacted by default because it may contain passwords, BIOS
+fields, recovery keys, disk unlock strings, and other sensitive material. Full
+capture requires explicit opt-in such as `PIKVM_FULL_CAPTURE`. Credential fields
+remain stripped even under full capture.
+
+### Real PiKVM Tool Surface And Screenshot Mouse Calibration
+
+Port target: PiKVM live provider capability map and later gated input phase.
+
+The donor MSD, ATX, and HID breakdown is the live PiKVM provider capability map
+reference. Screenshot-based absolute mouse calibration matters for real PiKVM
+input later and should be preserved in the provider design, fake tests, and
+manual smoke plans before any live input is attempted.
+
 ## Provider Code Worth Reviewing
 
 | Provider area | Donor files | Classification | Capability families |

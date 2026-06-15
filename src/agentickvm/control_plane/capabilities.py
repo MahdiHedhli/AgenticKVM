@@ -441,6 +441,20 @@ DEFAULT_CAPABILITIES: tuple[Capability, ...] = (
         required_scope=("session",),
     ),
     _capability(
+        "runtime.request_clearance",
+        "Request clearance",
+        "Request ACT clearance without granting or executing provider actions.",
+        RiskLevel.LOW,
+        required_scope=("session",),
+    ),
+    _capability(
+        "runtime.deny_clearance",
+        "Deny clearance",
+        "Record a clearance denial intent without granting or executing provider actions.",
+        RiskLevel.LOW,
+        required_scope=("session",),
+    ),
+    _capability(
         "runtime.run_approved_playbook",
         "Run approved playbook",
         "Run a pre-approved playbook inside explicit scope.",

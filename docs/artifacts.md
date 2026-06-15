@@ -4,8 +4,8 @@ AgenticKVM treats screenshots and screen observations as sensitive artifacts.
 They can contain passwords, recovery keys, hostnames, IP addresses, customer
 data, boot prompts, installer screens, and console sessions.
 
-Future remote desktop streams, session thumbnails, clipboard captures, and
-screen recordings are also sensitive artifacts.
+In-band remote desktop streams, session thumbnails, clipboard captures, and
+screen recordings are outside active AgenticKVM scope.
 
 ## Current State
 
@@ -25,8 +25,8 @@ Tests use synthetic fixtures and temporary directories only.
 - Screenshot metadata must carry a sensitivity label.
 - Raw screenshot bytes must be redacted from audit and external output.
 - Live screenshots remain blocked until the manual smoke gate is approved.
-- Future remote desktop stream artifacts remain blocked until an in-band
-  provider spec defines consent, retention, redaction, and audit behavior.
+- In-band remote desktop/session artifacts are parked outside AgenticKVM and
+  must not be added without a separate project decision.
 
 ## Paths
 

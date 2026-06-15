@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from agentickvm.control_plane import (
+    ACTClearanceVerifier,
     Actor,
     ActorType,
     ApprovalStore,
@@ -10,6 +11,7 @@ from agentickvm.control_plane import (
     CapabilityPolicy,
     CapabilityRegistry,
     CapabilityRequest,
+    ClearanceClient,
     ControlPlane,
     ControlPlaneResult,
     ControlPlaneStatus,
@@ -44,6 +46,9 @@ class MCPRouter:
         policy: CapabilityPolicy,
         audit_sink: AuditSink | None = None,
         approval_store: ApprovalStore | None = None,
+        clearance_client: ClearanceClient | None = None,
+        clearance_verifier: ACTClearanceVerifier | None = None,
+        clearance_timeout_seconds: int = 20,
         registry: MCPToolRegistry = DEFAULT_MCP_TOOL_REGISTRY,
         capability_registry: CapabilityRegistry = DEFAULT_CAPABILITY_REGISTRY,
         control_plane_factory: type[ControlPlane] = ControlPlane,
@@ -53,6 +58,9 @@ class MCPRouter:
         self.policy = policy
         self.audit_sink = audit_sink or InMemoryAuditSink()
         self.approval_store = approval_store
+        self.clearance_client = clearance_client
+        self.clearance_verifier = clearance_verifier
+        self.clearance_timeout_seconds = clearance_timeout_seconds
         self.registry = registry
         self.capability_registry = capability_registry
         self.control_plane_factory = control_plane_factory
@@ -149,6 +157,9 @@ class MCPRouter:
             audit_sink=self.audit_sink,
             registry=self.capability_registry,
             approval_store=self.approval_store,
+            clearance_client=self.clearance_client,
+            clearance_verifier=self.clearance_verifier,
+            clearance_timeout_seconds=self.clearance_timeout_seconds,
         )
         try:
             result: ControlPlaneResult = control_plane.handle(capability_request)

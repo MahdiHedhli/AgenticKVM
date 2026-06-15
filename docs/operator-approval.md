@@ -1,5 +1,19 @@
 # Operator Approval
 
+## Current Direction: ACT Clearance
+
+AgenticKVM now consumes clearance from Agentic Control Tower (ACT). ACT owns the
+production clearance contract, signing, mobile approval, operator channel, replay
+defense, one-time clearance consumption, and tower-side clearance audit.
+
+AgenticKVM owns capability resolution, local policy, provider and target safety,
+provider execution, local audit, and fail-closed behavior. It does not duplicate
+ACT broker crypto and does not author the clearance wire contract.
+
+The local signed-grant broker work described below is superseded for production
+authority. It may remain as dev/test scaffold and as regression coverage proving
+that editable local files are not authority. Production clearance comes from ACT.
+
 Operator approval is required when policy returns `ask_each_time` or
 `ask_once_per_session`.
 
@@ -115,20 +129,42 @@ successfully emitted. If audit persistence fails, approval submission fails
 closed and the grant is not usable. Approved resumption also fails closed when
 required audit emission fails before provider execution.
 
-## Future In-Band Provider Risks
+## Superseded Local Approval Broker Direction
 
-For future RustDesk, VNC, RDP, MeshCentral, BrowserBridge, or desktop/session
-providers, the following actions require explicit capability mapping and
-explainable approval before implementation:
+The local approval queue is not an authority model. The previous AgenticKVM
+Approval Broker v1 signed-grant direction is superseded by ACT for production
+clearance authority. File-backed storage is cache/UX state only.
 
-- keyboard and mouse control
-- clipboard read or write
-- file transfer
-- remote command execution
-- remote access agent install, update, or settings changes
-- privilege escalation
-- unattended control of production desktops
-- screenshot or stream capture when policy requires approval
+MCP may request clearance or deny clearance. MCP must never grant, approve,
+clear, sign, or trust a clearance.
 
-Approval must state whether the OS user is expected to be notified or involved
-when environment policy requires consent.
+## Local Broker CLI Surface Is Dev/Test Only
+
+Approval Broker v1 adds an operator-facing signed-cache surface:
+
+```bash
+agentickvm --broker-cache-path /explicit/temp/path/approvals.json approvals watch
+agentickvm --broker-cache-path /explicit/temp/path/approvals.json approvals allow <request-id> \
+  --operator-id <operator> \
+  --session-id <session> \
+  --target <target> \
+  --provider <provider> \
+  --capability <capability> \
+  --params-fingerprint <fingerprint> \
+  --risk-family <family> \
+  --expires-at <timestamp> \
+  --dev-signer
+agentickvm --broker-cache-path /explicit/temp/path/approvals.json approvals deny <request-id> \
+  --operator-id <operator>
+```
+
+The `allow` command is an operator surface, not an MCP tool. In this branch it
+uses a development/test HMAC signer only when `--dev-signer` is explicit. That
+signer is useful for local tests and compatibility checks, but it is not a
+production trust anchor if the agent can read the key material. Production
+clearance authority is ACT.
+
+The signed cache is written with explicit paths, atomic replacement, advisory
+locking, and `0600` file mode. The cache remains non-authoritative: editing the
+file cannot grant approval unless the signature and exact request binding still
+verify.

@@ -33,7 +33,9 @@
           <p class="hero-subtitle">
             AgenticKVM is a policy-controlled infrastructure control plane for
             AI-assisted machine observation, recovery, and operation across
-            KVM, BMC, and future remote-session providers.
+            KVM, BMC, PiKVM, Redfish, and other out-of-band provider surfaces.
+            Agentic Control Tower grants or denies clearance; AgenticKVM flies
+            the plane.
           </p>
           <div class="hero-actions" aria-label="Primary actions">
             <a class="button primary" href="#start">Read the docs</a>
@@ -41,13 +43,13 @@
             <a class="button" href="#safety">Explore the safety model</a>
           </div>
           <p class="beta-note">
-            Public beta candidate. Mock-first, live-provider gated, and not for
-            unattended production hardware use.
+            Public beta is deferred behind the killer demo: an agent recovering
+            a real wedged machine through the full ACT clearance chain.
           </p>
           <dl class="status-strip" aria-label="Current project status">
             <div>
-              <dt>Public beta</dt>
-              <dd>Candidate</dd>
+              <dt>Launch gate</dt>
+              <dd>Killer demo</dd>
             </div>
             <div>
               <dt>Live providers</dt>
@@ -68,7 +70,7 @@
           <ul class="check-list">
             <li>Out-of-band first</li>
             <li>Policy-controlled actions</li>
-            <li>Approval gates</li>
+              <li>ACT clearance gates</li>
             <li>Audit trail</li>
             <li>Mock-first provider development</li>
             <li>MCP-ready integration</li>
@@ -78,16 +80,16 @@
 
       <section class="section" id="beta">
         <div class="section-heading">
-          <p class="eyebrow">Public beta candidate</p>
-          <h2>What works today, and what is intentionally disabled.</h2>
+          <p class="eyebrow">Killer demo gated</p>
+          <h2>What works today, and what must exist before beta.</h2>
         </div>
         <div class="mini-grid">
           <article>
             <h3>Works today</h3>
             <ul>
               <li>Mock provider and fake/fixture observe paths</li>
-              <li>Policy, approval, audit, provider, and target registries</li>
-              <li>Local approval queue and operator console</li>
+              <li>Policy, audit, provider, and target registries</li>
+              <li>ACT clearance client boundary and local operator console</li>
               <li>SQLite audit backend v1 with explicit local paths</li>
               <li>Safe recovery playbooks through the control plane</li>
               <li>Release-quality scripts and mock-only CI</li>
@@ -100,7 +102,8 @@
               <li>PiKVM keyboard, mouse, paste, and hotkey input</li>
               <li>Live MCP server adoption</li>
               <li>Python MCP SDK dependency on mainline</li>
-              <li>RustDesk, VNC, RDP, MeshCentral, and browser/session providers</li>
+              <li>Public beta launch before a real approved recovery demo</li>
+              <li>In-band remote desktop/session providers</li>
               <li>Production external audit backend and SIEM integration</li>
             </ul>
           </article>
@@ -174,7 +177,7 @@
           <article class="card">
             <h3>Approval is first-class</h3>
             <p>
-              `approval_required` is a structured outcome, not an implicit grant.
+              `clearance_required` is a structured outcome, not an implicit grant.
               Gated actions wait for an explicit matching approval.
             </p>
           </article>
@@ -205,7 +208,12 @@
       <section class="section band" id="providers">
         <div class="section-heading">
           <p class="eyebrow">Provider roadmap</p>
-          <h2>Out-of-band providers are not the same as remote desktop providers.</h2>
+          <h2>AgenticKVM stays focused on out-of-band providers.</h2>
+          <p>
+            The future roadmap stays out-of-band: KVM, BMC, PiKVM, Redfish,
+            iLO, iDRAC, IPMI, Supermicro BMC, policy, approvals, audit, and
+            provider control.
+          </p>
         </div>
         <div class="provider-table" role="table" aria-label="Provider roadmap status">
           <div class="provider-row header" role="row">
@@ -227,17 +235,12 @@
             </div>
           </div>
           <div class="provider-row" role="row">
-            <div role="cell">In-band remote session</div>
-            <div role="cell">RustDesk, VNC, RDP, MeshCentral</div>
+            <div role="cell">Parked in-band/session scope</div>
+            <div role="cell">Remote desktop and browser/session providers</div>
             <div role="cell">
-              Future roadmap only. These depend on a running OS, service,
-              network path, and credential model.
+              Not on the AgenticKVM roadmap. May become a separate future
+              project that borrows the control plane.
             </div>
-          </div>
-          <div class="provider-row" role="row">
-            <div role="cell">Browser and session</div>
-            <div role="cell">BrowserBridge, desktop/session brokers</div>
-            <div role="cell">Future session-level provider family.</div>
           </div>
         </div>
       </section>
@@ -313,7 +316,7 @@ cd AgenticKVM</code></pre>
           </article>
           <article>
             <span>Future work</span>
-            <h3>Operator-reviewed live MCP server, observe-only real provider slices, in-band provider specs</h3>
+            <h3>ACT clearance client, official MCP SDK stdio server, live PiKVM observe, killer demo</h3>
           </article>
         </div>
       </section>

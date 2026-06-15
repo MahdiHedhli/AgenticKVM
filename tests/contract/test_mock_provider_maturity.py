@@ -122,7 +122,7 @@ def test_mock_provider_records_fake_input_events() -> None:
     typed = provider.execute_authorized(_provider_request("input.keyboard_type", text="hello"))
 
     assert key.data["input_events"][0]["parameters"]["key"] == "Enter"
-    assert typed.data["input_events"][-1]["parameters"]["text"] == "hello"
+    assert typed.data["input_events"][-1]["parameters"]["text"] == "[REDACTED]"
 
 
 def test_mock_provider_does_not_import_filesystem_or_network_clients() -> None:

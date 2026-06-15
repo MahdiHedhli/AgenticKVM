@@ -1,8 +1,8 @@
 # Public Beta Known Limitations
 
-This document describes the limits of the AgenticKVM public beta candidate. It
-is intentionally conservative so public users do not mistake roadmap or
-readiness work for implemented live-provider support.
+This document describes the limits of the AgenticKVM pre-beta state. Public
+beta is deferred behind the killer demo: an agent recovering a real wedged
+machine through the full ACT clearance chain.
 
 ## Live Providers
 
@@ -11,8 +11,8 @@ readiness work for implemented live-provider support.
 - Live Redfish network transport execution is deferred.
 - PiKVM input control against hardware is deferred.
 - Redfish mutation actions are not implemented.
-- RustDesk, VNC, RDP, MeshCentral, BrowserBridge, and desktop/session providers
-  remain roadmap-only.
+- In-band remote desktop/session providers are parked and are not on the
+  AgenticKVM roadmap.
 
 ## MCP Server And SDK
 
@@ -49,7 +49,7 @@ readiness work for implemented live-provider support.
 
 ## Production Use
 
-This beta candidate is not for unattended production hardware recovery. It is
+This pre-beta branch is not for unattended production hardware recovery. It is
 appropriate for:
 
 - reading specs and docs
@@ -57,6 +57,7 @@ appropriate for:
 - reviewing policy/approval/audit architecture
 - testing fake/fixture provider paths
 - reviewing release-quality gates
+- building toward the ACT clearance client boundary and the killer demo
 - planning future live-provider work
 
 Do not use this beta for:
@@ -68,3 +69,6 @@ Do not use this beta for:
   changes
 - storing secrets or raw credentials in config, issues, logs, audit exports, or
   release artifacts
+
+Do not treat mock-only conformance as a public launch criterion. The launch gate
+is a real, operator-approved out-of-band recovery demo.

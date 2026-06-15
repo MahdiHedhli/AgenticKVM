@@ -1563,3 +1563,160 @@
 - final validation: pending after this closeout commit
 - next recommended task: run final validation matrix, then ask a human
   maintainer to review `feature/public-beta-cutover` for merge readiness.
+
+## 2026-06-12T00:00:00-04:00
+
+- selected maturity level: Approval Broker v1 start
+- branch: `feature/approval-broker-v1`
+- starting point: branched from `feature/public-beta-cutover`
+- locked direction:
+  - AgenticKVM is out-of-band only; in-band remote desktop/session providers
+    move to the parking lot and are not on the AgenticKVM roadmap.
+  - Public beta is deferred behind the killer demo: an agent recovering a real
+    wedged machine through the full approval chain.
+  - Approval authority moves from file-backed queues to broker-owned signed
+    grants; storage is cache only and signatures are truth.
+- baseline checks before changes:
+  - `python3 scripts/check-package.py`: passed
+  - `python3 scripts/build-package.py`: passed with documented deferred build
+    status
+  - `python3 scripts/smoke-cli.py`: passed
+  - `python3 scripts/lint-sanity.py`: passed
+  - `python3 scripts/type-sanity.py`: passed
+  - `python3 scripts/validate-docs.py`: passed
+  - `python3 scripts/check-site.py`: passed
+  - `python3 scripts/check-public-beta.py`: passed
+  - `uv run --offline --with pytest --python python3.13 python -m pytest`:
+    575 passed
+- planned safe outputs:
+  - roadmap reset and Spec 007 parking lot
+  - Approval Broker v1 spec and contracts
+  - signed grant model, dev/test signer, verification, cache storage, short
+    code flow, notifier abstraction, and operator watch commands
+  - MCP approval verbs restricted to request/deny with no grant tool
+  - ControlPlane verifier for signed grants before provider execution
+  - host elicitation docs, conformance matrix, beta reset, and validation
+    updates
+
+## 2026-06-12T23:30:00-04:00
+
+- selected maturity level: Approval Broker v1 mock-safe implementation ready
+  for review
+- branch: `feature/approval-broker-v1`
+- completed:
+  - out-of-band-only roadmap reset and Spec 007 parking lot
+  - public beta deferred behind the killer demo
+  - Approval Broker v1 spec and contracts
+  - signed grant models and stable parameter fingerprints
+  - development/test signer abstraction and signed grant verifier
+  - signed approval cache with explicit path, atomic write, advisory lock, and
+    `0600` mode
+  - approval short-code and operator-message flow
+  - MCP approval tools restricted to request and deny
+  - ControlPlane signed grant verification before provider execution
+  - local out-of-band notifier payload model
+  - operator approval broker CLI watch, allow, and deny commands
+  - local file-backed approval queue changed to cache/UX state only
+  - conversational approval policy limits
+  - MCP elicitation capability model and host conformance matrix
+  - validation checks for parked in-band scope, deferred beta language, and no
+    MCP grant tool
+  - `docs/approval-broker-v1-review.md`
+- safety notes:
+  - real hardware touched: no
+  - live provider network calls made: no
+  - secrets touched: no
+  - live providers enabled by default: no
+  - SDK trial dependency added: no
+  - MCP grant tool added: no
+  - file-backed approval queue authority removed from CLI provider execution:
+    yes
+- final validation: pending after this closeout commit
+- next recommended task: review the broker trust-anchor design and implement a
+  production signer path before resuming official MCP SDK stdio server work.
+
+## 2026-06-13T00:00:00-04:00
+
+- selected maturity level: ACT clearance client boundary
+- branch: `feature/act-clearance-client-boundary`
+- starting point: branched from `feature/approval-broker-v1` at `4432434`
+- locked direction:
+  - AgenticKVM is a client aircraft of Agentic Control Tower.
+  - ACT owns clearance contract, signing, mobile approval, replay defense,
+    clearance audit, and operator channel.
+  - AgenticKVM owns capability resolution, local policy, provider/target safety,
+    provider execution, local audit, recovery behavior, and fail-closed behavior.
+  - AgenticKVM mirrors ACT clearance contract expectations until ACT publishes
+    the canonical contract; it does not author a competing wire contract or
+    proof format.
+- baseline checks before changes:
+  - `python3 scripts/check-package.py`: passed
+  - `python3 scripts/build-package.py`: passed with documented deferred build
+    status
+  - `python3 scripts/smoke-cli.py`: passed
+  - `python3 scripts/lint-sanity.py`: passed
+  - `python3 scripts/type-sanity.py`: passed
+  - `python3 scripts/validate-docs.py`: passed
+  - `python3 scripts/check-site.py`: passed
+  - `python3 scripts/check-public-beta.py`: passed
+  - `uv run --offline --with pytest --python python3.13 python -m pytest`:
+    617 passed
+- planned safe outputs:
+  - supersede local production broker authority with ACT clearance client docs
+  - ACT clearance client spec framed as a client-side mirror
+  - clearance request/response models with no local production proof format
+  - verification seam that fails closed outside mock/test proof verification
+  - ControlPlane route from approval-required policy to ACT clearance client
+  - MCP request-clearance and deny-only surface, with no grant/approve/clear
+    tools
+  - donor PiKVM port targets, roadmap reset, conformance matrix, validation
+    gates, and review docs
+
+## 2026-06-13T02:30:00-04:00
+
+- selected maturity level: ACT clearance client boundary complete
+- branch: `feature/act-clearance-client-boundary`
+- completed:
+  - local production broker direction superseded by ACT clearance authority
+  - ACT clearance client documentation and Spec 011
+  - clearance request/response models labeled as ACT client-side mirrors
+  - ACT client interface, mock ACT client, and fail-closed verification seam
+  - ControlPlane ACT clearance path for approval-required policy decisions
+  - MCP clearance verbs restricted to `request_clearance` and
+    `deny_clearance`
+  - `clearance_required` result contract with short code, risk summary,
+    operator message, retry guidance, and redacted params preview
+  - donor PiKVM cert-pinning, HID redaction, and screenshot mouse calibration
+    port targets recorded
+  - roadmap, site, public beta docs, and conformance matrix reset around the
+    ACT-cleared killer demo
+  - validation gates for ACT source-of-truth language, no MCP grant tools,
+    parked in-band scope, and donor port targets
+- safety notes:
+  - AgenticKVM production broker crypto duplicated: no
+  - clearance contract authored as AgenticKVM-owned: no
+  - proof/signature format invented locally: no
+  - local grant authority retained for production: no
+  - MCP grant path exists: no
+  - file queue authority exists: no
+  - timeout rule preserved: yes
+  - donor PiKVM port targets captured: yes
+  - real hardware touched: no
+  - live provider network calls made: no
+  - secrets touched: no
+  - SDK trial dependency added: no
+- final validation:
+  - `python3 scripts/check-package.py`: passed
+  - `python3 scripts/build-package.py`: passed with documented deferred build
+    status
+  - `python3 scripts/smoke-cli.py`: passed
+  - `python3 scripts/lint-sanity.py`: passed
+  - `python3 scripts/type-sanity.py`: passed
+  - `python3 scripts/validate-docs.py`: passed
+  - `python3 scripts/check-site.py`: passed
+  - `python3 scripts/check-public-beta.py`: passed
+  - `uv run --offline --with pytest --python python3.13 python -m pytest`:
+    633 passed
+- next recommended task: align the mirror models with ACT's canonical clearance
+  contract as soon as ACT publishes it, then implement the real ACT transport
+  and proof verifier behind the existing fail-closed seam.

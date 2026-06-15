@@ -1,8 +1,11 @@
 import inspect
 import json
+import stat
+from datetime import UTC, datetime, timedelta
 
 import agentickvm.cli.main as cli_module
 from agentickvm.cli import main
+from agentickvm.control_plane import SignedApprovalCache
 
 
 def _run(argv, capsys):
@@ -141,3 +144,124 @@ def test_cli_status_reports_local_operator_console_state(tmp_path, capsys) -> No
     assert payload["audit"]["hash_chain_valid"] is True
     assert payload["safety"]["live_providers_enabled_by_default"] is False
     assert payload["safety"]["network_listener"] is False
+
+
+def test_cli_broker_watch_reads_signed_cache_only(tmp_path, capsys) -> None:
+    cache_path = tmp_path / "signed-approvals.json"
+
+    exit_code, payload = _run(
+        ["--broker-cache-path", str(cache_path), "approvals", "watch"],
+        capsys,
+    )
+
+    assert exit_code == 0
+    assert payload["status"] == "ok"
+    assert payload["operator_surface"] == "approval_broker_cli"
+    assert payload["authority"] == "cache_only_signature_required"
+    assert payload["signed_grants"] == []
+    assert not cache_path.exists()
+
+
+def test_cli_broker_allow_requires_explicit_dev_signer(tmp_path, capsys) -> None:
+    cache_path = tmp_path / "signed-approvals.json"
+    expires_at = (datetime.now(UTC) + timedelta(minutes=5)).isoformat()
+
+    exit_code, payload = _run(
+        [
+            "--broker-cache-path",
+            str(cache_path),
+            "approvals",
+            "allow",
+            "request-1",
+            "--operator-id",
+            "operator",
+            "--session-id",
+            "session",
+            "--target",
+            "mock-host",
+            "--provider",
+            "mock",
+            "--capability",
+            "power.force_restart",
+            "--params-fingerprint",
+            "abc123",
+            "--risk-family",
+            "power",
+            "--expires-at",
+            expires_at,
+        ],
+        capsys,
+    )
+
+    assert exit_code == 2
+    assert payload["status"] == "validation_error"
+    assert "configured signer" in payload["reason"]
+    assert not cache_path.exists()
+
+
+def test_cli_broker_allow_writes_signed_grant_cache(tmp_path, capsys) -> None:
+    cache_path = tmp_path / "signed-approvals.json"
+    expires_at = (datetime.now(UTC) + timedelta(minutes=5)).isoformat()
+
+    exit_code, payload = _run(
+        [
+            "--broker-cache-path",
+            str(cache_path),
+            "approvals",
+            "allow",
+            "request-1",
+            "--operator-id",
+            "operator",
+            "--session-id",
+            "session",
+            "--target",
+            "mock-host",
+            "--provider",
+            "mock",
+            "--capability",
+            "power.force_restart",
+            "--params-fingerprint",
+            "abc123",
+            "--risk-family",
+            "power",
+            "--expires-at",
+            expires_at,
+            "--dev-signer",
+        ],
+        capsys,
+    )
+
+    assert exit_code == 0
+    assert payload["status"] == "approval_granted"
+    assert payload["operator_surface"] == "approval_broker_cli"
+    assert payload["production_authority"] is False
+    assert payload["grant"]["request_id"] == "request-1"
+    assert payload["grant"]["params_fingerprint"] == "abc123"
+    assert stat.S_IMODE(cache_path.stat().st_mode) == 0o600
+    grants = SignedApprovalCache(cache_path).read_signed_grants()
+    assert len(grants) == 1
+    assert grants[0].payload.capability == "power.force_restart"
+
+
+def test_cli_broker_deny_does_not_create_grant(tmp_path, capsys) -> None:
+    cache_path = tmp_path / "signed-approvals.json"
+
+    exit_code, payload = _run(
+        [
+            "--broker-cache-path",
+            str(cache_path),
+            "approvals",
+            "deny",
+            "request-1",
+            "--operator-id",
+            "operator",
+            "--reason",
+            "not safe",
+        ],
+        capsys,
+    )
+
+    assert exit_code == 0
+    assert payload["status"] == "approval_denied"
+    assert payload["approval"]["grant_created"] is False
+    assert not cache_path.exists()

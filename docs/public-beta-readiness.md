@@ -1,13 +1,14 @@
 # Public Beta Readiness
 
-This checklist defines what must be true before the
-`feature/agentickvm-next-10-integration` branch stack can be reviewed as a
-public beta candidate. It does not approve production operation or unattended
-live provider use.
+Public beta is deferred behind the killer demo: an agent recovering a real
+wedged machine through the full approval chain.
 
-## Current Beta Scope
+The existing release-quality checks remain useful preparation, but a mock-only
+conformance package is not the launch gate.
 
-Included in the beta candidate:
+## Current Pre-Beta Scope
+
+Available today as foundation work:
 
 - mock-first control plane, policy, approval, and audit flows
 - provider and target registries
@@ -20,13 +21,20 @@ Included in the beta candidate:
 - release-quality scripts and CI workflow
 - live-provider preflight gates
 
-Deferred from beta:
+Required before public beta:
+
+- Approval Broker v1 with broker-owned signed grants
+- out-of-band approval channel with signed Allow/Deny grants
+- official MCP SDK stdio server path after approval broker review
+- live PiKVM observe-only slice behind preflight and manual smoke gates
+- killer demo using the full approval chain against a real wedged machine
+
+Deferred from public beta and launch:
 
 - live PiKVM network transport execution
 - live Redfish network transport execution
 - live MCP server adoption
 - Python MCP SDK dependency on mainline
-- live remote desktop providers
 - PiKVM live input control
 - production external audit backend or SIEM integration
 
@@ -84,17 +92,19 @@ Automated tests must continue to block live-provider preflight.
 
 ## Human Decisions
 
-Before public beta merge:
+Before public beta launch:
 
-- confirm branch stack and merge order
+- confirm the killer demo evidence
+- confirm signed-grant approval broker behavior
+- confirm live PiKVM observe manual smoke results
 - review the public beta risk register
 - accept current local SQLite audit limitations
 - decide whether GitHub Pages should be enabled from Actions
 - confirm README/site wording
 - confirm rollback plan
-- decide whether this is a beta candidate or should remain held
+- decide whether public beta should proceed
 
 ## Current Recommendation
 
-Ready for human public beta merge review after all local checks and CI pass.
-Not ready for production operation or live-provider smoke.
+Hold public beta until the killer demo exists. Continue using this checklist for
+pre-beta readiness, docs accuracy, and release-quality validation.

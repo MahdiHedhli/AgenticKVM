@@ -75,7 +75,7 @@ def test_pikvm_fake_provider_executes_observe_only() -> None:
     assert result.ok is True
     assert result.performed_on_hardware is False
     assert result.data["fixture"] is True
-    assert result.data["screen"]["content"] == "PiKVM fixture screen"
+    assert result.data["screen"]["content"] == "[REDACTED]"
 
 
 def test_redfish_fake_provider_executes_observe_only() -> None:
