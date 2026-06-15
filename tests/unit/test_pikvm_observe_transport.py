@@ -87,7 +87,7 @@ def test_fake_pikvm_observe_transport_returns_fixture_observations() -> None:
     power = fake.get_power_state()
 
     assert health["health"] == "ok"
-    assert screen["content"] == "PiKVM fixture screen"
+    assert screen["content"] == "[REDACTED]"
     assert screenshot["artifact"]["target_id"] == "[REDACTED]"
     assert screenshot["raw_bytes_included"] is False
     assert power["power_state"] == "on"

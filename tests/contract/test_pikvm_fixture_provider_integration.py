@@ -70,7 +70,7 @@ def test_pikvm_observe_screen_runs_through_control_plane_and_fake_transport() ->
     assert result.status == ControlPlaneStatus.COMPLETED
     assert result.provider_result is not None
     assert result.provider_result.performed_on_hardware is False
-    assert result.provider_result.data["screen"]["content"] == "PiKVM fixture screen"
+    assert result.provider_result.data["screen"]["content"] == "[REDACTED]"
     assert len(provider.requests) == 1
     assert AuditEventType.PROVIDER_EXECUTION_STARTED in _event_types(sink)
     assert AuditEventType.PROVIDER_EXECUTION_COMPLETED in _event_types(sink)

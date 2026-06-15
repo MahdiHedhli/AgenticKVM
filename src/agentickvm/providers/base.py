@@ -12,6 +12,9 @@ from dataclasses import dataclass, field
 from types import MappingProxyType
 from typing import Any, Mapping
 
+from agentickvm.redaction import redact_mapping as redact_agentickvm_mapping
+from agentickvm.redaction import redact_value as redact_agentickvm_value
+
 
 @dataclass(frozen=True)
 class ProviderActionRequest:
@@ -27,14 +30,8 @@ class ProviderActionRequest:
     def redacted_parameters(self) -> Mapping[str, Any]:
         """Return parameters with obvious secret-shaped keys redacted."""
 
-        redacted: dict[str, Any] = {}
-        for key, value in self.parameters.items():
-            lowered = key.lower()
-            if "secret" in lowered or "password" in lowered or "token" in lowered:
-                redacted[key] = "[REDACTED]"
-            else:
-                redacted[key] = value
-        return MappingProxyType(redacted)
+        redacted, _ = redact_agentickvm_mapping(self.parameters)
+        return redacted
 
 
 @dataclass(frozen=True)
@@ -166,17 +163,4 @@ class Provider(ABC):
 
 
 def _redact_value(value: Any) -> Any:
-    if isinstance(value, Mapping):
-        redacted: dict[str, Any] = {}
-        for key, child in value.items():
-            lowered = str(key).lower()
-            if any(fragment in lowered for fragment in ("secret", "password", "token")):
-                redacted[str(key)] = "[REDACTED]"
-            else:
-                redacted[str(key)] = _redact_value(child)
-        return redacted
-    if isinstance(value, list):
-        return [_redact_value(item) for item in value]
-    if isinstance(value, tuple):
-        return tuple(_redact_value(item) for item in value)
-    return value
+    return redact_agentickvm_value(value).value

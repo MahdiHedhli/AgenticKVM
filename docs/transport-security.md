@@ -15,6 +15,8 @@ policy live transports must satisfy.
 - PiKVM fixture tests use `FakePiKVMObserveTransport`.
 - PiKVM cert-pinning tests use injected mock TLS/HTTP layers; no automated test
   calls a live PiKVM.
+- HID typed text and observed screen text are redacted by default in provider
+  results, audit records, and local result shapes.
 
 ## Timeouts
 
@@ -61,6 +63,22 @@ when paired with pinning. Without pinning, it is a misconfiguration.
   enabled by default.
 - PiKVM screenshot observations are sensitive artifacts; audit records metadata
   only and must not include raw image bytes.
+
+## HID And Screen Text Redaction
+
+Typed text and observed screen text can contain passwords, BIOS fields,
+recovery keys, MFA codes, and other operator secrets. AgenticKVM therefore
+redacts HID text and screen text by default before values enter audit records,
+logs, or result shapes.
+
+Full capture is allowed only through an explicit opt-in such as
+`PIKVM_FULL_CAPTURE` or an equivalent per-call posture flag. This posture is
+recorded as reduced protection in audit metadata. Full capture does not mean
+"capture everything": credential-class fields and token-shaped strings are
+still stripped by exact field policy plus entropy and secret-pattern backstops.
+
+Tests use only synthetic secret-shaped strings and never require real hardware
+or real credentials.
 
 ## Audit
 

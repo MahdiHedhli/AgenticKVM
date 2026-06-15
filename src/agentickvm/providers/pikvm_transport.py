@@ -29,6 +29,7 @@ from agentickvm.providers.transports import (
     TransportMethodNotAllowedError,
     TransportRouteNotFoundError,
 )
+from agentickvm.redaction import redact_value as redact_agentickvm_value
 
 PIKVM_HEALTH_PATH = "/api/health"
 PIKVM_SCREEN_STATE_PATH = "/api/screen-state"
@@ -390,29 +391,26 @@ def _validate_required(payload: Mapping[str, Any], required: tuple[str, ...]) ->
         )
 
 
-def redact_pikvm_observe_payload(value: Any) -> Any:
+def redact_pikvm_observe_payload(value: Any, *, full_capture: bool = False) -> Any:
     """Return a PiKVM-safe observe payload for results and audit metadata."""
 
     if isinstance(value, Mapping):
         redacted: dict[str, Any] = {}
         for key, child in value.items():
             lowered = str(key).lower()
-            if any(fragment in lowered for fragment in _SECRET_KEY_FRAGMENTS):
-                redacted[str(key)] = "[REDACTED]"
-            elif lowered != "raw_bytes_included" and (
+            if lowered != "raw_bytes_included" and (
                 "raw_bytes" in lowered or lowered in {"bytes", "image_bytes"}
             ):
                 redacted[str(key)] = "[REDACTED]"
             elif any(fragment in lowered for fragment in _TARGET_SENSITIVE_KEYS):
                 redacted[str(key)] = "[REDACTED]"
             else:
-                redacted[str(key)] = redact_pikvm_observe_payload(child)
-        return redacted
-    if isinstance(value, (list, tuple)):
-        return [redact_pikvm_observe_payload(item) for item in value]
-    if isinstance(value, bytes):
-        return "[REDACTED-BYTES]"
-    return value
+                redacted[str(key)] = redact_pikvm_observe_payload(
+                    child,
+                    full_capture=full_capture,
+                )
+        return redact_agentickvm_value(redacted, full_capture=full_capture).value
+    return redact_agentickvm_value(value, full_capture=full_capture).value
 
 
 def normalize_cert_fingerprint(value: str) -> str:

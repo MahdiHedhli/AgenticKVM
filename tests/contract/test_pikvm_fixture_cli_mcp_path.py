@@ -108,7 +108,7 @@ def test_cli_pikvm_fixture_observe_screen_and_power_state(capsys) -> None:
     assert screen["status"] == "ok"
     assert (
         screen["data"]["provider_result"]["data"]["screen"]["content"]
-        == "PiKVM fixture screen"
+        == "[REDACTED]"
     )
     assert screen["data"]["provider_result"]["data"]["screenshot"]["raw_bytes_included"] is False
     assert "keychain://" not in repr(screen)
