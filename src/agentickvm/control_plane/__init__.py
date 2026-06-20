@@ -180,9 +180,18 @@ from agentickvm.control_plane.act_client import (  # noqa: E402
     MockACTProofVerifier,
     cleared_response_for,
 )
+from agentickvm.control_plane.act_http_client import (  # noqa: E402
+    ACTHTTPClearanceClient,
+    ACTHTTPTransport,
+    UrllibACTHTTPTransport,
+    clearance_request_to_act_payload,
+)
 from agentickvm.control_plane.clearance import (  # noqa: E402
     ACT_AIRCRAFT_ID,
+    AIRCRAFT_RISK_FAMILIES,
+    CONTRACT_VERSION_V2,
     DEFAULT_CLEARANCE_TIMEOUT_SECONDS,
+    TOWER_RESOLVED_RISK_FAMILIES,
     ClearanceOperatorMessage,
     ClearanceParamsFingerprint,
     ClearanceRequest,
@@ -194,6 +203,7 @@ from agentickvm.control_plane.clearance import (  # noqa: E402
     ClearanceVerificationResult,
     build_clearance_request,
     build_operator_message,
+    clearance_response_from_act_payload,
 )
 from agentickvm.control_plane.fingerprints import (  # noqa: E402
     FingerprintError,
@@ -285,6 +295,14 @@ __all__ = [
     "TowerKeyRegistry",
     "build_clearance_proof_message",
     "verify_clearance_proof",
+    "ACTHTTPClearanceClient",
+    "ACTHTTPTransport",
+    "UrllibACTHTTPTransport",
+    "clearance_request_to_act_payload",
+    "clearance_response_from_act_payload",
+    "AIRCRAFT_RISK_FAMILIES",
+    "TOWER_RESOLVED_RISK_FAMILIES",
+    "CONTRACT_VERSION_V2",
     "Actor",
     "ActorType",
     "ApprovalGrant",

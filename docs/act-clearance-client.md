@@ -37,13 +37,29 @@ AgenticKVM owns:
 ## Contract Ownership
 
 The canonical clearance contract is owned by ACT. Any AgenticKVM model or spec
-that describes clearance request or response fields is a client-side mirror
-pending alignment with the canonical ACT contract. AgenticKVM must not author a
-competing clearance wire contract or invent a clearance-proof format.
+that describes clearance request or response fields is a client-side mirror of
+the canonical ACT contract.
+AgenticKVM must not author a competing clearance wire contract or invent a
+clearance-proof format.
 
-AgenticKVM must not author a competing clearance wire contract. When ACT
-publishes its contract, AgenticKVM alignment must be a field-mapping pass
-against that authoritative source.
+ACT has published the contract (`act.clearance.v2`): a versioned schema, the
+`ACT-CLEARANCE-PROOF-V1` Ed25519 proof format, and a committed verification
+vector. AgenticKVM has completed the field-mapping pass against that
+authoritative source. The real consume path is wired behind the fail-closed seam:
+
+- `control_plane.act_proof.ACTClearanceProofVerifier` verifies the tower's
+  Ed25519 proof (vendored pure-Python RFC 8032 verify; no third-party crypto
+  dependency, fully offline) and replaces the fail-closed
+  `ACTPendingProofVerifier`.
+- `control_plane.act_http_client.ACTHTTPClearanceClient` speaks the published
+  gateway approval endpoints with an injected HTTP transport and parses the
+  `act.clearance.v2` response, including target identity from the
+  `extensions.agentickvm` namespace.
+
+CI exercises no live network: the proof verifier is proven against the committed
+tower vector and the transport is faked. Default deployments stay fail-closed
+until an operator configures the tower public key(s) and gateway base URL. See
+[STATUS.md](../STATUS.md) for the full case report.
 
 ## Clearance Flow
 

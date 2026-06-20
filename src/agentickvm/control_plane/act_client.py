@@ -1,8 +1,12 @@
 """Client seam for Agentic Control Tower clearance.
 
 ACT is the source of truth for the canonical clearance request, response, and
-proof format. These interfaces consume a client-side mirror pending alignment
-with the canonical ACT spec; they are not an AgenticKVM-owned wire contract.
+proof format. These interfaces consume a client-side mirror aligned with the
+published ``act.clearance.v2`` contract.
+The mirror is not an AgenticKVM-owned wire contract.
+The fail-closed ``ACTPendingProofVerifier`` remains the default until an operator
+wires the real ``ACTClearanceProofVerifier`` (``act_proof``) and the real
+``ACTHTTPClearanceClient`` (``act_http_client``).
 """
 
 from __future__ import annotations
@@ -12,6 +16,7 @@ from datetime import UTC, datetime
 from typing import Mapping, Protocol
 
 from agentickvm.control_plane.clearance import (
+    AIRCRAFT_RISK_FAMILIES,
     ClearanceRequest,
     ClearanceResponse,
     ClearanceStatus,
@@ -121,28 +126,32 @@ class ACTClearanceVerifier:
                 reason="tower identity mismatch",
                 **base,
             )
-        mismatch = _first_mismatch(
-            {
-                "request_id": (response.request_id, request.request_id),
-                "session_id": (response.session_id, request.session_id),
-                "target": (response.target, request.target),
-                "provider": (response.provider, request.provider),
-                "capability": (response.capability, request.capability),
-                "params_fingerprint": (
-                    response.params_fingerprint,
-                    request.params_fingerprint,
-                ),
-                "risk_family": (
-                    response.risk_family.value,
-                    request.risk_summary.risk_family.value,
-                ),
-                "short_code": (response.short_code, request.short_code),
-                "audit_correlation_id": (
-                    response.audit_correlation_id,
-                    request.audit_correlation_id,
-                ),
-            }
-        )
+        checks = {
+            "request_id": (response.request_id, request.request_id),
+            "session_id": (response.session_id, request.session_id),
+            "target": (response.target, request.target),
+            "provider": (response.provider, request.provider),
+            "capability": (response.capability, request.capability),
+            "params_fingerprint": (
+                response.params_fingerprint,
+                request.params_fingerprint,
+            ),
+            "short_code": (response.short_code, request.short_code),
+            "audit_correlation_id": (
+                response.audit_correlation_id,
+                request.audit_correlation_id,
+            ),
+        }
+        # ACT owns risk-family resolution and binds it cryptographically in the
+        # proof. Only enforce request/response equality when ACT echoed the
+        # aircraft's coarse family; a tower-resolved act.clearance.v2 family is
+        # authoritative and is verified through the proof, not by string equality.
+        if response.risk_family in AIRCRAFT_RISK_FAMILIES:
+            checks["risk_family"] = (
+                response.risk_family.value,
+                request.risk_summary.risk_family.value,
+            )
+        mismatch = _first_mismatch(checks)
         if mismatch is not None:
             return ClearanceVerificationResult(
                 valid=False,

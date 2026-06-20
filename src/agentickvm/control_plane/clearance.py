@@ -1,8 +1,10 @@
 """Client-side mirror of the Agentic Control Tower clearance contract.
 
 ACT is the source of truth for the canonical clearance request, response, and
-proof format. These models are AgenticKVM client mirrors pending alignment with
-the canonical ACT spec; they are not an AgenticKVM-owned wire contract.
+proof format. These models mirror the published ``act.clearance.v2`` contract
+(see the Tower's ``contracts/clearance/``); they are an AgenticKVM client mirror,
+not an AgenticKVM-owned wire contract. Real proof verification lives in
+``act_proof`` and the real transport client in ``act_http_client``.
 """
 
 from __future__ import annotations
@@ -20,13 +22,55 @@ from agentickvm.control_plane.fingerprints import fingerprint_parameters
 
 ACT_AIRCRAFT_ID = "AgenticKVM"
 DEFAULT_CLEARANCE_TIMEOUT_SECONDS = 20
+CONTRACT_VERSION_V2 = "act.clearance.v2"
 
 
 class ClearanceRiskFamily(StrEnum):
-    """ACT-mirrored risk-family labels assigned by the AgenticKVM aircraft."""
+    """ACT-mirrored risk-family labels.
 
+    AgenticKVM (the aircraft) only assigns the coarse ``low_risk`` / ``high_risk``
+    labels -- it never derives the operator channel or tier. ACT owns risk-family
+    resolution and may return one of the fine-grained ``act.clearance.v2``
+    families, which are mirrored here so real tower responses parse and verify.
+    """
+
+    # Aircraft-assigned coarse labels.
     LOW_RISK = "low_risk"
     HIGH_RISK = "high_risk"
+    # Tower-resolved act.clearance.v2 families (ACT owns resolution).
+    OBSERVE = "observe"
+    READ_ONLY = "read_only"
+    ROUTINE = "routine"
+    EXTERNAL_EFFECT = "external_effect"
+    DESTRUCTIVE = "destructive"
+    CREDENTIAL_OR_SECRET = "credential_or_secret"
+    SAFETY_CRITICAL = "safety_critical"
+    IRREVERSIBLE = "irreversible"
+
+
+AIRCRAFT_RISK_FAMILIES = frozenset({ClearanceRiskFamily.LOW_RISK, ClearanceRiskFamily.HIGH_RISK})
+TOWER_RESOLVED_RISK_FAMILIES = frozenset(
+    {
+        ClearanceRiskFamily.OBSERVE,
+        ClearanceRiskFamily.READ_ONLY,
+        ClearanceRiskFamily.ROUTINE,
+        ClearanceRiskFamily.EXTERNAL_EFFECT,
+        ClearanceRiskFamily.DESTRUCTIVE,
+        ClearanceRiskFamily.CREDENTIAL_OR_SECRET,
+        ClearanceRiskFamily.SAFETY_CRITICAL,
+        ClearanceRiskFamily.IRREVERSIBLE,
+    }
+)
+
+# ACT clearance state -> AgenticKVM mirror status (see the Tower contract README).
+_ACT_STATE_TO_STATUS = {
+    "pending": "clearance_required",
+    "approved": "cleared",
+    "denied": "denied",
+    "expired": "expired",
+    # ``cancelled`` has no AgenticKVM mirror; treat it as not-cleared (fail closed).
+    "cancelled": "denied",
+}
 
 
 class ClearanceParamsFingerprint(str):
@@ -189,6 +233,8 @@ class ClearanceResponse:
     audit_correlation_id: str = ""
     operator_message: ClearanceOperatorMessage | str = ""
     reason: str = ""
+    contract_version: str = CONTRACT_VERSION_V2
+    bound_material: Mapping[str, str] | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(
@@ -208,6 +254,10 @@ class ClearanceResponse:
             raise ValueError("clearance response expiry must be timezone-aware")
         if self.proof is not None:
             object.__setattr__(self, "proof", MappingProxyType(dict(self.proof)))
+        if self.bound_material is not None:
+            object.__setattr__(
+                self, "bound_material", MappingProxyType(dict(self.bound_material))
+            )
 
     def to_dict(self) -> dict[str, Any]:
         """Return a JSON-safe ACT clearance response mirror."""
@@ -230,6 +280,7 @@ class ClearanceResponse:
             "audit_correlation_id": self.audit_correlation_id,
             "operator_message": self.operator_message,
             "reason": self.reason,
+            "contract_version": self.contract_version,
         }
 
 
@@ -350,3 +401,80 @@ def _risk_family(value: ClearanceRiskFamily | str) -> ClearanceRiskFamily:
         return ClearanceRiskFamily(str(value))
     except ValueError as exc:
         raise ValueError(f"unknown clearance risk_family: {value}") from exc
+
+
+def _parse_act_datetime(value: str) -> datetime:
+    text = str(value)
+    if text.endswith("Z"):
+        text = text[:-1] + "+00:00"
+    return datetime.fromisoformat(text)
+
+
+def clearance_response_from_act_payload(payload: Mapping[str, Any]) -> ClearanceResponse:
+    """Parse a published ``act.clearance.v2`` response into the mirror model.
+
+    Maps the ACT clearance ``state`` to the AgenticKVM mirror status, resolves
+    target identity from the core field or the ``extensions.agentickvm``
+    namespace, and preserves the exact wire strings ACT signed as
+    ``bound_material`` so the Ed25519 proof can be verified byte-for-byte.
+    """
+
+    if not isinstance(payload, Mapping):
+        raise ValueError("ACT clearance payload must be an object")
+
+    act_state = str(payload.get("state", "")).lower()
+    status_value = _ACT_STATE_TO_STATUS.get(act_state)
+    status = (
+        ClearanceStatus(status_value)
+        if status_value is not None
+        else ClearanceStatus.VERIFICATION_FAILED
+    )
+
+    request_id = str(payload.get("request_id") or payload.get("approval_id") or "")
+    extensions = payload.get("extensions")
+    akvm = extensions.get("agentickvm") if isinstance(extensions, Mapping) else None
+    akvm = akvm if isinstance(akvm, Mapping) else {}
+
+    target = payload.get("target") or akvm.get("target") or ""
+    provider = payload.get("provider") or akvm.get("provider") or ""
+    capability = payload.get("capability") or akvm.get("capability") or ""
+
+    expires_at_raw = payload.get("expires_at")
+    expires_at = _parse_act_datetime(expires_at_raw) if expires_at_raw else None
+
+    proof = payload.get("proof")
+    proof = proof if isinstance(proof, Mapping) else None
+    contract_version = str(payload.get("contract_version", CONTRACT_VERSION_V2))
+
+    bound_material = None
+    if proof is not None:
+        bound_material = {
+            "approval_id": str(payload.get("approval_id") or request_id),
+            "params_fingerprint": str(payload.get("params_fingerprint", "")),
+            "short_code": str(payload.get("short_code", "")),
+            "risk_family": str(payload.get("risk_family", "")),
+            "expires_at": str(expires_at_raw or ""),
+            "tower_id": str(payload.get("tower_id", "")),
+            "contract_version": contract_version,
+            "extensions_digest": str(proof.get("extensions_digest", "")),
+        }
+
+    return ClearanceResponse(
+        status=status,
+        request_id=request_id,
+        session_id=str(payload.get("session_id") or ""),
+        target=str(target),
+        provider=str(provider),
+        capability=str(capability),
+        params_fingerprint=str(payload.get("params_fingerprint", "")),
+        risk_family=str(payload.get("risk_family", "")),
+        short_code=str(payload.get("short_code", "")),
+        expires_at=expires_at,
+        tower_id=payload.get("tower_id"),
+        proof=proof,
+        audit_correlation_id=str(payload.get("audit_correlation_id") or ""),
+        operator_message=str(payload.get("operator_message") or ""),
+        reason=str(payload.get("reason") or ""),
+        contract_version=contract_version,
+        bound_material=bound_material,
+    )
