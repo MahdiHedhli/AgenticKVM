@@ -44,6 +44,12 @@ from agentickvm.control_plane.capabilities import (
     CapabilityRegistry,
     DEFAULT_CAPABILITY_REGISTRY,
 )
+from agentickvm.control_plane.auth_channel import (
+    DEFAULT_AUTH_CHANNEL,
+    AuthChannel,
+    AuthChannelSelection,
+    resolve_auth_channel,
+)
 from agentickvm.control_plane.decisions import PolicyDecision
 from agentickvm.control_plane.policy import CapabilityPolicy, PolicyDecisionResult
 from agentickvm.control_plane.risk_families import clearance_risk_family_for_capability
@@ -112,6 +118,7 @@ class ControlPlane:
         clearance_client: ClearanceClient | None = None,
         clearance_verifier: ACTClearanceVerifier | None = None,
         clearance_timeout_seconds: int = DEFAULT_CLEARANCE_TIMEOUT_SECONDS,
+        auth_channel: AuthChannel | str = DEFAULT_AUTH_CHANNEL,
     ) -> None:
         self.policy = policy
         self.provider = provider
@@ -123,6 +130,8 @@ class ControlPlane:
         self.clearance_client = clearance_client
         self.clearance_verifier = clearance_verifier
         self.clearance_timeout_seconds = clearance_timeout_seconds
+        self.auth_channel_selection: AuthChannelSelection = resolve_auth_channel(auth_channel)
+        self.auth_channel: AuthChannel = self.auth_channel_selection.channel
         self._consumed_signed_grant_ids: set[str] = set()
 
     def handle(self, request: CapabilityRequest) -> ControlPlaneResult:
@@ -205,7 +214,14 @@ class ControlPlane:
         if decision.requires_approval:
             if capability is None:
                 raise RuntimeError("Unknown capabilities cannot require approval")
-            if self.clearance_client is not None:
+            # Route the clearance step by the selected auth channel. mobile_signed
+            # (the recommended default) clears through ACT when a clearance client
+            # is wired; local_terminal is the explicit opt-out and always clears
+            # through the local signed-grant broker even if an ACT client exists.
+            if (
+                self.auth_channel == AuthChannel.MOBILE_SIGNED
+                and self.clearance_client is not None
+            ):
                 return self._handle_act_clearance(
                     request=request,
                     capability=capability,
@@ -259,7 +275,10 @@ class ControlPlane:
                 request=request,
                 capability_ref=capability_ref,
                 policy_decision=decision.decision,
-                approval_payload=approval_request.to_dict(),
+                approval_payload={
+                    **approval_request.to_dict(),
+                    "auth_channel": self.auth_channel_selection.to_dict(),
+                },
                 material_risks=decision.material_risks,
             )
             self._emit_result_returned(
@@ -320,6 +339,7 @@ class ControlPlane:
                 "clearance_request": clearance_request.to_dict(),
                 "authority": "Agentic Control Tower",
                 "contract_source": "ACT",
+                "auth_channel": self.auth_channel_selection.to_dict(),
             },
             material_risks=decision.material_risks,
         )

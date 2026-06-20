@@ -17,6 +17,25 @@ that editable local files are not authority. Production clearance comes from ACT
 Operator approval is required when policy returns `ask_each_time` or
 `ask_once_per_session`.
 
+## Selectable Auth Channel
+
+When approval is required, the clearance step is routed by a selectable
+authorization channel. The channel is set with `auth_channel` in config or
+`--auth-channel` on the CLI, and defaults to the recommended channel.
+
+- `mobile_signed` (default, recommended): clearance is granted off-device
+  through ACT mobile approval. This is the supported production path.
+- `local_terminal` (selectable opt-out): clearance is granted by the local
+  signed-grant broker on the same host as the agent. It is less secure and less
+  supported than `mobile_signed`; choosing it surfaces a warning in the CLI and
+  status output and records the choice in the approval audit record.
+
+Routing is explicit: `mobile_signed` clears through the ACT clearance client
+when one is wired, while `local_terminal` always clears through the local broker
+even if an ACT client is configured. Unknown channel values are rejected
+(fail-closed); the selection never silently downgrades to a weaker authority.
+This is selection structure only -- risk tiering remains owned by the Tower.
+
 ## Approval Prompt Requirements
 
 An approval prompt must explain:

@@ -103,6 +103,15 @@ from agentickvm.control_plane.decisions import (  # noqa: E402
     ControlMode,
     PolicyDecision,
 )
+from agentickvm.control_plane.auth_channel import (  # noqa: E402
+    AuthChannel,
+    AuthChannelError,
+    AuthChannelSelection,
+    DEFAULT_AUTH_CHANNEL,
+    LOCAL_TERMINAL_WARNING,
+    RECOMMENDED_AUTH_CHANNEL,
+    resolve_auth_channel,
+)
 from agentickvm.control_plane.policy import (  # noqa: E402
     CapabilityPolicy,
     PolicyDecisionResult,
@@ -253,6 +262,13 @@ __all__ = [
     "ACT_AIRCRAFT_ID",
     "ACTClearanceVerifier",
     "ACTPendingProofVerifier",
+    "AuthChannel",
+    "AuthChannelError",
+    "AuthChannelSelection",
+    "DEFAULT_AUTH_CHANNEL",
+    "LOCAL_TERMINAL_WARNING",
+    "RECOMMENDED_AUTH_CHANNEL",
+    "resolve_auth_channel",
     "Actor",
     "ActorType",
     "ApprovalGrant",

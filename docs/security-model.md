@@ -19,6 +19,11 @@ approval, scope, provider contracts, audit, and tests.
   clearance. AgenticKVM consumes ACT clearance as a client and does not own the
   clearance contract, proof format, mobile approval channel, replay defense, or
   production signing.
+- The clearance step runs through a selectable auth channel. `mobile_signed`
+  (ACT, the recommended default) is the supported authority; `local_terminal`
+  is a selectable opt-out routed to the local signed-grant broker, warned as
+  less secure and less supported, and recorded in the audit trail. Unknown
+  channels fail closed; the selection never silently downgrades authority.
 - Providers are execution adapters, not trust anchors.
 - Provider and target registries are validation gates, not permission grants.
 - Audit is mandatory evidence.

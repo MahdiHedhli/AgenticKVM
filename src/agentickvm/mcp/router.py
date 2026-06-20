@@ -7,12 +7,14 @@ from agentickvm.control_plane import (
     Actor,
     ActorType,
     ApprovalStore,
+    AuthChannel,
     CapabilityRef,
     CapabilityPolicy,
     CapabilityRegistry,
     CapabilityRequest,
     ClearanceClient,
     ControlPlane,
+    DEFAULT_AUTH_CHANNEL,
     ControlPlaneResult,
     ControlPlaneStatus,
     DEFAULT_CAPABILITY_REGISTRY,
@@ -49,6 +51,7 @@ class MCPRouter:
         clearance_client: ClearanceClient | None = None,
         clearance_verifier: ACTClearanceVerifier | None = None,
         clearance_timeout_seconds: int = 20,
+        auth_channel: AuthChannel | str = DEFAULT_AUTH_CHANNEL,
         registry: MCPToolRegistry = DEFAULT_MCP_TOOL_REGISTRY,
         capability_registry: CapabilityRegistry = DEFAULT_CAPABILITY_REGISTRY,
         control_plane_factory: type[ControlPlane] = ControlPlane,
@@ -61,6 +64,7 @@ class MCPRouter:
         self.clearance_client = clearance_client
         self.clearance_verifier = clearance_verifier
         self.clearance_timeout_seconds = clearance_timeout_seconds
+        self.auth_channel = auth_channel
         self.registry = registry
         self.capability_registry = capability_registry
         self.control_plane_factory = control_plane_factory
@@ -160,6 +164,7 @@ class MCPRouter:
             clearance_client=self.clearance_client,
             clearance_verifier=self.clearance_verifier,
             clearance_timeout_seconds=self.clearance_timeout_seconds,
+            auth_channel=self.auth_channel,
         )
         try:
             result: ControlPlaneResult = control_plane.handle(capability_request)

@@ -26,6 +26,7 @@ from agentickvm.control_plane import (
     inspect_sqlite_audit_event,
     list_sqlite_audit_events,
     mode_preset,
+    resolve_auth_channel,
     verify_audit_chain,
     verify_sqlite_audit_chain,
 )
@@ -58,6 +59,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             audit_sink=audit_sink,
             approval_store=None,
         )
+        # CLI --auth-channel overrides the configured channel; otherwise use the
+        # config selection (default mobile_signed / ACT).
+        auth_selection = resolve_auth_channel(
+            args.auth_channel
+            if getattr(args, "auth_channel", None)
+            else runtime.config.auth_channel
+        )
         if args.command == "list-providers":
             _print_json(_providers_payload(runtime))
             return 0
@@ -71,13 +79,14 @@ def main(argv: Sequence[str] | None = None) -> int:
                     approval_queue,
                     args.audit_path,
                     args.audit_sqlite_path,
+                    auth_selection,
                 )
             )
             return 0
         if args.command == "playbooks":
             return _playbooks(args, runtime)
         if args.command == "call":
-            return _call(args, runtime, approval_queue)
+            return _call(args, runtime, approval_queue, auth_selection)
     except Exception as exc:  # noqa: BLE001 - CLI must return structured failures.
         _print_json({"status": "validation_error", "reason": str(exc)})
         return 2
@@ -90,6 +99,7 @@ def _call(
     args: argparse.Namespace,
     runtime: Any,
     approval_queue: LocalApprovalQueue | None,
+    auth_selection: Any,
 ) -> int:
     policy = runtime.policy
     if args.mode is not None:
@@ -101,6 +111,7 @@ def _call(
         policy=policy,
         audit_sink=runtime.audit_sink,
         approval_store=runtime.approval_store,
+        auth_channel=auth_selection.channel,
     )
     result = router.handle_tool_request(
         MCPToolRequest(
@@ -115,6 +126,7 @@ def _call(
         )
     )
     payload = result.to_dict()
+    payload["auth_channel"] = auth_selection.to_dict()
     if approval_queue is not None and result.status == MCPResultStatus.APPROVAL_REQUIRED:
         queued = approval_queue.enqueue_mcp_result(payload)
         payload["approval_queue"] = {
@@ -153,6 +165,15 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--audit-sqlite-path",
         help="Explicit local SQLite audit path.",
+    )
+    parser.add_argument(
+        "--auth-channel",
+        choices=["mobile_signed", "local_terminal"],
+        default=None,
+        help=(
+            "Override the operator auth channel. mobile_signed (ACT) is the "
+            "recommended default; local_terminal is a less-secure opt-out."
+        ),
     )
     subparsers = parser.add_subparsers(dest="command")
 
@@ -607,6 +628,7 @@ def _status_payload(
     approval_queue: LocalApprovalQueue | None,
     audit_path: str | None,
     audit_sqlite_path: str | None,
+    auth_selection: Any,
 ) -> dict[str, Any]:
     providers = [dict(item) for item in runtime.provider_registry.list_summaries()]
     targets = [dict(item) for item in runtime.target_registry.list_summaries()]
@@ -618,6 +640,7 @@ def _status_payload(
     payload: dict[str, Any] = {
         "status": "ok",
         "mode": runtime.policy.mode.value,
+        "auth_channel": auth_selection.to_dict(),
         "providers": providers,
         "targets": targets,
         "pending_approvals": [],

@@ -7,6 +7,12 @@ from types import MappingProxyType
 from typing import Any, Mapping
 
 from agentickvm.control_plane.decisions import ControlMode, normalize_control_mode
+from agentickvm.control_plane.auth_channel import (
+    DEFAULT_AUTH_CHANNEL,
+    AuthChannel,
+    AuthChannelSelection,
+    resolve_auth_channel,
+)
 from agentickvm.config.validation import validate_credential_reference
 from agentickvm.providers.registry import KNOWN_PROVIDER_TYPES
 
@@ -70,9 +76,21 @@ class AgenticKVMConfig:
     providers: tuple[ProviderConfig, ...]
     targets: tuple[TargetConfig, ...]
     default_policy_mode: ControlMode = ControlMode.SUPERVISED
+    auth_channel: AuthChannel = DEFAULT_AUTH_CHANNEL
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "default_policy_mode", normalize_control_mode(self.default_policy_mode))
+        # resolve_auth_channel fails closed on unknown channels rather than
+        # silently falling back to a weaker authority.
+        object.__setattr__(
+            self, "auth_channel", resolve_auth_channel(self.auth_channel).channel
+        )
+
+    @property
+    def auth_channel_selection(self) -> AuthChannelSelection:
+        """Return the resolved, audit-friendly auth-channel selection."""
+
+        return resolve_auth_channel(self.auth_channel)
 
 
 __all__ = [

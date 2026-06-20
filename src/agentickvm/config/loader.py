@@ -24,11 +24,13 @@ from agentickvm.config.validation import (
 from agentickvm.control_plane import (
     ApprovalStore,
     AuditSink,
+    AuthChannelError,
     CapabilityPolicy,
     InMemoryAuditSink,
     TargetDefinition,
     TargetRegistry,
     mode_preset,
+    resolve_auth_channel,
 )
 from agentickvm.providers import (
     MockProvider,
@@ -118,11 +120,18 @@ def config_from_mapping(raw: Mapping[str, Any]) -> AgenticKVMConfig:
     if not isinstance(default_policy, Mapping):
         raise ConfigValidationError("default_policy must be an object")
 
+    raw_auth_channel = raw.get("auth_channel", default_policy.get("auth_channel"))
+    try:
+        auth_channel = resolve_auth_channel(raw_auth_channel).channel
+    except AuthChannelError as exc:
+        raise ConfigValidationError(str(exc)) from exc
+
     config = AgenticKVMConfig(
         version=str(raw.get("version", "0.1")),
         providers=providers,
         targets=targets,
         default_policy_mode=str(default_policy.get("mode", "Supervised")),
+        auth_channel=auth_channel,
     )
     build_provider_registry(config)
     build_target_registry(config, build_provider_registry(config))

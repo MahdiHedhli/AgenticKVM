@@ -99,6 +99,22 @@ The CLI supports safe mock/fixture workflows:
 - redacted operator previews
 - audit events for approval lifecycle
 
+### Selectable Auth Channel
+
+The clearance step runs through a selectable authorization channel:
+
+- `mobile_signed` (default, **recommended**) clears through Agentic Control
+  Tower (ACT) mobile approval.
+- `local_terminal` is a **selectable opt-out** that clears through the local
+  signed-grant broker on the agent host. It is less secure and less supported,
+  and the CLI/status output and audit trail carry an explicit warning.
+
+Select the channel with `auth_channel: mobile_signed | local_terminal` in
+config (or `--auth-channel` on the CLI). Unknown values are rejected; selection
+fails closed to the recommended channel only when nothing is configured. The
+selected channel is recorded in the approval audit record. Risk tiering is owned
+by the Tower and is not decided here.
+
 ### Audit
 
 - local JSONL audit sink

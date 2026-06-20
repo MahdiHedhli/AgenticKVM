@@ -74,12 +74,27 @@ If a capability has no explicit AgenticKVM mapping, the aircraft labels it
 default failure mode. ACT still owns channel and tier decisions, including any
 mobile-mandatory requirement.
 
+## Selectable Auth Channel
+
+The clearance step is routed by a selected authorization channel
+(`auth_channel`, default `mobile_signed`):
+
+- `mobile_signed` clears through the ACT clearance client (the recommended,
+  production path).
+- `local_terminal` is a selectable opt-out that clears through the local
+  signed-grant broker even if an ACT client is configured. It is warned as less
+  secure and less supported, and the selection is written to the approval audit
+  record.
+
+The channel selects *which authority clears*; it does not change risk tiering,
+which remains owned by the Tower. Unknown channels fail closed.
+
 ## Local Broker Work
 
 Earlier local signed-grant broker work is superseded for production clearance
-authority. Local signing and cache scaffolds may remain only as dev/test
-fixtures or compatibility tests proving that editable local files are not
-authority. Production clearance comes from ACT.
+authority. It is retained as the `local_terminal` opt-out channel above and as
+dev/test fixtures or compatibility tests proving that editable local files are
+not authority. Production clearance comes from ACT via `mobile_signed`.
 
 ## MCP Surface
 
