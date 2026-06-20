@@ -1765,3 +1765,38 @@
     670 passed (baseline 650 + 9 actuation-clearance + 11 live-validation harness)
 - next recommended task: implement selectable mobile_signed (ACT) /
   local_terminal auth channel selection (C2).
+
+## 2026-06-20T07:00:00Z
+
+- selected task: full mock-only QA suite -- end-to-end process/routine coverage
+  (C4) on top of the selectable-auth (C2) and real ACT consume seam (C3) work
+- branch sequence since the reconciliation baseline (all gated green):
+  - C2 `feat: add selectable ACT/local-terminal auth path`
+  - C3a `feat: add real ACT Ed25519 clearance proof verifier`
+  - C3b `feat: wire real ACT clearance transport and v2 response parsing`
+- ACT contract case: CASE A (pinnable). ACT published `act.clearance.v2` (schema,
+  `ACT-CLEARANCE-PROOF-V1` Ed25519 proof, committed vector, live gateway). The
+  real proof verifier and HTTP transport are wired behind the fail-closed seam;
+  CI verifies the committed tower vector and a faked transport with no live
+  network. See STATUS.md.
+- C4 added `tests/process/`: end-to-end mock-cleared actuation through the MCP
+  router (executes on fixtures only, `performed_on_hardware: False`), pending and
+  denied clearances fail closed, HID text redaction, local_terminal opt-out
+  routing to the local broker, an observe + fail-closed routine, and a CLI
+  happy-path smoke routine including the auth-channel surface.
+- safety posture: real hardware touched: no; live provider network calls in CI:
+  no; secrets touched: no; HID text/credential refs redacted.
+- final validation:
+  - `python3 scripts/check-package.py`: passed
+  - `python3 scripts/build-package.py`: passed
+  - `python3 scripts/smoke-cli.py`: passed
+  - `python3 scripts/lint-sanity.py`: passed
+  - `python3 scripts/type-sanity.py`: passed
+  - `python3 scripts/validate-docs.py`: passed
+  - `python3 scripts/check-site.py`: passed
+  - `python3 scripts/check-public-beta.py`: passed
+  - `uv run --offline --with pytest --python python3.13 python -m pytest`:
+    714 passed (670 -> +14 auth-channel, +16 ACT proof/transport, +14 process
+    routines, with the reconciliation baseline at 650)
+- next recommended task: operator-run live validation (supervised PiKVM, read-only
+  BMC, and live ACT gateway end-to-end with params-fingerprint parity).

@@ -24,6 +24,9 @@ Release candidates should keep focused coverage over:
 - mock provider behavior
 - fake PiKVM and Redfish observe paths
 - CLI mock and fixture paths
+- end-to-end process/routine suite (observe, mock-cleared actuation, redaction,
+  fail-closed, and selectable auth-channel routing)
+- real ACT clearance proof verification against the committed tower vector
 - workflow safety checks
 - docs/spec/site safety checks
 - release safety regressions
@@ -41,6 +44,8 @@ Before release, tests must prove:
 - live provider placeholders cannot execute
 - live provider configs are rejected by default
 - CLI/MCP/host paths preserve `ControlPlane`
+- mock-cleared actuation runs only on fixtures and never claims a hardware action
+- the selected auth channel routes the clearance step and surfaces its warning
 - public site/docs avoid live-support overclaims
 - CI and Pages workflows do not require secrets or live provider targets
 
