@@ -112,6 +112,15 @@ from agentickvm.control_plane.auth_channel import (  # noqa: E402
     RECOMMENDED_AUTH_CHANNEL,
     resolve_auth_channel,
 )
+from agentickvm.control_plane.act_proof import (  # noqa: E402
+    ACT_PROOF_CANONICALIZATION,
+    ACTClearanceProofVerifier,
+    ACTProofError,
+    SUPPORTED_CONTRACT_VERSIONS,
+    TowerKeyRegistry,
+    build_clearance_proof_message,
+    verify_clearance_proof,
+)
 from agentickvm.control_plane.policy import (  # noqa: E402
     CapabilityPolicy,
     PolicyDecisionResult,
@@ -269,6 +278,13 @@ __all__ = [
     "LOCAL_TERMINAL_WARNING",
     "RECOMMENDED_AUTH_CHANNEL",
     "resolve_auth_channel",
+    "ACT_PROOF_CANONICALIZATION",
+    "ACTClearanceProofVerifier",
+    "ACTProofError",
+    "SUPPORTED_CONTRACT_VERSIONS",
+    "TowerKeyRegistry",
+    "build_clearance_proof_message",
+    "verify_clearance_proof",
     "Actor",
     "ActorType",
     "ApprovalGrant",
