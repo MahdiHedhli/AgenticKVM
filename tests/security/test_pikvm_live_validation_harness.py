@@ -1,25 +1,14 @@
-"""Mock-only coverage for the supervised PiKVM live-validation harness.
-
-The harness in ``agentickvm.live_validation`` supports operator-run validation
-against real hardware. CI must never contact a device, so these tests inject a
-fake TLS probe and exercise only the pure logic: precondition hygiene,
-credential-reference redaction, certificate-pinning preflight (match vs.
-mismatch), and the human-checkpoint gate between stages.
-
-No socket is opened and no credential is resolved anywhere in this module.
-"""
-
 from __future__ import annotations
 
 import json
+import subprocess
+import sys
+from pathlib import Path
 
 import pytest
 
-from agentickvm.live_validation import (
+from agentickvm.live_validation.pikvm import (
     PiKVMLiveValidationError,
-    StageCheckpoint,
-    ValidationPreconditions,
-    build_stage_checkpoint,
     deliberately_wrong_fingerprint,
     load_preconditions,
     run_stage1_cert_preflight,
@@ -27,184 +16,188 @@ from agentickvm.live_validation import (
 )
 from agentickvm.providers.pikvm_transport import normalize_cert_fingerprint
 
-BASE_URL = "https://pikvm.example:443"
-CREDENTIAL_REF = "keychain://agentickvm/example"
-FAKE_FINGERPRINT = "ab" * 32  # 64 hex chars -> a valid SHA-256 fingerprint
+
+ROOT = Path(__file__).resolve().parents[2]
+GOOD_FINGERPRINT = "aa" * 32
 
 
-class _FakeTLSProbe:
-    """Returns a fixed fingerprint; never touches the network."""
-
+class MockTLSProbe:
     def __init__(self, fingerprint: str) -> None:
         self.fingerprint = fingerprint
-        self.calls = 0
+        self.calls: list[dict[str, object]] = []
 
-    def certificate_der_sha256(self, *, host: str, port: int, timeout_seconds: float) -> str:
-        self.calls += 1
+    def certificate_der_sha256(
+        self,
+        *,
+        host: str,
+        port: int,
+        timeout_seconds: float,
+    ) -> str:
+        self.calls.append({"host": host, "port": port, "timeout_seconds": timeout_seconds})
         return self.fingerprint
 
 
-def _preconditions(**overrides: str) -> ValidationPreconditions:
-    base = {
-        "sacrificial_target": "lab-pikvm-01",
-        "isolated_segment": "vlan-validation",
-        "credential_ref": CREDENTIAL_REF,
-        "firmware_version": "3.291",
-        "operator": "operator@example",
-        "confirmed_at": "2026-06-13T12:00:00+00:00",
-    }
-    base.update(overrides)
-    return ValidationPreconditions(**base)
+def test_preconditions_template_and_loader_require_written_operator_facts(tmp_path: Path) -> None:
+    template_path = tmp_path / "preconditions.json"
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts" / "pikvm-live-validation.py"),
+            "preconditions-template",
+            "--output",
+            str(template_path),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+        cwd=ROOT,
+    )
+
+    assert result.returncode == 0
+    payload = json.loads(template_path.read_text(encoding="utf-8"))
+    assert "sacrificial_target" in payload
+    payload.update(
+        {
+            "sacrificial_target": "sacrificial lab host",
+            "isolated_segment": "isolated validation VLAN",
+            "credential_ref": "keychain://pikvm/validation",
+            "firmware_version": "PiKVM fixture-version-record",
+            "operator": "human",
+            "confirmed_at": "2026-06-15T12:00:00Z",
+        }
+    )
+    template_path.write_text(json.dumps(payload), encoding="utf-8")
+
+    preconditions = load_preconditions(template_path)
+
+    assert preconditions.to_dict()["credential_ref"] == "[CREDENTIAL_REF]"
+    assert "keychain://pikvm/validation" not in repr(preconditions.to_dict())
 
 
-def test_preconditions_reject_missing_fields() -> None:
-    with pytest.raises(PiKVMLiveValidationError, match="missing live validation precondition"):
-        _preconditions(sacrificial_target="")
-
-
-def test_preconditions_reject_raw_secret_credential_ref() -> None:
-    with pytest.raises(PiKVMLiveValidationError, match="reference, not a raw secret"):
-        _preconditions(credential_ref="password=hunter2")
-
-
-def test_preconditions_to_dict_redacts_credential_ref() -> None:
-    payload = _preconditions().to_dict()
-
-    assert payload["credential_ref"] == "[CREDENTIAL_REF]"
-    assert CREDENTIAL_REF not in json.dumps(payload)
-    assert payload["sacrificial_target"] == "lab-pikvm-01"
-
-
-def test_load_preconditions_reads_operator_json(tmp_path) -> None:
-    path = tmp_path / "preconditions.json"
-    path.write_text(
+def test_preconditions_reject_raw_secret_shaped_credential_refs(tmp_path: Path) -> None:
+    preconditions_path = tmp_path / "preconditions.json"
+    preconditions_path.write_text(
         json.dumps(
             {
-                "sacrificial_target": "lab-pikvm-01",
-                "isolated_segment": "vlan-validation",
-                "credential_ref": CREDENTIAL_REF,
-                "firmware_version": "3.291",
-                "operator": "operator@example",
-                "confirmed_at": "2026-06-13T12:00:00+00:00",
+                "sacrificial_target": "sacrificial lab host",
+                "isolated_segment": "isolated validation VLAN",
+                "credential_ref": "password=synthetic-secret",
+                "firmware_version": "PiKVM fixture-version-record",
+                "operator": "human",
+                "confirmed_at": "2026-06-15T12:00:00Z",
             }
         ),
         encoding="utf-8",
     )
 
-    preconditions = load_preconditions(path)
-
-    assert preconditions.sacrificial_target == "lab-pikvm-01"
-    assert preconditions.to_dict()["credential_ref"] == "[CREDENTIAL_REF]"
+    with pytest.raises(PiKVMLiveValidationError, match="credential_ref"):
+        load_preconditions(preconditions_path)
 
 
-def test_stage1_preflight_pins_cert_and_never_auto_confirms() -> None:
-    probe = _FakeTLSProbe(FAKE_FINGERPRINT)
+def test_stage1_mock_preflight_proves_wrong_pin_aborts_before_credentials() -> None:
+    probe = MockTLSProbe(normalize_cert_fingerprint(GOOD_FINGERPRINT))
 
     checkpoint = run_stage1_cert_preflight(
-        base_url=BASE_URL,
-        credential_ref=CREDENTIAL_REF,
-        cert_fingerprint=FAKE_FINGERPRINT,
-        verify_ssl=True,
+        base_url="https://pikvm.example.invalid",
+        credential_ref="keychain://pikvm/validation",
+        cert_fingerprint=GOOD_FINGERPRINT,
+        verify_ssl=False,
         tls_probe=probe,
     )
 
-    assert probe.calls >= 1
     assert checkpoint.stage == "stage1-cert-pinning-preflight"
-    assert checkpoint.status == "operator_review_required"
-    assert checkpoint.next_stage == "stage2-observe"
     assert checkpoint.operator_confirmed is False
-
-    details = checkpoint.details
-    # The observed fingerprint is recorded exactly as the probe returned it.
-    assert details["observed_cert_fingerprint"] == FAKE_FINGERPRINT
-    assert details["credential_ref"] == "[CREDENTIAL_REF]"
-    # A matching pin hands trust to the authenticated client...
-    assert details["pinned_match_built_authenticated_client"] is True
-    # ...while a wrong pin aborts before any credential is handed over.
-    assert details["wrong_fingerprint_aborted_before_credentials"] is True
-    assert details["verify_ssl_false_without_pin_rejected"] is True
-
-    # The checkpoint payload must never carry the raw credential reference.
-    assert CREDENTIAL_REF not in json.dumps(checkpoint.to_dict())
+    assert checkpoint.next_stage == "stage2-observe"
+    assert checkpoint.details["pinned_match_built_authenticated_client"] is True
+    assert checkpoint.details["wrong_fingerprint_aborted_before_credentials"] is True
+    assert checkpoint.details["verify_ssl_false_without_pin_rejected"] is True
+    assert checkpoint.details["credential_ref"] == "[CREDENTIAL_REF]"
+    assert probe.calls
 
 
-def test_stage1_preflight_requires_https_base_url() -> None:
-    with pytest.raises(Exception):
-        run_stage1_cert_preflight(
-            base_url="http://pikvm.example",
-            credential_ref=CREDENTIAL_REF,
-            cert_fingerprint=FAKE_FINGERPRINT,
-            verify_ssl=True,
-            tls_probe=_FakeTLSProbe(FAKE_FINGERPRINT),
+def test_deliberately_wrong_fingerprint_remains_valid_and_different() -> None:
+    wrong = deliberately_wrong_fingerprint(GOOD_FINGERPRINT)
+
+    assert normalize_cert_fingerprint(wrong) == wrong
+    assert wrong != normalize_cert_fingerprint(GOOD_FINGERPRINT)
+
+
+def test_checkpoint_must_be_operator_confirmed_before_next_stage(tmp_path: Path) -> None:
+    checkpoint_path = tmp_path / "stage1.json"
+    checkpoint = {
+        "stage": "stage1-cert-pinning-preflight",
+        "status": "operator_review_required",
+        "operator_confirmed": False,
+        "next_stage": "stage2-observe",
+        "details": {},
+        "generated_at": "2026-06-15T12:00:00Z",
+    }
+    checkpoint_path.write_text(json.dumps(checkpoint), encoding="utf-8")
+
+    with pytest.raises(PiKVMLiveValidationError, match="operator must confirm"):
+        validate_prior_checkpoint(
+            checkpoint_path,
+            expected_stage="stage1-cert-pinning-preflight",
         )
 
-
-def test_build_stage_checkpoint_never_auto_confirms() -> None:
-    checkpoint = build_stage_checkpoint(
-        stage="stage2-observe",
-        status="operator_review_required",
-        next_stage="stage3-input",
-        details={"ok": True},
+    checkpoint["operator_confirmed"] = True
+    checkpoint_path.write_text(json.dumps(checkpoint), encoding="utf-8")
+    confirmed = validate_prior_checkpoint(
+        checkpoint_path,
+        expected_stage="stage1-cert-pinning-preflight",
     )
 
-    assert isinstance(checkpoint, StageCheckpoint)
-    assert checkpoint.operator_confirmed is False
-    assert checkpoint.generated_at  # ISO timestamp present
+    assert confirmed.operator_confirmed is True
 
 
-def test_validate_prior_checkpoint_requires_operator_confirmation(tmp_path) -> None:
-    path = tmp_path / "stage1.json"
-    unconfirmed = build_stage_checkpoint(
-        stage="stage1-cert-pinning-preflight",
-        status="operator_review_required",
-        next_stage="stage2-observe",
-        details={"ok": True},
-    ).to_dict()
-    path.write_text(json.dumps(unconfirmed), encoding="utf-8")
-
-    with pytest.raises(PiKVMLiveValidationError, match="must confirm"):
-        validate_prior_checkpoint(path, expected_stage="stage1-cert-pinning-preflight")
-
-
-def test_validate_prior_checkpoint_rejects_wrong_stage(tmp_path) -> None:
-    path = tmp_path / "stage1.json"
-    payload = build_stage_checkpoint(
-        stage="stage1-cert-pinning-preflight",
-        status="operator_review_required",
-        next_stage="stage2-observe",
-        details={"ok": True},
-    ).to_dict()
-    payload["operator_confirmed"] = True
-    path.write_text(json.dumps(payload), encoding="utf-8")
-
-    with pytest.raises(PiKVMLiveValidationError, match="expected prior checkpoint"):
-        validate_prior_checkpoint(path, expected_stage="stage2-observe")
-
-
-def test_validate_prior_checkpoint_accepts_operator_confirmed(tmp_path) -> None:
-    path = tmp_path / "stage1.json"
-    payload = build_stage_checkpoint(
-        stage="stage1-cert-pinning-preflight",
-        status="operator_confirmed",
-        next_stage="stage2-observe",
-        details={"ok": True},
-    ).to_dict()
-    payload["operator_confirmed"] = True
-    path.write_text(json.dumps(payload), encoding="utf-8")
-
-    checkpoint = validate_prior_checkpoint(
-        path, expected_stage="stage1-cert-pinning-preflight"
+def test_stage2_script_refuses_unconfirmed_prior_checkpoint(tmp_path: Path) -> None:
+    preconditions_path = tmp_path / "preconditions.json"
+    preconditions_path.write_text(
+        json.dumps(
+            {
+                "sacrificial_target": "sacrificial lab host",
+                "isolated_segment": "isolated validation VLAN",
+                "credential_ref": "keychain://pikvm/validation",
+                "firmware_version": "PiKVM fixture-version-record",
+                "operator": "human",
+                "confirmed_at": "2026-06-15T12:00:00Z",
+            }
+        ),
+        encoding="utf-8",
+    )
+    checkpoint_path = tmp_path / "stage1.json"
+    checkpoint_path.write_text(
+        json.dumps(
+            {
+                "stage": "stage1-cert-pinning-preflight",
+                "status": "operator_review_required",
+                "operator_confirmed": False,
+                "next_stage": "stage2-observe",
+                "details": {},
+                "generated_at": "2026-06-15T12:00:00Z",
+            }
+        ),
+        encoding="utf-8",
     )
 
-    assert checkpoint.operator_confirmed is True
-    assert checkpoint.next_stage == "stage2-observe"
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts" / "pikvm-live-validation.py"),
+            "stage2-observe",
+            "--preconditions",
+            str(preconditions_path),
+            "--previous-checkpoint",
+            str(checkpoint_path),
+            "--output",
+            str(tmp_path / "stage2.json"),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+        cwd=ROOT,
+    )
 
-
-def test_deliberately_wrong_fingerprint_differs_but_stays_valid() -> None:
-    normalized = normalize_cert_fingerprint(FAKE_FINGERPRINT)
-    wrong = deliberately_wrong_fingerprint(FAKE_FINGERPRINT)
-
-    assert wrong != normalized
-    assert len(wrong) == len(normalized)
-    # Normalized fingerprints are colon-separated lowercase hex pairs.
-    assert set(wrong) <= set("0123456789abcdef:")
+    assert result.returncode == 2
+    assert "operator must confirm" in result.stdout

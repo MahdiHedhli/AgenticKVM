@@ -44,7 +44,7 @@ def test_full_control_hard_invariants_are_present() -> None:
     assert any("cannot reveal raw secrets by default" in item for item in HARD_INVARIANTS)
 
 
-def test_provider_modules_are_mock_or_offline_observe_scaffolds() -> None:
+def test_provider_modules_are_mock_or_offline_scaffolds() -> None:
     provider_dir = ROOT / "src" / "agentickvm" / "providers"
     provider_files = {path.name for path in provider_dir.glob("*.py")}
 

@@ -1800,3 +1800,23 @@
     routines, with the reconciliation baseline at 650)
 - next recommended task: operator-run live validation (supervised PiKVM, read-only
   BMC, and live ACT gateway end-to-end with params-fingerprint parity).
+
+## 2026-06-20T08:00:00Z
+
+- selected task: restore the authentic actuation/live-validation tests from the
+  operator's Mac Studio backup, now that the SMB share is reachable
+- verification: the operator's backup repo (Mac Studio, branch
+  `feature/pikvm-live-validation @ 3d42f03`) still held the original, readable
+  test files. Diffing the ten recovered **source** files against that backup
+  confirmed the earlier eviction recovery was **byte-identical** -- the source
+  reconstruction was exact.
+- restoration: replaced the seven reconstructed test files with the authentic
+  originals (richer coverage -- the actuation suite parametrizes all eight PiKVM
+  actuation capabilities and adds params-binding, target-binding, and one-shot
+  clearance-consumption cases; the harness suite drives the operator script
+  end-to-end via subprocess).
+- fix: `scripts/pikvm-live-validation.py` was the only operator script missing
+  the `src`-on-`sys.path` bootstrap its siblings use, so it raised
+  ModuleNotFoundError when run from a fresh clone without an editable install.
+  Added the bootstrap; the authentic subprocess-driven harness tests now pass.
+- final validation: all 8 gate scripts pass; pytest 714 passed.

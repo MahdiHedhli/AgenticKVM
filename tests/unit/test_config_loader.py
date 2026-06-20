@@ -14,7 +14,6 @@ from agentickvm.config import (
 from agentickvm.providers import ProviderRegistryError
 from agentickvm.providers.pikvm import PiKVMObserveProvider
 from agentickvm.providers.redfish import RedfishObserveProvider
-from agentickvm.providers.registry import TEST_FIXTURE_PROVIDER_RISK_CLASSES
 
 ROOT = Path(__file__).resolve().parents[2]
 
@@ -183,7 +182,12 @@ def test_fixture_mode_config_can_build_explicit_fake_provider(
 
     assert isinstance(provider, adapter_type)
     assert provider.is_real_hardware is False
-    assert provider.risk_class in TEST_FIXTURE_PROVIDER_RISK_CLASSES
+    expected_risk_class = (
+        "test_fake_clearance_gated"
+        if provider_type == "pikvm"
+        else "test_fake_observe_only"
+    )
+    assert provider.risk_class == expected_risk_class
     assert target.provider_id == f"{provider_type}-fixture"
 
 
