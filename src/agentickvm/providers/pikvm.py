@@ -1,8 +1,8 @@
-"""PiKVM observe-only provider scaffolding.
+"""PiKVM provider scaffolding.
 
-Only fixture-backed observe behavior is implemented here. No live transport,
-credentials, input, power, media, boot, storage, network, or BMC mutation
-behavior exists in this module.
+Live network execution is not implemented here. Fixture-backed observe and
+actuation behavior exists so the control-plane clearance seam can be tested
+without hardware.
 """
 
 from __future__ import annotations
@@ -17,20 +17,39 @@ from agentickvm.providers.base import (
     ProviderStatus,
     ProviderValidationResult,
 )
-from agentickvm.providers.errors import ProviderError
+from agentickvm.providers.errors import (
+    ProviderError,
+    ProviderMutationBlockedError,
+    ProviderProtocolError,
+    ProviderResponseValidationError,
+)
+from agentickvm.providers.pikvm_calibration import PiKVMScreenshotCalibration
 from agentickvm.providers.pikvm_transport import (
     FakePiKVMObserveTransport,
+    PIKVM_ATX_POWER_CYCLE_PATH,
+    PIKVM_ATX_POWER_OFF_PATH,
+    PIKVM_ATX_POWER_ON_PATH,
+    PIKVM_ATX_RESET_PATH,
     PIKVM_BOOT_STATUS_PATH,
     PIKVM_EVENT_LOGS_PATH,
     PIKVM_HARDWARE_INVENTORY_PATH,
     PIKVM_HEALTH_PATH,
+    PIKVM_HID_KEYBOARD_TYPE_PATH,
+    PIKVM_HID_MOUSE_CLICK_PATH,
+    PIKVM_HID_MOUSE_MOVE_PATH,
+    PIKVM_MSD_MOUNT_PATH,
     PIKVM_POWER_STATE_PATH,
     PIKVM_SCREENSHOT_METADATA_PATH,
     PIKVM_SCREEN_STATE_PATH,
     PiKVMObserveTransport,
 )
 from agentickvm.providers.transport_policy import TransportSecurityPolicy
-from agentickvm.providers.transports import FakeTransport
+from agentickvm.providers.transports import (
+    FakeTransport,
+    TransportError,
+    TransportMethodNotAllowedError,
+    TransportRouteNotFoundError,
+)
 
 PIKVM_OBSERVE_CAPABILITIES = frozenset(
     {
@@ -43,6 +62,21 @@ PIKVM_OBSERVE_CAPABILITIES = frozenset(
         "observe.boot_status",
     }
 )
+
+PIKVM_ACTUATION_CAPABILITIES = frozenset(
+    {
+        "power.on",
+        "power.force_off",
+        "power.power_cycle",
+        "power.reset",
+        "input.keyboard_type",
+        "input.mouse_move",
+        "input.mouse_click",
+        "media.mount_approved_iso",
+    }
+)
+
+PIKVM_SUPPORTED_CAPABILITIES = PIKVM_OBSERVE_CAPABILITIES | PIKVM_ACTUATION_CAPABILITIES
 
 
 def default_pikvm_fake_transport() -> FakeTransport:
@@ -106,6 +140,20 @@ def default_pikvm_fake_transport() -> FakeTransport:
                     }
                 ]
             },
+            ("POST", PIKVM_ATX_POWER_ON_PATH): {"performed": True, "atx": "power_on"},
+            ("POST", PIKVM_ATX_POWER_OFF_PATH): {"performed": True, "atx": "power_off"},
+            (
+                "POST",
+                PIKVM_ATX_POWER_CYCLE_PATH,
+            ): {"performed": True, "atx": "power_cycle"},
+            ("POST", PIKVM_ATX_RESET_PATH): {"performed": True, "atx": "reset"},
+            (
+                "POST",
+                PIKVM_HID_KEYBOARD_TYPE_PATH,
+            ): {"performed": True, "hid": "keyboard_type"},
+            ("POST", PIKVM_HID_MOUSE_MOVE_PATH): {"performed": True, "hid": "mouse_move"},
+            ("POST", PIKVM_HID_MOUSE_CLICK_PATH): {"performed": True, "hid": "mouse_click"},
+            ("POST", PIKVM_MSD_MOUNT_PATH): {"performed": True, "msd": "mount"},
             (
                 "GET",
                 "/api/status",
@@ -143,7 +191,8 @@ def default_pikvm_fake_transport() -> FakeTransport:
                     }
                 ]
             },
-        }
+        },
+        allowed_methods=frozenset({"GET", "POST"}),
     )
 
 
@@ -202,6 +251,69 @@ class PiKVMObserveClient:
 
         return self.observe_transport.get_event_logs()
 
+    def power_on(self) -> Mapping[str, Any]:
+        """Fixture ATX power-on actuation."""
+
+        return self._post(PIKVM_ATX_POWER_ON_PATH)
+
+    def power_off(self) -> Mapping[str, Any]:
+        """Fixture ATX power-off actuation."""
+
+        return self._post(PIKVM_ATX_POWER_OFF_PATH)
+
+    def power_cycle(self) -> Mapping[str, Any]:
+        """Fixture ATX power-cycle actuation."""
+
+        return self._post(PIKVM_ATX_POWER_CYCLE_PATH)
+
+    def reset(self) -> Mapping[str, Any]:
+        """Fixture ATX reset actuation."""
+
+        return self._post(PIKVM_ATX_RESET_PATH)
+
+    def type_text(self, *, text: str) -> Mapping[str, Any]:
+        """Fixture HID text typing actuation with redacted echo."""
+
+        return self._post(PIKVM_HID_KEYBOARD_TYPE_PATH, params={"text": text})
+
+    def mouse_move(
+        self,
+        *,
+        x: int,
+        y: int,
+        screen_width: int,
+        screen_height: int,
+    ) -> Mapping[str, Any]:
+        """Fixture HID mouse movement actuation using screenshot calibration."""
+
+        calibrated = PiKVMScreenshotCalibration(
+            width=screen_width,
+            height=screen_height,
+        ).map_point(x=x, y=y)
+        return self._post(PIKVM_HID_MOUSE_MOVE_PATH, params=calibrated)
+
+    def mouse_click(
+        self,
+        *,
+        x: int,
+        y: int,
+        screen_width: int,
+        screen_height: int,
+        button: str = "left",
+    ) -> Mapping[str, Any]:
+        """Fixture HID mouse click actuation using screenshot calibration."""
+
+        calibrated = PiKVMScreenshotCalibration(
+            width=screen_width,
+            height=screen_height,
+        ).map_point(x=x, y=y)
+        return self._post(PIKVM_HID_MOUSE_CLICK_PATH, params={**calibrated, "button": button})
+
+    def mount_msd(self, *, image_ref: str) -> Mapping[str, Any]:
+        """Fixture MSD image mount actuation."""
+
+        return self._post(PIKVM_MSD_MOUNT_PATH, params={"image_ref": image_ref})
+
     def _get(self, path: str) -> Mapping[str, Any]:
         return MappingProxyType(
             dict(
@@ -213,12 +325,34 @@ class PiKVMObserveClient:
             )
         )
 
+    def _post(self, path: str, *, params: Mapping[str, Any] | None = None) -> Mapping[str, Any]:
+        try:
+            payload = dict(
+                self.transport.request(
+                    "POST",
+                    path,
+                    params=params or {},
+                    timeout_seconds=self.timeout_seconds,
+                ).json()
+            )
+        except TransportMethodNotAllowedError as exc:
+            raise ProviderMutationBlockedError(
+                "PiKVM fake transport rejected actuation method"
+            ) from exc
+        except TransportRouteNotFoundError as exc:
+            raise ProviderResponseValidationError(
+                f"PiKVM fake fixture route missing: {path}"
+            ) from exc
+        except TransportError as exc:
+            raise ProviderProtocolError("PiKVM fake actuation transport error") from exc
+        return MappingProxyType(dict(payload))
+
 
 class PiKVMObserveProvider(Provider):
-    """Observe-only PiKVM adapter for fixture-backed tests."""
+    """PiKVM adapter for fixture-backed observe and actuation tests."""
 
     provider_kind = "pikvm"
-    supported_capabilities = PIKVM_OBSERVE_CAPABILITIES
+    supported_capabilities = PIKVM_SUPPORTED_CAPABILITIES
 
     def __init__(
         self,
@@ -235,7 +369,7 @@ class PiKVMObserveProvider(Provider):
         self.risk_class = (
             "real_hardware_disabled"
             if client is None
-            else "test_fake_observe_only"
+            else "test_fake_clearance_gated"
         )
 
     def status(self) -> ProviderStatus:
@@ -243,9 +377,9 @@ class PiKVMObserveProvider(Provider):
 
         status = super().status()
         message = (
-            "PiKVM observe provider is fixture-backed"
+            "PiKVM provider is fixture-backed; actuation requires ControlPlane clearance"
             if self.client is not None and self.enabled
-            else "PiKVM observe provider is disabled; no live transport exists"
+            else "PiKVM provider is disabled; no live transport exists"
         )
         return ProviderStatus(
             provider_id=status.provider_id,
@@ -268,7 +402,7 @@ class PiKVMObserveProvider(Provider):
                 ok=False,
                 provider_id=self.provider_id,
                 capability=request.capability,
-                message="PiKVM observe provider has no fake transport",
+                message="PiKVM provider has no fake transport",
             )
         return super().validate_authorized(request)
 
@@ -299,11 +433,51 @@ class PiKVMObserveProvider(Provider):
                 data = {"events": list(self.client.event_logs()["events"])}
             elif request.capability == "observe.boot_status":
                 data = {"boot_status": self.client.boot_status()["boot_status"]}
+            elif request.capability == "power.on":
+                data = {"actuation": self.client.power_on()}
+            elif request.capability == "power.force_off":
+                data = {"actuation": self.client.power_off()}
+            elif request.capability == "power.power_cycle":
+                data = {"actuation": self.client.power_cycle()}
+            elif request.capability == "power.reset":
+                data = {"actuation": self.client.reset()}
+            elif request.capability == "input.keyboard_type":
+                data = {
+                    "actuation": self.client.type_text(
+                        text=str(request.parameters.get("text", ""))
+                    ),
+                    "parameters": request.redacted_parameters(),
+                }
+            elif request.capability == "input.mouse_move":
+                data = {
+                    "actuation": self.client.mouse_move(
+                        x=int(request.parameters.get("x", 0)),
+                        y=int(request.parameters.get("y", 0)),
+                        screen_width=int(request.parameters.get("screen_width", 1280)),
+                        screen_height=int(request.parameters.get("screen_height", 720)),
+                    ),
+                }
+            elif request.capability == "input.mouse_click":
+                data = {
+                    "actuation": self.client.mouse_click(
+                        x=int(request.parameters.get("x", 0)),
+                        y=int(request.parameters.get("y", 0)),
+                        screen_width=int(request.parameters.get("screen_width", 1280)),
+                        screen_height=int(request.parameters.get("screen_height", 720)),
+                        button=str(request.parameters.get("button", "left")),
+                    ),
+                }
+            elif request.capability == "media.mount_approved_iso":
+                data = {
+                    "actuation": self.client.mount_msd(
+                        image_ref=str(request.parameters.get("image_ref", ""))
+                    )
+                }
             else:
                 return self._result(
                     request,
                     ok=False,
-                    message="Unsupported PiKVM observe-only capability",
+                    message="Unsupported PiKVM capability",
                 )
         except ProviderError as exc:
             return exc.to_provider_result(
@@ -321,7 +495,7 @@ class PiKVMObserveProvider(Provider):
         return self._result(
             request,
             ok=True,
-            message="PiKVM fixture observation completed; no hardware action performed.",
+            message="PiKVM fixture operation completed; no hardware action performed.",
             data=safe_data,
         )
 
@@ -349,7 +523,9 @@ class PiKVMObserveProvider(Provider):
 
 
 __all__ = [
+    "PIKVM_ACTUATION_CAPABILITIES",
     "PIKVM_OBSERVE_CAPABILITIES",
+    "PIKVM_SUPPORTED_CAPABILITIES",
     "PiKVMObserveClient",
     "PiKVMObserveProvider",
     "default_pikvm_fake_transport",

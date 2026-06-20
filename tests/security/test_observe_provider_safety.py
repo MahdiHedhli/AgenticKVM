@@ -39,14 +39,14 @@ def test_redfish_fake_transport_rejects_mutating_methods() -> None:
             transport.request(method, "/redfish/v1/Systems/1/Actions/ComputerSystem.Reset")
 
 
-def test_pikvm_client_exposes_observe_only_methods() -> None:
+def test_pikvm_client_exposes_observe_and_clearance_gated_actuation_methods() -> None:
     public = {
         name
         for name in dir(PiKVMObserveClient)
         if not name.startswith("_") and callable(getattr(PiKVMObserveClient, name))
     }
 
-    assert public == {
+    observe_methods = {
         "boot_status",
         "event_logs",
         "hardware_inventory",
@@ -55,6 +55,21 @@ def test_pikvm_client_exposes_observe_only_methods() -> None:
         "screenshot_metadata",
         "status",
     }
+    # Actuation methods exist on the fixture client but are exercised only after
+    # ControlPlane clearance and never reach real hardware (the fixture transport
+    # is fake). See tests/security/test_pikvm_actuation_clearance.py.
+    actuation_methods = {
+        "power_on",
+        "power_off",
+        "power_cycle",
+        "reset",
+        "type_text",
+        "mouse_move",
+        "mouse_click",
+        "mount_msd",
+    }
+
+    assert public == observe_methods | actuation_methods
 
 
 def test_redfish_client_exposes_observe_only_methods() -> None:

@@ -52,8 +52,9 @@ def test_pikvm_provider_reports_fixture_status_without_live_contact() -> None:
 
     assert status.enabled is True
     assert status.is_real_hardware is False
-    assert status.risk_class == "test_fake_observe_only"
+    assert status.risk_class == "test_fake_clearance_gated"
     assert "fixture-backed" in status.message
+    assert "clearance" in status.message
 
 
 def test_pikvm_observe_screen_runs_through_control_plane_and_fake_transport() -> None:

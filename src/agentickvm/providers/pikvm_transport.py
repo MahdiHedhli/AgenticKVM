@@ -1,8 +1,8 @@
-"""PiKVM observe transport boundary.
+"""PiKVM transport boundary.
 
-This module intentionally implements only fake transport behavior. It contains
-no live network transport, credential resolution, input, power mutation, media,
-boot mutation, storage, network, or BMC credential behavior.
+Live network transport remains observe-only. Fixture transport routes may model
+actuation for clearance-gate tests, but automated tests still perform no live
+network IO, credential resolution, or hardware access.
 """
 
 from __future__ import annotations
@@ -39,6 +39,14 @@ PIKVM_BOOT_STATUS_PATH = "/api/boot"
 PIKVM_HARDWARE_INVENTORY_PATH = "/api/inventory"
 PIKVM_EVENT_LOGS_PATH = "/api/events"
 PIKVM_DEVICE_INFO_PATH = "/api/device-info"
+PIKVM_ATX_POWER_ON_PATH = "/api/atx/power/on"
+PIKVM_ATX_POWER_OFF_PATH = "/api/atx/power/off"
+PIKVM_ATX_POWER_CYCLE_PATH = "/api/atx/power/cycle"
+PIKVM_ATX_RESET_PATH = "/api/atx/reset"
+PIKVM_HID_KEYBOARD_TYPE_PATH = "/api/hid/keyboard/type"
+PIKVM_HID_MOUSE_MOVE_PATH = "/api/hid/mouse/move"
+PIKVM_HID_MOUSE_CLICK_PATH = "/api/hid/mouse/click"
+PIKVM_MSD_MOUNT_PATH = "/api/msd/mount"
 
 _SECRET_KEY_FRAGMENTS = (
     "password",
@@ -431,11 +439,19 @@ def sha256_fingerprint_for_der(cert_der: bytes) -> str:
 __all__ = [
     "FakePiKVMObserveTransport",
     "LivePiKVMObserveTransport",
+    "PIKVM_ATX_POWER_CYCLE_PATH",
+    "PIKVM_ATX_POWER_OFF_PATH",
+    "PIKVM_ATX_POWER_ON_PATH",
+    "PIKVM_ATX_RESET_PATH",
     "PIKVM_BOOT_STATUS_PATH",
     "PIKVM_DEVICE_INFO_PATH",
     "PIKVM_EVENT_LOGS_PATH",
+    "PIKVM_HID_KEYBOARD_TYPE_PATH",
+    "PIKVM_HID_MOUSE_CLICK_PATH",
+    "PIKVM_HID_MOUSE_MOVE_PATH",
     "PIKVM_HARDWARE_INVENTORY_PATH",
     "PIKVM_HEALTH_PATH",
+    "PIKVM_MSD_MOUNT_PATH",
     "PIKVM_POWER_STATE_PATH",
     "PIKVM_SCREENSHOT_METADATA_PATH",
     "PIKVM_SCREEN_STATE_PATH",

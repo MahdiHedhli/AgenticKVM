@@ -1720,3 +1720,48 @@
 - next recommended task: align the mirror models with ACT's canonical clearance
   contract as soon as ACT publishes it, then implement the real ACT transport
   and proof verifier behind the existing fail-closed seam.
+
+## 2026-06-20T05:00:00Z
+
+- selected task: reconcile the green ACT-independent feature branches onto a
+  single `feature/beta-candidate` working branch as the beta-candidate baseline
+- branch reconciliation: `origin/main` already contained the clearance-boundary,
+  transport-preflight, HID-redaction, risk-family, approval-broker, audit-store,
+  observe-only-provider and public-beta-cutover work. The two branches still
+  outstanding were `feature/pikvm-actuation` and `feature/pikvm-live-validation`
+  (a linear `origin/main + 7` stack that had been merged into a never-pushed
+  local `main`).
+- recovery provenance: the prior local working copy was corrupted by an
+  uninstalled macOS file-provider (evicted, un-faultable objects), so git object
+  enumeration hung. All actuation + live-validation **source** was still resident
+  in the working tree and was recovered verbatim (8 source modules, the operator
+  validation script, and `docs/pikvm-live-validation.md`). The seven companion
+  test files and this log's prior delta had been evicted and were unrecoverable,
+  so the test coverage was **rebuilt from the recovered source**, not restored
+  byte-for-byte. Reviewers should treat the actuation/live-validation tests as
+  freshly authored against the recovered behavior.
+- surface integrated: fixture-backed PiKVM actuation (ATX power on/off/cycle/
+  reset, HID keyboard/mouse, MSD mount) gated through ControlPlane ACT clearance,
+  screenshot to absolute-HID mouse calibration, and the supervised operator-run
+  live-validation harness (cert-pinning preflight with credential-withholding on
+  mismatch, human-checkpoint gating between stages).
+- safety posture:
+  - real hardware touched: no
+  - live provider network calls made: no (the harness TLS probe is injected and
+    faked in tests; the only real network path is operator-run and outside CI)
+  - secrets touched: no; HID text and credential refs redacted in results
+  - actuation performed on hardware: no (every fixture actuation reports
+    `performed_on_hardware: False`)
+- final validation:
+  - `python3 scripts/check-package.py`: passed
+  - `python3 scripts/build-package.py`: passed
+  - `python3 scripts/smoke-cli.py`: passed
+  - `python3 scripts/lint-sanity.py`: passed
+  - `python3 scripts/type-sanity.py`: passed
+  - `python3 scripts/validate-docs.py`: passed
+  - `python3 scripts/check-site.py`: passed
+  - `python3 scripts/check-public-beta.py`: passed
+  - `uv run --offline --with pytest --python python3.13 python -m pytest`:
+    670 passed (baseline 650 + 9 actuation-clearance + 11 live-validation harness)
+- next recommended task: implement selectable mobile_signed (ACT) /
+  local_terminal auth channel selection (C2).

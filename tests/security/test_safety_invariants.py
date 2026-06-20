@@ -55,6 +55,7 @@ def test_provider_modules_are_mock_or_offline_observe_scaffolds() -> None:
         "errors.py",
         "mock.py",
         "pikvm.py",
+        "pikvm_calibration.py",
         "pikvm_transport.py",
         "placeholders.py",
         "preflight.py",

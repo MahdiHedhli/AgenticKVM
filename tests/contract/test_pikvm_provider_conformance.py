@@ -1,5 +1,6 @@
 from agentickvm.providers import pikvm as pikvm_module
 from agentickvm.providers.pikvm import (
+    PIKVM_ACTUATION_CAPABILITIES,
     PiKVMObserveClient,
     PiKVMObserveProvider,
     default_pikvm_fake_transport,
@@ -9,12 +10,13 @@ from tests.contract.provider_conformance import (
     assert_disabled_provider_fails,
     assert_fake_provider_does_not_read_env,
     assert_fake_transport_used,
-    assert_observe_only_provider_rejects_mutation,
     assert_observe_result,
     assert_provider_metadata,
     assert_provider_module_has_no_live_io,
+    assert_structured_result,
     assert_unknown_capability_fails,
     assert_unsupported_capability_fails,
+    provider_request,
 )
 
 
@@ -48,11 +50,23 @@ def test_pikvm_provider_observe_results_are_structured_and_redacted() -> None:
         assert_observe_result(_pikvm_provider(), capability)
 
 
-def test_pikvm_provider_is_observe_only_and_uses_fake_transport() -> None:
+def test_pikvm_provider_actuation_is_fixture_backed_and_uses_fake_transport() -> None:
     provider = _pikvm_provider()
 
-    assert_observe_only_provider_rejects_mutation(provider)
-    assert provider.requests == []
+    # The PiKVM fixture provider supports actuation capabilities, but at the
+    # provider boundary every actuation runs through the fake transport and is
+    # reported as never performed on hardware. ControlPlane clearance gating is
+    # covered separately in tests/security/test_pikvm_actuation_clearance.py.
+    assert PIKVM_ACTUATION_CAPABILITIES <= provider.supported_capabilities
+
+    for capability in sorted(PIKVM_ACTUATION_CAPABILITIES):
+        result = provider.execute_authorized(provider_request(capability))
+        assert_structured_result(result)
+        assert result.ok is True, capability
+        assert result.performed_on_hardware is False, capability
+        assert result.data["performed"] is False, capability
+
+    assert len(provider.requests) == len(PIKVM_ACTUATION_CAPABILITIES)
     assert_fake_transport_used(provider)
 
 

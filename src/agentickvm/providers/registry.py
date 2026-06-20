@@ -16,6 +16,12 @@ from agentickvm.providers.base import Provider
 
 EXECUTABLE_PROVIDER_TYPES = frozenset({"mock"})
 TEST_FIXTURE_PROVIDER_RISK_CLASS = "test_fake_observe_only"
+TEST_FIXTURE_PROVIDER_RISK_CLASSES = frozenset(
+    {
+        TEST_FIXTURE_PROVIDER_RISK_CLASS,
+        "test_fake_clearance_gated",
+    }
+)
 PLACEHOLDER_PROVIDER_TYPES = frozenset(
     {
         "pikvm",
@@ -222,7 +228,7 @@ def _is_test_fixture_adapter(provider: Provider | None, provider_type: str) -> b
         provider.provider_kind == provider_type
         and provider.enabled
         and provider.is_real_hardware is False
-        and provider.risk_class == TEST_FIXTURE_PROVIDER_RISK_CLASS
+        and provider.risk_class in TEST_FIXTURE_PROVIDER_RISK_CLASSES
     )
 
 
@@ -242,4 +248,5 @@ __all__ = [
     "ProviderRegistry",
     "ProviderRegistryError",
     "TEST_FIXTURE_PROVIDER_RISK_CLASS",
+    "TEST_FIXTURE_PROVIDER_RISK_CLASSES",
 ]

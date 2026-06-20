@@ -114,6 +114,24 @@ DEFAULT_MCP_TOOLS: tuple[MCPToolDefinition, ...] = (
         dangerous=True,
     ),
     MCPToolDefinition(
+        tool_name="power_off",
+        capability_id="power.force_off",
+        description="Force power off for an in-scope target.",
+        dangerous=True,
+    ),
+    MCPToolDefinition(
+        tool_name="power_cycle",
+        capability_id="power.power_cycle",
+        description="Power-cycle an in-scope target.",
+        dangerous=True,
+    ),
+    MCPToolDefinition(
+        tool_name="power_reset",
+        capability_id="power.reset",
+        description="Trigger an ATX reset for an in-scope target.",
+        dangerous=True,
+    ),
+    MCPToolDefinition(
         tool_name="graceful_restart",
         capability_id="power.graceful_restart",
         description="Request an orderly restart.",
@@ -141,6 +159,18 @@ DEFAULT_MCP_TOOLS: tuple[MCPToolDefinition, ...] = (
         tool_name="type_text",
         capability_id="input.keyboard_type",
         description="Type text through a remote input device.",
+        dangerous=True,
+    ),
+    MCPToolDefinition(
+        tool_name="mouse_move",
+        capability_id="input.mouse_move",
+        description="Move the mouse through a remote input device.",
+        dangerous=True,
+    ),
+    MCPToolDefinition(
+        tool_name="mouse_click",
+        capability_id="input.mouse_click",
+        description="Click the mouse through a remote input device.",
         dangerous=True,
     ),
     MCPToolDefinition(
