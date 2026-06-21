@@ -1845,3 +1845,30 @@
 - final validation: all 8 gate scripts pass; pytest 736 passed (714 + 22 Redfish
   actuation-clearance).
 - next recommended task: aircraft params_fingerprint parity with ACT (F2).
+
+## 2026-06-20T10:00:00Z
+
+- selected task: aircraft params_fingerprint parity with ACT (F2), to de-risk the
+  outstanding live ACT binding
+- finding: ACT computes params_fingerprint, extensions_digest, and short_code
+  authoritatively and ignores any aircraft-supplied fingerprint (Tower test
+  `test_params_fingerprint_and_requester_identity_are_tower_authoritative`). The
+  aircraft must predict them with ACT's exact algorithm for the clearance binding
+  to hold live.
+- implemented: `control_plane/act_fingerprint.py` mirrors the Tower contract
+  algorithm exactly -- canonical `json.dumps(sort_keys, separators=(",",":"),
+  default=str)` + SHA-256 -- providing act_params_fingerprint, act_content_hash,
+  act_extensions_digest, act_short_code, and the agentickvm extensions envelope.
+  The real client now builds its payload_redacted/extensions from a single source
+  and exposes predicted_act_params_fingerprint / predicted_act_short_code over
+  exactly what it puts on the wire.
+- tests: tests/security/test_act_fingerprint_parity.py pins parity against an
+  inline reference of ACT's algorithm, proves key-order independence, the 10-hex
+  short code, and a round-trip (predicted fingerprint == fingerprint over the
+  real client's outbound payload).
+- safety posture: no hardware, no live network in CI, no secrets. This is pure
+  algorithm parity; wiring the predicted fingerprint into the engine's outbound
+  request is part of the real-ACT config/runtime wiring (F4).
+- final validation: all 8 gate scripts pass; pytest 743 passed (736 + 7).
+- next recommended task: productionize the local_terminal channel -- keychain
+  signer + signer trust registry (F3, issue #3).

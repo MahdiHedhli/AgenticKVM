@@ -18,6 +18,11 @@ import json
 from dataclasses import dataclass, field
 from typing import Any, Mapping, Protocol
 
+from agentickvm.control_plane.act_fingerprint import (
+    act_agentickvm_extensions,
+    act_params_fingerprint,
+    act_short_code,
+)
 from agentickvm.control_plane.clearance import (
     ClearanceRequest,
     ClearanceResponse,
@@ -74,6 +79,47 @@ class UrllibACTHTTPTransport:
         return payload
 
 
+def act_payload_redacted(request: ClearanceRequest) -> dict[str, Any]:
+    """Return the redacted payload the aircraft sends (no raw parameters)."""
+
+    return {"capability": request.capability}
+
+
+def act_request_extensions(request: ClearanceRequest) -> dict[str, Any]:
+    """Return the extensions envelope the aircraft sends to ACT."""
+
+    return act_agentickvm_extensions(
+        target=request.target,
+        provider=request.provider,
+        capability=request.capability,
+        risk_summary=request.risk_summary.summary,
+        policy_context=request.policy_context,
+    )
+
+
+def predicted_act_params_fingerprint(request: ClearanceRequest) -> str:
+    """Predict the params_fingerprint ACT will compute for this request.
+
+    ACT computes the fingerprint authoritatively from exactly the redacted
+    payload and extensions the aircraft sends, so the aircraft can predict it to
+    keep its clearance binding consistent with a live ACT response.
+    """
+
+    return act_params_fingerprint(
+        payload_redacted=act_payload_redacted(request),
+        extensions=act_request_extensions(request),
+    )
+
+
+def predicted_act_short_code(request: ClearanceRequest, *, approval_id: str | None = None) -> str:
+    """Predict the operator short code ACT will derive for this request."""
+
+    return act_short_code(
+        approval_id or request.request_id,
+        predicted_act_params_fingerprint(request),
+    )
+
+
 def clearance_request_to_act_payload(
     request: ClearanceRequest,
     *,
@@ -89,7 +135,7 @@ def clearance_request_to_act_payload(
         "risk_family": request.risk_summary.risk_family.value,
         "summary": request.risk_summary.summary,
         # No raw parameters cross this boundary; only the redacted shape does.
-        "payload_redacted": {"capability": request.capability},
+        "payload_redacted": act_payload_redacted(request),
         "agent_id": agent_id,
         "session_id": request.session_id,
         "expires_in_seconds": expires_in_seconds,
@@ -97,15 +143,7 @@ def clearance_request_to_act_payload(
         "short_code": str(request.short_code),
         "audit_correlation_id": request.audit_correlation_id,
         "request_id": request.request_id,
-        "extensions": {
-            "agentickvm": {
-                "target": request.target,
-                "provider": request.provider,
-                "capability": request.capability,
-                "risk_summary": request.risk_summary.summary,
-                "policy_context": dict(request.policy_context),
-            }
-        },
+        "extensions": act_request_extensions(request),
     }
 
 
@@ -196,5 +234,9 @@ __all__ = [
     "ACTHTTPClearanceClient",
     "ACTHTTPTransport",
     "UrllibACTHTTPTransport",
+    "act_payload_redacted",
+    "act_request_extensions",
     "clearance_request_to_act_payload",
+    "predicted_act_params_fingerprint",
+    "predicted_act_short_code",
 ]

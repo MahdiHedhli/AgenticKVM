@@ -121,6 +121,14 @@ from agentickvm.control_plane.act_proof import (  # noqa: E402
     build_clearance_proof_message,
     verify_clearance_proof,
 )
+from agentickvm.control_plane.act_fingerprint import (  # noqa: E402
+    act_agentickvm_extensions,
+    act_canonical_json,
+    act_content_hash,
+    act_extensions_digest,
+    act_params_fingerprint,
+    act_short_code,
+)
 from agentickvm.control_plane.policy import (  # noqa: E402
     CapabilityPolicy,
     PolicyDecisionResult,
@@ -185,6 +193,8 @@ from agentickvm.control_plane.act_http_client import (  # noqa: E402
     ACTHTTPTransport,
     UrllibACTHTTPTransport,
     clearance_request_to_act_payload,
+    predicted_act_params_fingerprint,
+    predicted_act_short_code,
 )
 from agentickvm.control_plane.clearance import (  # noqa: E402
     ACT_AIRCRAFT_ID,
@@ -295,11 +305,19 @@ __all__ = [
     "TowerKeyRegistry",
     "build_clearance_proof_message",
     "verify_clearance_proof",
+    "act_agentickvm_extensions",
+    "act_canonical_json",
+    "act_content_hash",
+    "act_extensions_digest",
+    "act_params_fingerprint",
+    "act_short_code",
     "ACTHTTPClearanceClient",
     "ACTHTTPTransport",
     "UrllibACTHTTPTransport",
     "clearance_request_to_act_payload",
     "clearance_response_from_act_payload",
+    "predicted_act_params_fingerprint",
+    "predicted_act_short_code",
     "AIRCRAFT_RISK_FAMILIES",
     "TOWER_RESOLVED_RISK_FAMILIES",
     "CONTRACT_VERSION_V2",

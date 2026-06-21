@@ -58,9 +58,21 @@ CI exercises no live network. Default deployments remain fail-closed
 (`ACTPendingProofVerifier`) until an operator configures the tower public key(s)
 and gateway base URL.
 
+### Params-fingerprint parity
+
+ACT computes `params_fingerprint`, `extensions_digest`, and the operator
+`short_code` authoritatively from the redacted payload and extensions envelope
+the aircraft sends. `control_plane/act_fingerprint.py` mirrors that exact
+algorithm (canonical `json.dumps` + SHA-256, per the Tower contract), and the
+real client predicts the fingerprint over exactly the payload it puts on the
+wire (`predicted_act_params_fingerprint`). Parity is pinned by
+`tests/security/test_act_fingerprint_parity.py`. Wiring this predicted
+fingerprint into the engine's outbound clearance request (so the binding holds
+live) lands with the config/runtime wiring of the real ACT client.
+
 ## Outstanding (operator-run, not in CI)
 
-- Live end-to-end clearance against a running ACT gateway, including
-  params-fingerprint parity between the aircraft and the tower.
+- Live end-to-end clearance against a running ACT gateway to confirm the
+  params-fingerprint parity against a real tower computation.
 - Supervised live PiKVM validation and read-only BMC validation (hardware is not
   validated; all actuation/transport QA is mock-only).
