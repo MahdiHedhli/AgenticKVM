@@ -1898,3 +1898,33 @@
   engine remain follow-ups on issue #3.
 - final validation: all 8 gate scripts pass; pytest 751 passed (743 + 8).
 - next recommended task: wire the real ACT client into config/runtime (F4).
+
+## 2026-06-20T12:00:00Z
+
+- selected task: wire the real ACT clearance client into config/runtime (F4), so
+  the real consume seam built in C3 is actually operable by an operator
+- implemented:
+  - config: an `act` section (`gateway_url`, `tower_id`, `tower_keys` -- all
+    public tower data, no secrets) on AgenticKVMConfig, parsed and validated.
+  - build_runtime: when the `act` section is complete, it constructs the real
+    `ACTHTTPClearanceClient` + `ACTClearanceProofVerifier` behind the fail-closed
+    seam and turns on ACT-parity fingerprinting; otherwise the seam stays
+    fail-closed (no live ACT calls, local-broker path). Tests inject a transport
+    factory so no live network is touched in CI.
+  - MCPRouter + CLI thread the runtime's clearance client/verifier and the
+    ACT-parity flag through, so `mobile_signed` actually clears through ACT when
+    configured.
+  - clearance: build_clearance_request gained an `act_parity` mode that computes
+    the fingerprint and short code exactly as ACT does (F2), so the engine's
+    outbound request binds against a live ACT response.
+  - examples/config/act-clearance.yaml is a valid operator template.
+- tests: tests/security/test_act_runtime_wiring.py (real client/verifier built
+  from config; fail-closed default; partial config not configured; invalid `act`
+  rejected; injected-transport path; engine emits ACT-parity fingerprints; the
+  example template builds).
+- safety posture: building a runtime makes no network call; the client only calls
+  out when an operator drives a real clearance. CI exercises no live network and
+  no secrets.
+- final validation: all 8 gate scripts pass; pytest 759 passed (751 + 8).
+- next recommended task: operator-run live ACT gateway validation end-to-end, now
+  that the real path is constructable and fingerprint-aligned.

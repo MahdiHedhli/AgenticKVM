@@ -1,0 +1,34 @@
+{
+  "version": "0.1",
+  "providers": [
+    {
+      "id": "mock",
+      "type": "mock",
+      "enabled": true,
+      "description": "Safe in-memory mock provider"
+    }
+  ],
+  "targets": [
+    {
+      "id": "mock-host",
+      "provider": "mock",
+      "enabled": true,
+      "name": "Mock Host",
+      "environment": "local",
+      "labels": ["mock", "safe"],
+      "risk_tier": "low",
+      "allowed_modes": ["Observe", "Supervised"]
+    }
+  ],
+  "default_policy": {
+    "mode": "Supervised"
+  },
+  "auth_channel": "mobile_signed",
+  "act": {
+    "gateway_url": "https://act.example.invalid/v1",
+    "tower_id": "tower_test",
+    "tower_keys": {
+      "tower:tower_test": "OGpHYc-bD8rOc-IQfh8jWn6nO1gc3qpEvm8EbHXXWAc"
+    }
+  }
+}

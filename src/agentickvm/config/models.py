@@ -69,6 +69,30 @@ class TargetConfig:
 
 
 @dataclass(frozen=True)
+class ACTClearanceConfig:
+    """Optional real ACT clearance wiring (public tower data only, no secrets).
+
+    When fully configured, the runtime builds the real ACT HTTP clearance client
+    and Ed25519 proof verifier. Unset (the default) leaves the consume seam
+    fail-closed: no live ACT calls, local-broker path only.
+    """
+
+    gateway_url: str | None = None
+    tower_id: str | None = None
+    # key_id -> base64url Ed25519 public key (public material, not a secret).
+    tower_keys: Mapping[str, str] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "tower_keys", MappingProxyType(dict(self.tower_keys)))
+
+    @property
+    def is_configured(self) -> bool:
+        """Return whether the real ACT path can be built from this config."""
+
+        return bool(self.gateway_url and self.tower_id and self.tower_keys)
+
+
+@dataclass(frozen=True)
 class AgenticKVMConfig:
     """Validated AgenticKVM config."""
 
@@ -77,6 +101,7 @@ class AgenticKVMConfig:
     targets: tuple[TargetConfig, ...]
     default_policy_mode: ControlMode = ControlMode.SUPERVISED
     auth_channel: AuthChannel = DEFAULT_AUTH_CHANNEL
+    act: ACTClearanceConfig = field(default_factory=ACTClearanceConfig)
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "default_policy_mode", normalize_control_mode(self.default_policy_mode))
@@ -94,6 +119,7 @@ class AgenticKVMConfig:
 
 
 __all__ = [
+    "ACTClearanceConfig",
     "AgenticKVMConfig",
     "ProviderConfig",
     "TargetConfig",

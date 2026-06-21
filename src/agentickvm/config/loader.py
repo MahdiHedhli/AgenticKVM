@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from agentickvm.config.models import (
+    ACTClearanceConfig,
     AgenticKVMConfig,
     ProviderConfig,
     TargetConfig,
@@ -22,13 +23,19 @@ from agentickvm.config.validation import (
     reject_unsafe_config_keys,
 )
 from agentickvm.control_plane import (
+    ACTClearanceProofVerifier,
+    ACTClearanceVerifier,
+    ACTHTTPClearanceClient,
     ApprovalStore,
     AuditSink,
     AuthChannelError,
     CapabilityPolicy,
+    ClearanceClient,
     InMemoryAuditSink,
     TargetDefinition,
     TargetRegistry,
+    TowerKeyRegistry,
+    UrllibACTHTTPTransport,
     mode_preset,
     resolve_auth_channel,
 )
@@ -55,6 +62,9 @@ class ConfigRuntime:
     policy: CapabilityPolicy
     audit_sink: AuditSink
     approval_store: ApprovalStore
+    clearance_client: ClearanceClient | None = None
+    clearance_verifier: ACTClearanceVerifier | None = None
+    act_parity_fingerprint: bool = False
 
 
 def mock_only_config() -> AgenticKVMConfig:
@@ -100,6 +110,10 @@ def load_config(path: str | Path | None = None) -> AgenticKVMConfig:
     return config_from_mapping(raw)
 
 
+def _optional_str(value: Any) -> str | None:
+    return str(value) if value else None
+
+
 def config_from_mapping(raw: Mapping[str, Any]) -> AgenticKVMConfig:
     """Build a config model from a parsed mapping."""
 
@@ -126,12 +140,27 @@ def config_from_mapping(raw: Mapping[str, Any]) -> AgenticKVMConfig:
     except AuthChannelError as exc:
         raise ConfigValidationError(str(exc)) from exc
 
+    raw_act = raw.get("act", {})
+    if raw_act is None:
+        raw_act = {}
+    if not isinstance(raw_act, Mapping):
+        raise ConfigValidationError("act must be an object")
+    raw_tower_keys = raw_act.get("tower_keys", {})
+    if not isinstance(raw_tower_keys, Mapping):
+        raise ConfigValidationError("act.tower_keys must be an object")
+    act = ACTClearanceConfig(
+        gateway_url=_optional_str(raw_act.get("gateway_url")),
+        tower_id=_optional_str(raw_act.get("tower_id")),
+        tower_keys={str(key): str(value) for key, value in raw_tower_keys.items()},
+    )
+
     config = AgenticKVMConfig(
         version=str(raw.get("version", "0.1")),
         providers=providers,
         targets=targets,
         default_policy_mode=str(default_policy.get("mode", "Supervised")),
         auth_channel=auth_channel,
+        act=act,
     )
     build_provider_registry(config)
     build_target_registry(config, build_provider_registry(config))
@@ -143,13 +172,41 @@ def build_runtime(
     *,
     audit_sink: AuditSink | None = None,
     approval_store: ApprovalStore | None = None,
+    act_transport_factory: Any | None = None,
 ) -> ConfigRuntime:
-    """Build safe runtime objects from config."""
+    """Build safe runtime objects from config.
+
+    When the config carries a complete ``act`` section, the real ACT clearance
+    client and Ed25519 proof verifier are constructed behind the fail-closed
+    seam. Otherwise the consume seam stays fail-closed (no live ACT calls). The
+    real client is constructed but makes no network call until used, so building
+    a runtime is safe in CI; tests may inject ``act_transport_factory`` to avoid
+    any live transport entirely.
+    """
 
     resolved_config = config or mock_only_config()
     provider_registry = build_provider_registry(resolved_config)
     target_registry = build_target_registry(resolved_config, provider_registry)
     policy = mode_preset(resolved_config.default_policy_mode)
+
+    clearance_client: ClearanceClient | None = None
+    clearance_verifier: ACTClearanceVerifier | None = None
+    act_parity_fingerprint = False
+    act = resolved_config.act
+    if act.is_configured:
+        registry = TowerKeyRegistry.from_b64url(dict(act.tower_keys))
+        clearance_verifier = ACTClearanceVerifier(
+            tower_id=str(act.tower_id),
+            proof_verifier=ACTClearanceProofVerifier(registry=registry),
+        )
+        transport = (
+            act_transport_factory(act.gateway_url)
+            if act_transport_factory is not None
+            else UrllibACTHTTPTransport(base_url=str(act.gateway_url))
+        )
+        clearance_client = ACTHTTPClearanceClient(transport=transport)
+        act_parity_fingerprint = True
+
     return ConfigRuntime(
         config=resolved_config,
         provider_registry=provider_registry,
@@ -157,6 +214,9 @@ def build_runtime(
         policy=policy,
         audit_sink=audit_sink or InMemoryAuditSink(),
         approval_store=approval_store or ApprovalStore(),
+        clearance_client=clearance_client,
+        clearance_verifier=clearance_verifier,
+        act_parity_fingerprint=act_parity_fingerprint,
     )
 
 

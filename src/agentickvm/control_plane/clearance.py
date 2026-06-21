@@ -17,6 +17,11 @@ from types import MappingProxyType
 from typing import Any, Mapping
 from uuid import uuid4
 
+from agentickvm.control_plane.act_fingerprint import (
+    act_agentickvm_extensions,
+    act_params_fingerprint,
+    act_short_code,
+)
 from agentickvm.control_plane.fingerprints import fingerprint_parameters
 
 
@@ -323,16 +328,38 @@ def build_clearance_request(
     now: datetime,
     ttl_seconds: int = DEFAULT_CLEARANCE_TIMEOUT_SECONDS,
     request_id: str | None = None,
+    act_parity: bool = False,
 ) -> ClearanceRequest:
-    """Build an ACT clearance request mirror with stable fingerprint and code."""
+    """Build an ACT clearance request mirror with stable fingerprint and code.
+
+    When ``act_parity`` is set, the fingerprint and short code are computed the
+    way ACT computes them -- over exactly the redacted payload and extensions the
+    real client sends -- so the aircraft's clearance binding holds against a live
+    ACT response. Otherwise the local mirror fingerprint is used (mock/local
+    broker path).
+    """
 
     if ttl_seconds < 0:
         raise ValueError("clearance ttl cannot be negative")
     if ttl_seconds > DEFAULT_CLEARANCE_TIMEOUT_SECONDS:
         raise ValueError("clearance ttl cannot exceed default without explicit policy")
     request_id = request_id or uuid4().hex
-    params_fingerprint = ClearanceParamsFingerprint(fingerprint_parameters(parameters))
-    short_code = ClearanceShortCode(_short_code(request_id, params_fingerprint))
+    if act_parity:
+        fingerprint_value = act_params_fingerprint(
+            payload_redacted={"capability": capability},
+            extensions=act_agentickvm_extensions(
+                target=target,
+                provider=provider,
+                capability=capability,
+                risk_summary=risk_summary,
+                policy_context=policy_context,
+            ),
+        )
+        params_fingerprint = ClearanceParamsFingerprint(fingerprint_value)
+        short_code = ClearanceShortCode(act_short_code(request_id, fingerprint_value))
+    else:
+        params_fingerprint = ClearanceParamsFingerprint(fingerprint_parameters(parameters))
+        short_code = ClearanceShortCode(_short_code(request_id, params_fingerprint))
     risk = ClearanceRiskSummary(
         risk_family=risk_family,
         summary=risk_summary,

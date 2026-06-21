@@ -119,6 +119,7 @@ class ControlPlane:
         clearance_verifier: ACTClearanceVerifier | None = None,
         clearance_timeout_seconds: int = DEFAULT_CLEARANCE_TIMEOUT_SECONDS,
         auth_channel: AuthChannel | str = DEFAULT_AUTH_CHANNEL,
+        act_parity_fingerprint: bool = False,
     ) -> None:
         self.policy = policy
         self.provider = provider
@@ -132,6 +133,7 @@ class ControlPlane:
         self.clearance_timeout_seconds = clearance_timeout_seconds
         self.auth_channel_selection: AuthChannelSelection = resolve_auth_channel(auth_channel)
         self.auth_channel: AuthChannel = self.auth_channel_selection.channel
+        self.act_parity_fingerprint = act_parity_fingerprint
         self._consumed_signed_grant_ids: set[str] = set()
 
     def handle(self, request: CapabilityRequest) -> ControlPlaneResult:
@@ -329,6 +331,7 @@ class ControlPlane:
             now=now,
             ttl_seconds=self.clearance_timeout_seconds,
             request_id=request.approval_request_id,
+            act_parity=self.act_parity_fingerprint,
         )
         self._emit(
             event_type=AuditEventType.APPROVAL_REQUESTED,

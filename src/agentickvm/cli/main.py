@@ -112,6 +112,9 @@ def _call(
         audit_sink=runtime.audit_sink,
         approval_store=runtime.approval_store,
         auth_channel=auth_selection.channel,
+        clearance_client=runtime.clearance_client,
+        clearance_verifier=runtime.clearance_verifier,
+        act_parity_fingerprint=runtime.act_parity_fingerprint,
     )
     result = router.handle_tool_request(
         MCPToolRequest(

@@ -31,6 +31,12 @@ Evidence the contract is pinnable (Agentic Control Tower repo):
   shape, polls the gateway approval endpoints, and parses the `act.clearance.v2`
   response. The HTTP transport is injected; the default `UrllibACTHTTPTransport`
   uses only the standard library.
+- **Config/runtime wiring** — `config`: a `act` config section (`gateway_url`,
+  `tower_id`, `tower_keys`, all public, no secrets) makes `build_runtime`
+  construct the real client + Ed25519 verifier and turn on ACT-parity
+  fingerprinting; the CLI/MCP router thread them through. With no `act` section
+  the seam stays fail-closed (no live ACT calls, local-broker path). See
+  `examples/config/act-clearance.yaml`.
 - **Mirror alignment** — `control_plane/clearance.py`: `ClearanceResponse` now
   carries `contract_version` and the verbatim `bound_material` ACT signed;
   `clearance_response_from_act_payload` maps ACT `state` → mirror status,
