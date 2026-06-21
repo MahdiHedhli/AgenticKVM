@@ -36,6 +36,25 @@ even if an ACT client is configured. Unknown channel values are rejected
 (fail-closed); the selection never silently downgrades to a weaker authority.
 This is selection structure only -- risk tiering remains owned by the Tower.
 
+### Productionizing local_terminal signing
+
+The `local_terminal` channel clears through the local signed-grant broker. For
+development that uses a symmetric HMAC signer the agent can read, which is not a
+production authority. Two pieces make it production-grade:
+
+- `KeychainApprovalSigner` signs grants through an injectable
+  `KeychainSignerBackend`. Operators back it with the OS keychain (the private
+  key never leaves the keychain; the agent process cannot read it). Tests and the
+  explicit dev fallback use a deterministic in-memory backend.
+- `SignerTrustRegistry` records which signer key ids are trusted. Grant
+  verification consults it (`ApprovalGrantVerifier.from_trust_registry`), so a
+  grant signed by an unknown or development signer fails closed with
+  `untrusted signer key id`. A production registry (`allow_development=False`)
+  refuses development signers outright.
+
+This is signing authority only; the recommended `mobile_signed` (ACT) path and
+Tower-owned risk tiering are unchanged. Tracked in issue #3.
+
 ## Approval Prompt Requirements
 
 An approval prompt must explain:

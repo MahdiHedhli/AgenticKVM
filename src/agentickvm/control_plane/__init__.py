@@ -179,6 +179,13 @@ from agentickvm.control_plane.approval_store import (  # noqa: E402
     ApprovalCacheError,
     SignedApprovalCache,
 )
+from agentickvm.control_plane.signer_trust import (  # noqa: E402
+    InMemoryKeychainBackend,
+    KeychainApprovalSigner,
+    KeychainSignerBackend,
+    SignerTrust,
+    SignerTrustRegistry,
+)
 from agentickvm.control_plane.act_client import (  # noqa: E402
     ACTClearanceVerifier,
     ACTPendingProofVerifier,
@@ -298,6 +305,11 @@ __all__ = [
     "LOCAL_TERMINAL_WARNING",
     "RECOMMENDED_AUTH_CHANNEL",
     "resolve_auth_channel",
+    "InMemoryKeychainBackend",
+    "KeychainApprovalSigner",
+    "KeychainSignerBackend",
+    "SignerTrust",
+    "SignerTrustRegistry",
     "ACT_PROOF_CANONICALIZATION",
     "ACTClearanceProofVerifier",
     "ACTProofError",

@@ -1872,3 +1872,29 @@
 - final validation: all 8 gate scripts pass; pytest 743 passed (736 + 7).
 - next recommended task: productionize the local_terminal channel -- keychain
   signer + signer trust registry (F3, issue #3).
+
+## 2026-06-20T11:00:00Z
+
+- selected task: productionize the local_terminal channel signing (F3, issue #3)
+  by mining the keychain-signer / trust-registry ideas from the abandoned spec
+  010 without reverting the ACT-first architecture
+- implemented `control_plane/signer_trust.py`:
+  - `KeychainApprovalSigner` signs grants through an injectable
+    `KeychainSignerBackend` (OS keychain for operators; deterministic
+    `InMemoryKeychainBackend` for tests and the dev fallback). The private key
+    never has to be readable by the agent in production.
+  - `SignerTrustRegistry` records trusted signer key ids; development signers are
+    untrusted unless explicitly allowed, so the dev HMAC signer cannot authorize
+    in a production configuration.
+  - `ApprovalGrantVerifier.from_trust_registry` builds a verifier from only the
+    trusted signers, so a grant from an unknown or development signer fails closed
+    with `untrusted signer key id`.
+- tests: tests/security/test_signer_trust.py (keychain sign/verify round trip,
+  tamper + missing-key fail-closed, registry trusts production not development,
+  explicit dev allowance, verifier-from-registry accept/reject, audit summary).
+- safety posture: no hardware, no live network, no secrets logged. This is
+  signing authority only; mobile_signed (ACT) and Tower-owned tiering unchanged.
+  The real OS-keychain backend and the runtime wiring of the registry into the
+  engine remain follow-ups on issue #3.
+- final validation: all 8 gate scripts pass; pytest 751 passed (743 + 8).
+- next recommended task: wire the real ACT client into config/runtime (F4).

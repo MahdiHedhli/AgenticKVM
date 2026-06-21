@@ -7,8 +7,11 @@ import hmac
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from hashlib import sha256
-from typing import Any, Mapping, Protocol
+from typing import TYPE_CHECKING, Any, Mapping, Protocol
 from uuid import uuid4
+
+if TYPE_CHECKING:
+    from agentickvm.control_plane.signer_trust import SignerTrustRegistry
 
 from agentickvm.control_plane.approvals import APPROVAL_RESUMPTION_BLOCKED_CAPABILITIES
 from agentickvm.control_plane.fingerprints import fingerprint_parameters
@@ -271,6 +274,16 @@ class ApprovalGrantVerifier:
 
     def __init__(self, signers: Mapping[str, ApprovalSigner]) -> None:
         self.signers = dict(signers)
+
+    @classmethod
+    def from_trust_registry(cls, registry: "SignerTrustRegistry") -> "ApprovalGrantVerifier":
+        """Build a verifier that accepts only the registry's trusted signers.
+
+        Untrusted or development signers are excluded, so a grant signed by them
+        fails closed with ``untrusted signer key id``.
+        """
+
+        return cls(signers=registry.trusted_signers())
 
     def verify(
         self,
