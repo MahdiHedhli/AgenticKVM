@@ -40,7 +40,7 @@ def test_mcp_translates_provider_errors_consistently() -> None:
 
     result = router.handle_tool_request(
         MCPToolRequest(
-            tool_name="force_restart",
+            tool_name="type_text",
             target="redfish-target",
             session_id="s1",
             requester_id="agent-1",
@@ -67,7 +67,7 @@ def test_cli_translates_provider_errors_consistently(tmp_path, capsys) -> None:
             "--target",
             "redfish-target",
             "--tool",
-            "force_restart",
+            "type_text",
             "--mode",
             "Full Control",
         ]

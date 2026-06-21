@@ -113,7 +113,8 @@ def test_normalized_provider_result_redacts_secret_like_values() -> None:
 
 
 def test_normalized_provider_error_shape() -> None:
-    payload = _redfish().execute_authorized(_request("power.force_restart")).normalized()
+    # input.keyboard_type (HID) is outside the Redfish BMC surface -> unsupported.
+    payload = _redfish().execute_authorized(_request("input.keyboard_type")).normalized()
 
     assert payload["status"] == "error"
     assert payload["provider_type"] == "redfish"

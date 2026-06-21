@@ -70,9 +70,13 @@ production network endpoints. Tests should use mocks, fixtures, schemas, and
 offline contract checks.
 
 PiKVM and Redfish provider-specific tests use fake transports only. The fake
-Redfish transport rejects non-GET methods. The provider modules do not define a
-live transport implementation, and placeholder configs remain disabled by
-default.
+transports model clearance-gated actuation routes (PiKVM ATX/HID/MSD; Redfish
+power/boot/BMC over POST/PATCH) so the ControlPlane clearance seam can be
+exercised without hardware. Every fixture actuation result reports
+`performed_on_hardware: False`, the provider modules define no live transport
+implementation, and placeholder configs remain disabled by default. The base
+fake transport still rejects non-GET methods unless a fixture explicitly opts
+into actuation routes.
 
 PiKVM now has a provider-specific fake observe transport boundary and synthetic
 fixture contracts. The live PiKVM transport is still absent. Fixture mode must

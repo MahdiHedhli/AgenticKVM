@@ -1,5 +1,6 @@
 from agentickvm.providers import redfish as redfish_module
 from agentickvm.providers.redfish import (
+    REDFISH_ACTUATION_CAPABILITIES,
     RedfishObserveClient,
     RedfishObserveProvider,
     default_redfish_fake_transport,
@@ -9,12 +10,13 @@ from tests.contract.provider_conformance import (
     assert_disabled_provider_fails,
     assert_fake_provider_does_not_read_env,
     assert_fake_transport_used,
-    assert_observe_only_provider_rejects_mutation,
     assert_observe_result,
     assert_provider_metadata,
     assert_provider_module_has_no_live_io,
+    assert_structured_result,
     assert_unknown_capability_fails,
     assert_unsupported_capability_fails,
+    provider_request,
 )
 
 
@@ -47,11 +49,23 @@ def test_redfish_provider_observe_results_are_structured_and_redacted() -> None:
         assert_observe_result(_redfish_provider(), capability)
 
 
-def test_redfish_provider_is_observe_only_and_uses_fake_transport() -> None:
+def test_redfish_provider_actuation_is_fixture_backed_and_uses_fake_transport() -> None:
     provider = _redfish_provider()
 
-    assert_observe_only_provider_rejects_mutation(provider)
-    assert provider.requests == []
+    # The Redfish fixture provider supports power/boot/BMC actuation, but at the
+    # provider boundary every actuation runs through the fake transport and is
+    # reported as never performed on hardware. ControlPlane clearance gating is
+    # covered in tests/security/test_redfish_actuation_clearance.py.
+    assert REDFISH_ACTUATION_CAPABILITIES <= provider.supported_capabilities
+
+    for capability in sorted(REDFISH_ACTUATION_CAPABILITIES):
+        result = provider.execute_authorized(provider_request(capability))
+        assert_structured_result(result)
+        assert result.ok is True, capability
+        assert result.performed_on_hardware is False, capability
+        assert result.data["performed"] is False, capability
+
+    assert len(provider.requests) == len(REDFISH_ACTUATION_CAPABILITIES)
     assert_fake_transport_used(provider)
 
 

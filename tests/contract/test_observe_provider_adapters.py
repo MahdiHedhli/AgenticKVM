@@ -93,7 +93,7 @@ def test_redfish_fake_provider_executes_observe_only() -> None:
     assert result.data["sensors"][0]["Name"] == "CPU Temp"
 
 
-def test_mutating_capability_is_unsupported_by_observe_only_providers() -> None:
+def test_out_of_surface_capability_is_unsupported_by_fixture_providers() -> None:
     pikvm = PiKVMObserveProvider(
         enabled=True,
         client=PiKVMObserveClient(transport=default_pikvm_fake_transport()),
@@ -103,8 +103,9 @@ def test_mutating_capability_is_unsupported_by_observe_only_providers() -> None:
         client=RedfishObserveClient(transport=default_redfish_fake_transport()),
     )
 
+    # bmc.rotate_password is outside both fixture providers' supported surfaces.
     for provider in (pikvm, redfish):
-        result = provider.execute_authorized(_provider_request("power.force_restart"))
+        result = provider.execute_authorized(_provider_request("bmc.rotate_password"))
         assert result.ok is False
         assert result.performed_on_hardware is False
         assert "unsupported" in result.message.lower()

@@ -184,7 +184,7 @@ def test_fixture_mode_config_can_build_explicit_fake_provider(
     assert provider.is_real_hardware is False
     expected_risk_class = (
         "test_fake_clearance_gated"
-        if provider_type == "pikvm"
+        if provider_type in {"pikvm", "redfish"}
         else "test_fake_observe_only"
     )
     assert provider.risk_class == expected_risk_class

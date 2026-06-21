@@ -1,8 +1,9 @@
-"""Redfish observe-only provider scaffolding.
+"""Redfish provider scaffolding.
 
-Only fixture-backed GET-style observe behavior is implemented here. No live
-transport, credentials, reset, virtual media, boot, BIOS, firmware, storage,
-network, account, or credential mutation behavior exists in this module.
+Live network execution is not implemented here. Fixture-backed observe and
+actuation behavior exists so the control-plane clearance seam can be tested
+without hardware. Redfish actuation is power, boot-override, and BMC reset
+(there is no HID input surface, unlike PiKVM).
 """
 
 from __future__ import annotations
@@ -17,7 +18,22 @@ from agentickvm.providers.base import (
     ProviderStatus,
     ProviderValidationResult,
 )
-from agentickvm.providers.transports import FakeTransport
+from agentickvm.providers.errors import (
+    ProviderError,
+    ProviderMutationBlockedError,
+    ProviderProtocolError,
+    ProviderResponseValidationError,
+)
+from agentickvm.providers.transports import (
+    FakeTransport,
+    TransportError,
+    TransportMethodNotAllowedError,
+    TransportRouteNotFoundError,
+)
+
+REDFISH_SYSTEM_PATH = "/redfish/v1/Systems/System.Embedded.1"
+REDFISH_RESET_ACTION_PATH = "/redfish/v1/Systems/System.Embedded.1/Actions/ComputerSystem.Reset"
+REDFISH_MANAGER_RESET_PATH = "/redfish/v1/Managers/1/Actions/Manager.Reset"
 
 REDFISH_OBSERVE_CAPABILITIES = frozenset(
     {
@@ -29,6 +45,33 @@ REDFISH_OBSERVE_CAPABILITIES = frozenset(
         "observe.boot_status",
     }
 )
+
+REDFISH_ACTUATION_CAPABILITIES = frozenset(
+    {
+        "power.on",
+        "power.force_off",
+        "power.graceful_shutdown",
+        "power.graceful_restart",
+        "power.force_restart",
+        "power.power_cycle",
+        "power.nmi",
+        "boot.override",
+        "bmc.reset",
+    }
+)
+
+REDFISH_SUPPORTED_CAPABILITIES = REDFISH_OBSERVE_CAPABILITIES | REDFISH_ACTUATION_CAPABILITIES
+
+# Map AgenticKVM power capabilities to Redfish ComputerSystem.Reset ResetType values.
+_REDFISH_RESET_TYPES = {
+    "power.on": "On",
+    "power.force_off": "ForceOff",
+    "power.graceful_shutdown": "GracefulShutdown",
+    "power.graceful_restart": "GracefulRestart",
+    "power.force_restart": "ForceRestart",
+    "power.power_cycle": "PowerCycle",
+    "power.nmi": "Nmi",
+}
 
 
 def default_redfish_fake_transport() -> FakeTransport:
@@ -53,7 +96,7 @@ def default_redfish_fake_transport() -> FakeTransport:
             },
             (
                 "GET",
-                "/redfish/v1/Systems/System.Embedded.1",
+                REDFISH_SYSTEM_PATH,
             ): {
                 "Id": "System.Embedded.1",
                 "Name": "Redfish fixture system",
@@ -95,12 +138,25 @@ def default_redfish_fake_transport() -> FakeTransport:
                 "Name": "Fixture BMC",
                 "Status": {"State": "Enabled", "Health": "OK"},
             },
-        }
+            (
+                "POST",
+                REDFISH_RESET_ACTION_PATH,
+            ): {"performed": True, "action": "ComputerSystem.Reset"},
+            (
+                "PATCH",
+                REDFISH_SYSTEM_PATH,
+            ): {"performed": True, "action": "BootOverride"},
+            (
+                "POST",
+                REDFISH_MANAGER_RESET_PATH,
+            ): {"performed": True, "action": "Manager.Reset"},
+        },
+        allowed_methods=frozenset({"GET", "POST", "PATCH"}),
     )
 
 
 class RedfishObserveClient:
-    """Redfish observe-only client using an injected fake transport."""
+    """Redfish client using an injected fake transport for observe + actuation."""
 
     def __init__(
         self,
@@ -124,7 +180,7 @@ class RedfishObserveClient:
     def computer_system(self) -> Mapping[str, Any]:
         """Read fake primary computer system."""
 
-        return self._get("/redfish/v1/Systems/System.Embedded.1")
+        return self._get(REDFISH_SYSTEM_PATH)
 
     def power_state(self) -> Mapping[str, Any]:
         """Read fake power state."""
@@ -169,6 +225,24 @@ class RedfishObserveClient:
 
         return self._get("/redfish/v1/Managers/1")
 
+    def reset(self, *, reset_type: str) -> Mapping[str, Any]:
+        """Fixture ComputerSystem.Reset actuation."""
+
+        return self._post(REDFISH_RESET_ACTION_PATH, params={"ResetType": reset_type})
+
+    def set_boot_override(self, *, target: str) -> Mapping[str, Any]:
+        """Fixture one-time boot-source override actuation."""
+
+        return self._patch(
+            REDFISH_SYSTEM_PATH,
+            params={"Boot": {"BootSourceOverrideTarget": target}},
+        )
+
+    def bmc_reset(self) -> Mapping[str, Any]:
+        """Fixture Manager.Reset (BMC reset) actuation."""
+
+        return self._post(REDFISH_MANAGER_RESET_PATH, params={"ResetType": "GracefulRestart"})
+
     def _get(self, path: str) -> Mapping[str, Any]:
         return MappingProxyType(
             dict(
@@ -180,12 +254,42 @@ class RedfishObserveClient:
             )
         )
 
+    def _post(self, path: str, *, params: Mapping[str, Any] | None = None) -> Mapping[str, Any]:
+        return self._mutate("POST", path, params=params)
+
+    def _patch(self, path: str, *, params: Mapping[str, Any] | None = None) -> Mapping[str, Any]:
+        return self._mutate("PATCH", path, params=params)
+
+    def _mutate(
+        self, method: str, path: str, *, params: Mapping[str, Any] | None
+    ) -> Mapping[str, Any]:
+        try:
+            payload = dict(
+                self.transport.request(
+                    method,
+                    path,
+                    params=params or {},
+                    timeout_seconds=self.timeout_seconds,
+                ).json()
+            )
+        except TransportMethodNotAllowedError as exc:
+            raise ProviderMutationBlockedError(
+                "Redfish fake transport rejected actuation method"
+            ) from exc
+        except TransportRouteNotFoundError as exc:
+            raise ProviderResponseValidationError(
+                f"Redfish fake fixture route missing: {path}"
+            ) from exc
+        except TransportError as exc:
+            raise ProviderProtocolError("Redfish fake actuation transport error") from exc
+        return MappingProxyType(dict(payload))
+
 
 class RedfishObserveProvider(Provider):
-    """Observe-only Redfish adapter for fixture-backed tests."""
+    """Redfish adapter for fixture-backed observe and actuation tests."""
 
     provider_kind = "redfish"
-    supported_capabilities = REDFISH_OBSERVE_CAPABILITIES
+    supported_capabilities = REDFISH_SUPPORTED_CAPABILITIES
 
     def __init__(
         self,
@@ -202,7 +306,7 @@ class RedfishObserveProvider(Provider):
         self.risk_class = (
             "real_hardware_disabled"
             if client is None
-            else "test_fake_observe_only"
+            else "test_fake_clearance_gated"
         )
 
     def status(self) -> ProviderStatus:
@@ -210,9 +314,9 @@ class RedfishObserveProvider(Provider):
 
         status = super().status()
         message = (
-            "Redfish observe provider is fixture-backed"
+            "Redfish provider is fixture-backed; actuation requires ControlPlane clearance"
             if self.client is not None and self.enabled
-            else "Redfish observe provider is disabled; no live transport exists"
+            else "Redfish provider is disabled; no live transport exists"
         )
         return ProviderStatus(
             provider_id=status.provider_id,
@@ -235,7 +339,7 @@ class RedfishObserveProvider(Provider):
                 ok=False,
                 provider_id=self.provider_id,
                 capability=request.capability,
-                message="Redfish observe provider has no fake transport",
+                message="Redfish provider has no fake transport",
             )
         return super().validate_authorized(request)
 
@@ -248,26 +352,48 @@ class RedfishObserveProvider(Provider):
             return self._result(request, ok=False, message=validation.message)
 
         self.requests.append(request)
-        if request.capability == "observe.status":
-            data = {
-                "service_root": self.client.service_root(),
-                "manager": self.client.manager_status(),
-            }
-        elif request.capability == "observe.power_state":
-            data = {"power_state": self.client.power_state()["power_state"]}
-        elif request.capability == "observe.hardware_inventory":
-            data = {"inventory": self.client.hardware_inventory()}
-        elif request.capability == "observe.sensors":
-            data = {"sensors": list(self.client.sensors()["Members"])}
-        elif request.capability == "observe.event_logs":
-            data = {"events": list(self.client.event_logs()["Members"])}
-        elif request.capability == "observe.boot_status":
-            data = {"boot_status": self.client.boot_status()}
-        else:
-            return self._result(
-                request,
-                ok=False,
-                message="Unsupported Redfish observe-only capability",
+        try:
+            if request.capability == "observe.status":
+                data = {
+                    "service_root": self.client.service_root(),
+                    "manager": self.client.manager_status(),
+                }
+            elif request.capability == "observe.power_state":
+                data = {"power_state": self.client.power_state()["power_state"]}
+            elif request.capability == "observe.hardware_inventory":
+                data = {"inventory": self.client.hardware_inventory()}
+            elif request.capability == "observe.sensors":
+                data = {"sensors": list(self.client.sensors()["Members"])}
+            elif request.capability == "observe.event_logs":
+                data = {"events": list(self.client.event_logs()["Members"])}
+            elif request.capability == "observe.boot_status":
+                data = {"boot_status": self.client.boot_status()}
+            elif request.capability in _REDFISH_RESET_TYPES:
+                data = {
+                    "actuation": self.client.reset(
+                        reset_type=_REDFISH_RESET_TYPES[request.capability]
+                    )
+                }
+            elif request.capability == "boot.override":
+                data = {
+                    "actuation": self.client.set_boot_override(
+                        target=str(request.parameters.get("boot_target", "Pxe"))
+                    ),
+                    "parameters": request.redacted_parameters(),
+                }
+            elif request.capability == "bmc.reset":
+                data = {"actuation": self.client.bmc_reset()}
+            else:
+                return self._result(
+                    request,
+                    ok=False,
+                    message="Unsupported Redfish capability",
+                )
+        except ProviderError as exc:
+            return exc.to_provider_result(
+                request=request,
+                provider_id=self.provider_id,
+                provider_type=self.provider_kind,
             )
 
         safe_data = {
@@ -279,7 +405,7 @@ class RedfishObserveProvider(Provider):
         return self._result(
             request,
             ok=True,
-            message="Redfish fixture observation completed; no hardware action performed.",
+            message="Redfish fixture operation completed; no hardware action performed.",
             data=safe_data,
         )
 
@@ -307,7 +433,9 @@ class RedfishObserveProvider(Provider):
 
 
 __all__ = [
+    "REDFISH_ACTUATION_CAPABILITIES",
     "REDFISH_OBSERVE_CAPABILITIES",
+    "REDFISH_SUPPORTED_CAPABILITIES",
     "RedfishObserveClient",
     "RedfishObserveProvider",
     "default_redfish_fake_transport",

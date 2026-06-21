@@ -65,14 +65,14 @@ def test_pikvm_client_exposes_fixture_observe_and_actuation_methods() -> None:
     }
 
 
-def test_redfish_client_exposes_observe_only_methods() -> None:
+def test_redfish_client_exposes_observe_and_clearance_gated_actuation_methods() -> None:
     public = {
         name
         for name in dir(RedfishObserveClient)
         if not name.startswith("_") and callable(getattr(RedfishObserveClient, name))
     }
 
-    assert public == {
+    observe_methods = {
         "boot_status",
         "computer_system",
         "event_logs",
@@ -83,3 +83,8 @@ def test_redfish_client_exposes_observe_only_methods() -> None:
         "service_root",
         "systems_collection",
     }
+    # Actuation methods exist on the fixture client but run only after ControlPlane
+    # clearance and never reach hardware. See test_redfish_actuation_clearance.py.
+    actuation_methods = {"reset", "set_boot_override", "bmc_reset"}
+
+    assert public == observe_methods | actuation_methods

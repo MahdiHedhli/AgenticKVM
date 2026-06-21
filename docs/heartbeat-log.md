@@ -1820,3 +1820,28 @@
   ModuleNotFoundError when run from a fresh clone without an editable install.
   Added the bootstrap; the authentic subprocess-driven harness tests now pass.
 - final validation: all 8 gate scripts pass; pytest 714 passed.
+
+## 2026-06-20T09:00:00Z
+
+- selected task: Redfish clearance-gated fixture actuation parity (mirror the
+  PiKVM actuation surface onto the Redfish provider)
+- surface added: the Redfish fixture provider now supports power (On, ForceOff,
+  GracefulShutdown, GracefulRestart, ForceRestart, PowerCycle, Nmi), one-time
+  boot-source override, and BMC (Manager) reset, all gated through ControlPlane
+  ACT clearance. There is no HID surface (Redfish is a BMC, not a KVM), so HID
+  capabilities remain correctly unsupported.
+- transport: the Redfish fake transport now models POST (ComputerSystem.Reset,
+  Manager.Reset) and PATCH (boot override) actuation routes; the base fake
+  transport still rejects non-GET methods.
+- safety posture: real hardware touched: no; live Redfish remains observe-only
+  (no live actuation transport); every fixture actuation reports
+  `performed_on_hardware: False`; boot-override parameters are redacted.
+- tests: added tests/security/test_redfish_actuation_clearance.py (clearance
+  required per capability, fixture-only execution after clearance, denied
+  fail-closed, one-shot consumption, target binding, boot-override redaction);
+  updated the Redfish conformance/observe-safety/adapter/error-interface tests
+  for the new actuation surface (out-of-surface probes now use an HID or
+  bmc.rotate_password capability Redfish genuinely lacks).
+- final validation: all 8 gate scripts pass; pytest 736 passed (714 + 22 Redfish
+  actuation-clearance).
+- next recommended task: aircraft params_fingerprint parity with ACT (F2).
