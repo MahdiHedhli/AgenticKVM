@@ -116,12 +116,23 @@ def issue_verified_mutation_clearance(
     response: Any,
     verifier: ClearanceVerifierSeam | None,
     now: datetime,
+    parameters: Mapping[str, Any] | None = None,
 ) -> VerifiedMutationClearance:
     """Issue a mutation handle only from a fully verified ACT clearance.
 
     Fails closed on every gap: missing verifier, non-cleared status, missing
     or invalid Ed25519 proof, params-fingerprint or identity mismatch, missing
     or passed expiry, and observe-family capabilities.
+
+    When ``parameters`` is provided, the handle's params fingerprint is bound
+    to the exact raw parameters the caller is about to actuate with
+    (``fingerprint_parameters``). This is required for ACT-parity clearances:
+    a live tower fingerprints only the redacted payload and extensions (raw
+    parameters never cross that boundary), so the per-call transport parity
+    check needs the raw-parameter binding fixed at issuance time, after the
+    tower response has been verified against the request. Without
+    ``parameters`` the handle carries the response fingerprint unchanged
+    (local-broker / mock fingerprint domain).
     """
 
     if request is None or response is None:
@@ -155,12 +166,17 @@ def issue_verified_mutation_clearance(
             "mutation clearance cannot be issued for observe capabilities"
         )
     risk_family = getattr(response, "risk_family", "")
+    bound_params_fingerprint = (
+        fingerprint_parameters(parameters)
+        if parameters is not None
+        else str(getattr(response, "params_fingerprint", ""))
+    )
     return VerifiedMutationClearance(
         request_id=str(getattr(response, "request_id", "")),
         capability=capability,
         target=str(getattr(response, "target", "")),
         provider=str(getattr(response, "provider", "")),
-        params_fingerprint=str(getattr(response, "params_fingerprint", "")),
+        params_fingerprint=bound_params_fingerprint,
         risk_family=str(getattr(risk_family, "value", risk_family)),
         expires_at=expires_at,
         tower_id=getattr(response, "tower_id", None),

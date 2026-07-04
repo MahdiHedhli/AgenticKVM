@@ -343,3 +343,107 @@ def test_require_refuses_expired_handle_at_call_time() -> None:
             now=NOW + timedelta(seconds=3600),
             ledger=MutationClearanceLedger(),
         )
+
+
+def test_issue_with_parameters_binds_handle_to_raw_actuation_params() -> None:
+    """Issuance may rebind the handle to the raw parameters about to actuate."""
+
+    request = _clearance_request()
+    response = cleared_response_for(request)
+
+    handle = issue_verified_mutation_clearance(
+        request=request,
+        response=response,
+        verifier=_verifier(),
+        now=NOW,
+        parameters=BOOT_PARAMS,
+    )
+
+    assert handle.params_fingerprint == fingerprint_parameters(BOOT_PARAMS)
+    verified = require_verified_mutation_clearance(
+        handle,
+        capability="boot.override",
+        parameters=BOOT_PARAMS,
+        target=TARGET,
+        provider=PROVIDER,
+        now=NOW,
+        ledger=MutationClearanceLedger(),
+    )
+    assert verified is handle
+
+
+def test_act_parity_clearance_actuates_only_via_raw_parameter_rebinding() -> None:
+    """ACT-parity fingerprints cover the redacted view, not raw parameters.
+
+    A live tower fingerprints only the redacted payload + extensions, so a
+    handle carrying the response fingerprint unchanged can never satisfy the
+    per-call raw-parameter parity gate. Explicit rebinding at issuance (after
+    verification) is the only path to actuation, and it stays fail-closed.
+    """
+
+    request = build_clearance_request(
+        session_id="session-1",
+        target=TARGET,
+        provider=PROVIDER,
+        capability="boot.override",
+        parameters=BOOT_PARAMS,
+        risk_family="high_risk",
+        risk_summary="mutating hardware action",
+        material_risks=("hardware state change",),
+        intended_effect="exercise the mutation gate in fixtures",
+        requested_by="agent",
+        audit_correlation_id="corr-mutation-gate",
+        policy_context={},
+        now=NOW,
+        act_parity=True,
+    )
+    response = cleared_response_for(request)
+
+    unbound = issue_verified_mutation_clearance(
+        request=request, response=response, verifier=_verifier(), now=NOW
+    )
+    with pytest.raises(ProviderMutationBlockedError, match="fingerprint mismatch"):
+        require_verified_mutation_clearance(
+            unbound,
+            capability="boot.override",
+            parameters=BOOT_PARAMS,
+            target=TARGET,
+            provider=PROVIDER,
+            now=NOW,
+            ledger=MutationClearanceLedger(),
+        )
+
+    rebound = issue_verified_mutation_clearance(
+        request=request,
+        response=response,
+        verifier=_verifier(),
+        now=NOW,
+        parameters=BOOT_PARAMS,
+    )
+    verified = require_verified_mutation_clearance(
+        rebound,
+        capability="boot.override",
+        parameters=BOOT_PARAMS,
+        target=TARGET,
+        provider=PROVIDER,
+        now=NOW,
+        ledger=MutationClearanceLedger(),
+    )
+    assert verified is rebound
+
+
+def test_issue_with_parameters_still_requires_verified_response() -> None:
+    """Raw-parameter rebinding never bypasses clearance verification."""
+
+    request = _clearance_request()
+    response = cleared_response_for(request)
+    tampered = replace(response, params_fingerprint="a" * 64)
+
+    with pytest.raises(ProviderMutationBlockedError):
+        issue_verified_mutation_clearance(
+            request=request,
+            response=tampered,
+            verifier=_verifier(),
+            now=NOW,
+            parameters=BOOT_PARAMS,
+        )
