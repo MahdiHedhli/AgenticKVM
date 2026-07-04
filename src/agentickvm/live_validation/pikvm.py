@@ -16,10 +16,16 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import Any, Mapping
 
+from agentickvm.live_validation.http_read import (
+    GETOnlyHTTPSJSONClient,
+    HTTPSConnectionFactory,
+    resolve_credential_pair,
+)
 from agentickvm.providers.pikvm_transport import (
     LivePiKVMObserveTransport,
     PiKVMCredentialRef,
     PiKVMFingerprintMismatchError,
+    PiKVMHTTPClientFactory,
     PiKVMTargetConfig,
     PiKVMPinnedTrust,
     normalize_cert_fingerprint,
@@ -116,6 +122,66 @@ class RealTLSPiKVMProbe:
         if not cert_der:
             raise PiKVMLiveValidationError("PiKVM peer did not present a certificate")
         return sha256_fingerprint_for_der(cert_der)
+
+
+class RealPiKVMAuthenticatedHTTPClient:
+    """Observe-only ``PiKVMAuthenticatedHTTPClient`` backed by real HTTPS.
+
+    Authentication uses the PiKVM kvmd header scheme (``X-KVMD-User`` /
+    ``X-KVMD-Passwd``). The underlying shared client can only issue GET
+    requests, so no mutating kvmd endpoint (ATX, HID, MSD) is reachable
+    through this surface; anything non-GET fails closed before a connection
+    is opened.
+    """
+
+    def __init__(
+        self,
+        *,
+        trust: PiKVMPinnedTrust | None,
+        client: GETOnlyHTTPSJSONClient,
+    ) -> None:
+        self.trust = trust
+        self._client = client
+
+    def get_json(self, path: str, *, timeout_seconds: float) -> Mapping[str, Any]:
+        return self._client.get_json(path, timeout_seconds=timeout_seconds)
+
+
+def pikvm_http_client_factory(
+    *,
+    env: Mapping[str, str] | None = None,
+    connection_factory: HTTPSConnectionFactory | None = None,
+) -> PiKVMHTTPClientFactory:
+    """Return a ``PiKVMHTTPClientFactory`` building real authenticated clients.
+
+    The credential reference (``env://`` or ``file://``) is resolved only when
+    the factory runs, which ``LivePiKVMObserveTransport`` guarantees happens
+    after the TLS pin preflight has passed. Resolved values exist solely in
+    the kvmd auth headers of the underlying GET-only client and never appear
+    in errors, logs, or ``repr``.
+    """
+
+    def _build(
+        config: PiKVMTargetConfig,
+        credential_ref: PiKVMCredentialRef,
+        trust: PiKVMPinnedTrust | None,
+    ) -> RealPiKVMAuthenticatedHTTPClient:
+        username, password = resolve_credential_pair(credential_ref.value, env=env)
+        client = GETOnlyHTTPSJSONClient(
+            host=config.host,
+            port=config.port,
+            headers={
+                "X-KVMD-User": username,
+                "X-KVMD-Passwd": password,
+                "Accept": "application/json",
+            },
+            pinned_sha256=trust.sha256_fingerprint if trust else None,
+            verify_tls=config.verify_ssl,
+            connection_factory=connection_factory,
+        )
+        return RealPiKVMAuthenticatedHTTPClient(trust=trust, client=client)
+
+    return _build
 
 
 class _RecordingAuthenticatedHTTPClient:
