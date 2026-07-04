@@ -68,14 +68,24 @@ def act_agentickvm_extensions(
     capability: str | None,
     risk_summary: str | None,
     policy_context: Mapping[str, Any] | None,
+    session_id: str | None = None,
 ) -> dict[str, Any]:
-    """Build the ``extensions.agentickvm`` envelope the aircraft sends to ACT."""
+    """Build the ``extensions.agentickvm`` envelope the aircraft sends to ACT.
+
+    The envelope carries the aircraft-side identity binding (target, provider,
+    capability, session) because the tower echoes extensions verbatim in the
+    clearance status response and binds them into the signed proof via
+    ``extensions_digest``. ``session_id`` rides here so the aircraft can verify
+    session binding against real tower responses, whose core status shape does
+    not carry a session field.
+    """
 
     return {
         "agentickvm": {
             "target": target,
             "provider": provider,
             "capability": capability,
+            "session_id": session_id,
             "risk_summary": risk_summary,
             "policy_context": dict(policy_context) if policy_context else {},
         }

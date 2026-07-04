@@ -206,3 +206,15 @@ def test_target_identity_resolved_from_extensions_when_core_absent() -> None:
     response = clearance_response_from_act_payload(payload)
 
     assert response.target == "mock-host"
+
+
+def test_session_identity_resolved_from_extensions_when_core_absent() -> None:
+    # A real tower status response carries no core session field; the aircraft's
+    # session identity round-trips through the signed extensions envelope.
+    payload = _cleared_payload()
+    payload.pop("session_id")
+    payload["extensions"] = {"agentickvm": {"session_id": "session-1"}}
+
+    response = clearance_response_from_act_payload(payload)
+
+    assert response.session_id == "session-1"

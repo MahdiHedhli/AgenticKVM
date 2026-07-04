@@ -34,6 +34,22 @@ ACT_AIRCRAFT_AGENT_ID = "agentickvm"
 APPROVAL_REQUESTED_PATH = "/hermes/tools/approval_requested"
 APPROVAL_STATUS_PATH = "/hermes/tools/approval_status"
 
+# The published gateway clearance schema accepts only the fine-grained
+# act.clearance.v2 risk families; the aircraft's coarse labels must be mapped
+# to their most conservative published equivalents on the wire. ACT owns the
+# authoritative resolution either way and binds its resolved family into the
+# signed proof.
+_GATEWAY_RISK_FAMILY_BY_AIRCRAFT_LABEL = {
+    "high_risk": "external_effect",
+    "low_risk": "routine",
+}
+
+
+def act_wire_risk_family(risk_family: str) -> str:
+    """Map an aircraft risk-family label to the published gateway vocabulary."""
+
+    return _GATEWAY_RISK_FAMILY_BY_AIRCRAFT_LABEL.get(str(risk_family), str(risk_family))
+
 
 class ACTHTTPTransport(Protocol):
     """Minimal JSON-over-HTTP transport seam for the ACT gateway."""
@@ -94,6 +110,7 @@ def act_request_extensions(request: ClearanceRequest) -> dict[str, Any]:
         capability=request.capability,
         risk_summary=request.risk_summary.summary,
         policy_context=request.policy_context,
+        session_id=request.session_id,
     )
 
 
@@ -132,7 +149,7 @@ def clearance_request_to_act_payload(
         "requested_tool": request.capability,
         "capability": request.capability,
         "risk_level": "high" if request.risk_summary.risk_family.value == "high_risk" else "low",
-        "risk_family": request.risk_summary.risk_family.value,
+        "risk_family": act_wire_risk_family(request.risk_summary.risk_family.value),
         "summary": request.risk_summary.summary,
         # No raw parameters cross this boundary; only the redacted shape does.
         "payload_redacted": act_payload_redacted(request),
@@ -142,7 +159,10 @@ def clearance_request_to_act_payload(
         "operator_message": str(request.operator_message),
         "short_code": str(request.short_code),
         "audit_correlation_id": request.audit_correlation_id,
-        "request_id": request.request_id,
+        # The published gateway schema is strict (extra fields are rejected);
+        # the aircraft request id rides in ``action_id``, the tower's
+        # caller-correlation field.
+        "action_id": request.request_id,
         "extensions": act_request_extensions(request),
     }
 
@@ -236,6 +256,7 @@ __all__ = [
     "UrllibACTHTTPTransport",
     "act_payload_redacted",
     "act_request_extensions",
+    "act_wire_risk_family",
     "clearance_request_to_act_payload",
     "predicted_act_params_fingerprint",
     "predicted_act_short_code",

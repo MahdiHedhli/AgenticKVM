@@ -353,6 +353,7 @@ def build_clearance_request(
                 capability=capability,
                 risk_summary=risk_summary,
                 policy_context=policy_context,
+                session_id=session_id,
             ),
         )
         params_fingerprint = ClearanceParamsFingerprint(fingerprint_value)
@@ -465,6 +466,9 @@ def clearance_response_from_act_payload(payload: Mapping[str, Any]) -> Clearance
     target = payload.get("target") or akvm.get("target") or ""
     provider = payload.get("provider") or akvm.get("provider") or ""
     capability = payload.get("capability") or akvm.get("capability") or ""
+    # The tower's status shape carries no core session field; the aircraft's
+    # session identity round-trips through the signed extensions envelope.
+    session_id = payload.get("session_id") or akvm.get("session_id") or ""
 
     expires_at_raw = payload.get("expires_at")
     expires_at = _parse_act_datetime(expires_at_raw) if expires_at_raw else None
@@ -489,7 +493,7 @@ def clearance_response_from_act_payload(payload: Mapping[str, Any]) -> Clearance
     return ClearanceResponse(
         status=status,
         request_id=request_id,
-        session_id=str(payload.get("session_id") or ""),
+        session_id=str(session_id),
         target=str(target),
         provider=str(provider),
         capability=str(capability),

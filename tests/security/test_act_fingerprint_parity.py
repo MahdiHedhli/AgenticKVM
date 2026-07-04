@@ -24,6 +24,7 @@ from agentickvm.control_plane import (
 from agentickvm.control_plane.act_http_client import (
     act_payload_redacted,
     act_request_extensions,
+    act_wire_risk_family,
     clearance_request_to_act_payload,
     predicted_act_params_fingerprint,
     predicted_act_short_code,
@@ -138,3 +139,33 @@ def test_predicted_short_code_binds_request_id_and_fingerprint() -> None:
     assert predicted_act_short_code(request, approval_id="appr-xyz") == act_short_code(
         "appr-xyz", predicted_act_params_fingerprint(request)
     )
+
+
+def test_wire_payload_speaks_the_published_gateway_schema() -> None:
+    # The published gateway schema is strict: there is no request_id field
+    # (the aircraft request id rides in action_id), and risk_family only
+    # accepts the fine-grained act.clearance.v2 vocabulary.
+    request = _request()
+    payload = clearance_request_to_act_payload(
+        request, agent_id="agentickvm", expires_in_seconds=20
+    )
+
+    assert "request_id" not in payload
+    assert payload["action_id"] == request.request_id
+    assert payload["risk_level"] == "high"
+    assert payload["risk_family"] == "external_effect"
+
+
+def test_wire_risk_family_maps_coarse_labels_and_passes_resolved_through() -> None:
+    assert act_wire_risk_family("high_risk") == "external_effect"
+    assert act_wire_risk_family("low_risk") == "routine"
+    # Tower-resolved act.clearance.v2 families are already on-vocabulary.
+    assert act_wire_risk_family("destructive") == "destructive"
+
+
+def test_extensions_envelope_carries_session_identity() -> None:
+    request = _request()
+
+    envelope = act_request_extensions(request)["agentickvm"]
+
+    assert envelope["session_id"] == request.session_id
