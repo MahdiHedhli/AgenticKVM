@@ -60,6 +60,7 @@ def test_provider_modules_are_mock_or_offline_scaffolds() -> None:
         "placeholders.py",
         "preflight.py",
         "redfish.py",
+        "redfish_transport.py",
         "registry.py",
         "transport_policy.py",
         "transports.py",
@@ -69,6 +70,7 @@ def test_provider_modules_are_mock_or_offline_scaffolds() -> None:
         [
             (provider_dir / "transports.py").read_text(encoding="utf-8"),
             (provider_dir / "pikvm_transport.py").read_text(encoding="utf-8"),
+            (provider_dir / "redfish_transport.py").read_text(encoding="utf-8"),
         ]
     )
     for forbidden_import in (
