@@ -102,12 +102,12 @@ def test_extensions_digest_matches_act_reference() -> None:
 
 def test_short_code_matches_act_reference_and_is_ten_hex() -> None:
     fingerprint = "a" * 64
-    expected = hashlib.sha256(f"appr-1:{fingerprint}".encode("utf-8")).hexdigest()[:10]
+    expected = hashlib.sha256(f"appr-1:{fingerprint}".encode("utf-8")).hexdigest()[:10].upper()
 
     code = act_short_code("appr-1", fingerprint)
     assert code == expected
     assert len(code) == 10
-    assert all(ch in "0123456789abcdef" for ch in code)
+    assert all(ch in "0123456789ABCDEF" for ch in code)
 
 
 def test_predicted_fingerprint_covers_exactly_what_the_client_sends() -> None:

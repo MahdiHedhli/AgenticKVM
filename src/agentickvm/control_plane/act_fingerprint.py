@@ -58,7 +58,7 @@ def act_short_code(approval_id: str, params_fingerprint: str) -> str:
 
     return hashlib.sha256(
         f"{approval_id}:{params_fingerprint}".encode("utf-8")
-    ).hexdigest()[:10]
+    ).hexdigest()[:10].upper()
 
 
 def act_agentickvm_extensions(
