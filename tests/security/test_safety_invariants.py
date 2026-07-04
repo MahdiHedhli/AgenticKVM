@@ -54,12 +54,15 @@ def test_provider_modules_are_mock_or_offline_scaffolds() -> None:
         "base.py",
         "errors.py",
         "mock.py",
+        "mutation_gate.py",
         "pikvm.py",
         "pikvm_calibration.py",
+        "pikvm_mutation_transport.py",
         "pikvm_transport.py",
         "placeholders.py",
         "preflight.py",
         "redfish.py",
+        "redfish_mutation_transport.py",
         "redfish_transport.py",
         "registry.py",
         "transport_policy.py",
@@ -69,8 +72,11 @@ def test_provider_modules_are_mock_or_offline_scaffolds() -> None:
     transport_source = "\n".join(
         [
             (provider_dir / "transports.py").read_text(encoding="utf-8"),
+            (provider_dir / "mutation_gate.py").read_text(encoding="utf-8"),
             (provider_dir / "pikvm_transport.py").read_text(encoding="utf-8"),
+            (provider_dir / "pikvm_mutation_transport.py").read_text(encoding="utf-8"),
             (provider_dir / "redfish_transport.py").read_text(encoding="utf-8"),
+            (provider_dir / "redfish_mutation_transport.py").read_text(encoding="utf-8"),
         ]
     )
     for forbidden_import in (
