@@ -330,7 +330,9 @@ def test_redfish_mutating_transport_end_to_end_fixture_actuation() -> None:
         system_path=SYSTEM_PATH,
         tls_probe=_StaticProbe(FAKE_CERT_FINGERPRINT),
         http_client_factory=redfish_mutating_http_client_factory(
-            env=env, connection_factory=FakeConnectionFactory(connection)
+            env=env,
+            connection_factory=FakeConnectionFactory(connection),
+            now_factory=lambda: NOW,
         ),
         now_factory=lambda: NOW,
     )
@@ -371,7 +373,9 @@ def test_pikvm_mutating_transport_end_to_end_fixture_actuation() -> None:
         provider_id=PIKVM_PROVIDER_ID,
         tls_probe=_StaticProbe(FAKE_CERT_FINGERPRINT),
         http_client_factory=pikvm_mutating_http_client_factory(
-            env=env, connection_factory=FakeConnectionFactory(connection)
+            env=env,
+            connection_factory=FakeConnectionFactory(connection),
+            now_factory=lambda: NOW,
         ),
         now_factory=lambda: NOW,
     )
