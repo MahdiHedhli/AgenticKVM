@@ -1,15 +1,25 @@
 :root {
+  /* AgenticSuite canonical tokens — generated from
+     agentic-suite-site/design/tokens.json (design/out/tokens.css). */
   color-scheme: dark;
-  --bg: #0d1117;
-  --panel: #151b23;
-  --panel-strong: #1d2633;
-  --text: #f1f5f9;
-  --muted: #a8b3c7;
-  --line: #2a3545;
-  --accent: #69d2b6;
-  --accent-strong: #8fe7d0;
-  --warning: #f3c969;
-  --shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+  --bg: #0a0e14;
+  --panel: #111721;
+  --panel-strong: #1a2230;
+  --text: #e6edf3;
+  --muted: #8b949e;
+  --line: #1e2733;
+  --accent: #f5a623; /* beacon amber — THE single brand accent */
+  --accent-strong: #f5a623;
+  /* semantic ramp */
+  --go: #5ec8a0;
+  --attention: #f5a623;
+  --warn: #e8892b;
+  --warn-soft: #e8892b24;
+  --alert: #ff5c5c;
+  --warning: var(--warn);
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas,
+    monospace;
+  --tracking-label: 0.14em;
 }
 
 * {
@@ -25,8 +35,8 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family:
-    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
+    "Inter Variable", Inter, ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
   line-height: 1.6;
 }
 
@@ -43,7 +53,7 @@ a {
   justify-content: space-between;
   gap: 24px;
   padding: 18px clamp(20px, 4vw, 56px);
-  background: rgba(13, 17, 23, 0.88);
+  background: rgba(10, 14, 20, 0.88);
   border-bottom: 1px solid var(--line);
   backdrop-filter: blur(14px);
 }
@@ -57,15 +67,17 @@ a {
 }
 
 .brand-mark {
-  display: grid;
-  width: 34px;
-  height: 34px;
-  place-items: center;
-  border: 1px solid var(--accent);
-  border-radius: 8px;
-  color: var(--accent-strong);
-  font-size: 0.78rem;
-  letter-spacing: 0;
+  display: inline-flex;
+  width: 26px;
+  height: 26px;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+}
+
+.brand-mark svg {
+  width: 100%;
+  height: 100%;
 }
 
 .site-nav {
@@ -113,9 +125,10 @@ a {
 .eyebrow {
   margin: 0 0 12px;
   color: var(--accent-strong);
+  font-family: var(--font-mono);
   font-size: 0.78rem;
-  font-weight: 750;
-  letter-spacing: 0.12em;
+  font-weight: 600;
+  letter-spacing: var(--tracking-label);
   text-transform: uppercase;
 }
 
@@ -177,23 +190,28 @@ h3 {
 
 .status-strip dt {
   color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 700;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
 }
 
 .status-strip dd {
   margin: 4px 0 0;
   color: var(--accent-strong);
-  font-weight: 800;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
 }
 
 .beta-note {
   max-width: 760px;
   margin: 22px 0 0;
   padding: 12px 14px;
-  border: 1px solid rgba(243, 201, 105, 0.5);
+  border: 1px solid rgba(232, 137, 43, 0.5);
   border-radius: 8px;
-  background: rgba(243, 201, 105, 0.08);
+  background: var(--warn-soft);
   color: var(--warning);
   font-weight: 700;
 }
@@ -215,7 +233,7 @@ h3 {
 .button.primary {
   border-color: var(--accent);
   background: var(--accent);
-  color: #062019;
+  color: #0a0e14;
 }
 
 .hero-panel {
@@ -223,7 +241,6 @@ h3 {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel);
-  box-shadow: var(--shadow);
 }
 
 .hero-panel h2 {
@@ -257,7 +274,7 @@ h3 {
 }
 
 .band {
-  background: #111722;
+  background: #0e131b;
 }
 
 .section-heading {
@@ -336,7 +353,9 @@ h3 {
   display: block;
   margin-bottom: 8px;
   color: var(--accent-strong);
+  font-family: var(--font-mono);
   font-size: 0.78rem;
+  letter-spacing: var(--tracking-label);
   content: "0" counter(list-item);
 }
 
@@ -397,12 +416,12 @@ pre {
   padding: 18px;
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #070a0f;
+  background: #070b12;
   color: var(--accent-strong);
 }
 
 code {
-  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-family: var(--font-mono);
   font-size: 0.9rem;
 }
 
@@ -429,8 +448,11 @@ code {
   display: block;
   margin-bottom: 10px;
   color: var(--accent-strong);
-  font-size: 0.82rem;
-  font-weight: 800;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
 }
 
 .site-footer {
