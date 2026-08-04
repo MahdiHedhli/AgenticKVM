@@ -130,6 +130,9 @@ def _check_live_urls(path: Path, text: str) -> None:
             continue
         if host in {"github.com", "www.github.com"}:
             continue
+        if host in {"w3.org", "www.w3.org"}:
+            # XML namespace identifiers (e.g. the SVG xmlns), not live endpoints.
+            continue
         raise LintSanityFailure(f"non-documentation URL {match.group(0)!r} in {path}")
 
 
